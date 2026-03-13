@@ -8,6 +8,11 @@ framework:
     #esi: true
     #fragments: true
 
+    assets:
+        packages:
+            placeholders:
+                base_path: /resources/placeholders
+
 when@test:
     framework:
         test: true
