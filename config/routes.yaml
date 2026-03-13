@@ -9,3 +9,29 @@
 
 controllers:
     resource: routing.controllers
+
+home:
+    path: '/'
+    methods: GET
+    controller: App\Controller\HomeController::index
+
+#Authentification
+login.view:
+    path: '/login'
+    methods: GET
+
+login.controller:
+    path: '/login'
+    methods: POST
+
+register.view:
+    path: '/register'
+    methods: GET
+
+register.controller:
+    path: '/register'
+    methods: POST
+
+logout:
+    path: '/logout'
+    methods: POST
