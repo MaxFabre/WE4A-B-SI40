@@ -1,0 +1,111 @@
+body {
+    font-family: comic sans ms, cursive, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.marge {
+    margin: 20px;
+}
+
+.grand_titre {
+    font-size: 30px;
+    text-align: center;
+}
+
+button {
+    background-color: #ff47f6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+header {
+    background-color: #e76fdd;
+    padding: 10px;
+    text-align: center;
+}
+
+.messages{
+    background-color: #f5abdc;
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 5px;
+    width : fit-content;
+}
+
+.contenu_message{
+    background-color: #ffd4f1;
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.titre_message{
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.auteur_message{
+    font-size: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: right;
+    align-self: flex-end;
+    
+}
+
+.header_message{
+    background-color: #e76fdd;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+
+}
+
+.date_message{
+    font-style: italic;
+    font-size: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: right;
+    align-self: flex-end;
+}
+
+.tout_centre{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.champs{
+    border: black solid 1px;
+    border-radius: 8px;
+}
+
+.divcolonne{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}   
+
+.error {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+#password-error,
+.password-error{
+    color: red !important;
+    font-size: 14px !important;
+    margin-top: 5px !important;
+    display: none;
+}
