@@ -18,11 +18,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\JoinTable(name: 'person')]
-    #[ORM\JoinColumn(name: 'person', referencedColumnName: 'id_human', nullable: false)]
-    #[ORM\OneToOne(targetEntity: 'Person')]
-    private string $person_id;
-
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
@@ -37,6 +32,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Person $id_person = null;
 
     public function getId(): ?int
     {
@@ -117,5 +116,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     public function eraseCredentials(): void
     {
         // @deprecated, to be removed when upgrading to Symfony 8
+    }
+
+    public function getIdPerson(): ?Person
+    {
+        return $this->id_person;
+    }
+
+    public function setIdPerson(Person $id_person): static
+    {
+        $this->id_person = $id_person;
+
+        return $this;
     }
 }
