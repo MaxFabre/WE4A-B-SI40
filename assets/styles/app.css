@@ -19,10 +19,12 @@ body {
     display: flex;
     gap: 2em;
     text-align: center;
+    align-items: center;
 
     a {
+        background-repeat: no-repeat;
+        background-size: cover;
         text-decoration: none;
-
     }
 }
 
