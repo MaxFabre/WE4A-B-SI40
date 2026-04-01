@@ -35,7 +35,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Person $id_person = null;
+    private ?Person $person = null;
 
     public function getId(): ?int
     {
@@ -118,14 +118,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
         // @deprecated, to be removed when upgrading to Symfony 8
     }
 
-    public function getIdPerson(): ?Person
+    public function getPerson(): ?Person
     {
-        return $this->id_person;
+        return $this->person;
     }
 
-    public function setIdPerson(Person $id_person): static
+    public function setPerson(Person $person): static
     {
-        $this->id_person = $id_person;
+        $this->person = $person;
 
         return $this;
     }
