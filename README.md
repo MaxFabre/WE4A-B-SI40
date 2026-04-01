@@ -8,7 +8,8 @@ Utiliser ces commandes afin d'obtenir les packages:
 
 ## Front-End
 `composer require twig`  
-`composer require symfony/asset`
+`composer require symfony/asset`  
+`composer require symfony/ux-icons`
 
 ## Back-End:
 `composer require symfony/security-bundle`  
