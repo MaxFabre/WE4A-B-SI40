@@ -1,3 +1,36 @@
-.auth {
+body {
+}
+
+.nav {
+    li {
+        display: inline-block;
+        flex-wrap: wrap;
+
+        a{
+            display: block;
+            padding: 14px 16px;
+            text-align: center;
+            text-decoration: none;
+        }
+    }
+}
+
+.header-user-connection{
     display: flex;
+    gap: 2em;
+    text-align: center;
+    align-items: center;
+
+    a {
+        background-repeat: no-repeat;
+        background-size: cover;
+        text-decoration: none;
+    }
+}
+
+.round-crop {
+    overflow: hidden;
+    width: 3em;
+    height: 3em;
+    border-radius: 50%;
 }
