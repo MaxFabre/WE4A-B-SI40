@@ -7,7 +7,7 @@ Utiliser ces commandes afin d'obtenir les packages:
 (vous pouvez le faire directement depuis le terminal de votre IDE)
 
 ## Front-End
-`composer require twig`  
+`ccomposer require symfony/twig-bundle`  
 `composer require symfony/asset`  
 `composer require symfony/ux-icons`
 
