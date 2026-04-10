@@ -32,17 +32,20 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="header-user-connection">
-                        <!-- Option de connexion -->
-                        <div>
-                            <div>Username</div>
-                            <div><span>Outils</span> • <span><a href="/logout">Déconnexion</a></span></div>
+                    {% if app.user %}
+                        <div class="header-user-connection">
+                            <!-- Option de connexion -->
+                            <div>
+                                <div>{{ app.user.username }}</div>
+                                <div><span>Outils</span> • <span><a href="/logout">Déconnexion</a></span></div>
+                            </div>
+                            <a href="{{ url('account', parameters = {'id': app.user.id}) }}" style="background-image: url('/resources/images/profil_pictures/{{ app.user.person.photo }}')" class="round-crop"></a>
+                            <a href="/notifications">{{ ux_icon('header:bell') }}</a>
+                            <a href="/cart">{{ ux_icon('header:shopping-cart') }}</a>
                         </div>
-                        <!-- <a href="{à doubler url('account', ['user_id' => jsp $_SESSION['user']->getID()]) }" style="background-image: url('{à doubler asset(path='user.jpg', packageName = 'placeholders') }')" class="round-crop"></a> -->
-                        <a href="/account" style="background-image: url('{{ asset(path='user.jpg', packageName = 'placeholders') }}')" class="round-crop"></a>
-                        <a href="/notifications">{{ ux_icon('header:bell') }}</a>
-                        <a href="/cart">{{ ux_icon('header:shopping-cart') }}</a>
-                    </div>
+                    {% else %}
+                        <div><span><a href="/login">Connection</a></span> • <span><a href="/register">Inscription</a></span></div>
+                    {% endif %}
                 </div>
             </nav>
         </header>

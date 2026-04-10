@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class AccountController extends AbstractController
 {
-    #[Route('/account', name: 'app_account')]
+    #[Route('/account/{id}', name: 'account', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function index(): Response
     {
         return $this->render('account/index.html.twig', [

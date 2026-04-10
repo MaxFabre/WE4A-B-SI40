@@ -18,6 +18,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 50)]
+    private ?string $username = null;
+
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
@@ -37,18 +40,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     #[ORM\JoinColumn(nullable: false)]
     private ?Person $person = null;
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getEmail(): ?string
-    {
+    public function getEmail(): ?string {
         return $this->email;
     }
 
-    public function setEmail(string $email): static
-    {
+    public function setEmail(string $email): static {
         $this->email = $email;
 
         return $this;
@@ -59,16 +59,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
      *
      * @see UserInterface
      */
-    public function getUserIdentifier(): string
-    {
+    public function getUserIdentifier(): string {
         return (string) $this->email;
     }
 
     /**
      * @see UserInterface
      */
-    public function getRoles(): array
-    {
+    public function getRoles(): array {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
@@ -79,8 +77,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     /**
      * @param list<string> $roles
      */
-    public function setRoles(array $roles): static
-    {
+    public function setRoles(array $roles): static {
         $this->roles = $roles;
 
         return $this;
@@ -89,13 +86,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): ?string
-    {
+    public function getPassword(): ?string {
         return $this->password;
     }
 
-    public function setPassword(string $password): static
-    {
+    public function setPassword(string $password): static {
         $this->password = $password;
 
         return $this;
@@ -104,8 +99,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     /**
      * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
      */
-    public function __serialize(): array
-    {
+    public function __serialize(): array {
         $data = (array) $this;
         $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
 
@@ -113,19 +107,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     }
 
     #[\Deprecated]
-    public function eraseCredentials(): void
-    {
+    public function eraseCredentials(): void {
         // @deprecated, to be removed when upgrading to Symfony 8
     }
 
-    public function getPerson(): ?Person
-    {
+    public function getPerson(): ?Person {
         return $this->person;
     }
 
-    public function setPerson(Person $person): static
-    {
+    public function setPerson(Person $person): static {
         $this->person = $person;
+
+        return $this;
+    }
+
+    public function getUsername(): ?string {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): static {
+        $this->username = $username;
 
         return $this;
     }
