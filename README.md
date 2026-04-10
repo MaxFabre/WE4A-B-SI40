@@ -15,7 +15,8 @@ Utiliser ces commandes afin d'obtenir les packages:
 `composer require symfony/security-bundle`  
 `composer require symfony/orm-pack`  
 `composer require --dev symfony/maker-bundle`  
-`composer require form validator`
+`composer require form validator`  
+`composer require vich/uploader-bundle`
 
 ## Resources
 Les resources (CSS, images et autres) sont à placer dans le dossier public (celui qui est chargé par le client).
