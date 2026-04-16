@@ -51,3 +51,30 @@ body {
 .profil-info {
     color: azure;
 }
+
+.carousel-inner {
+    background-color: #333;
+    border: 1em outset #f5a22c;
+    color: azure;
+}
+
+.film-pined {
+    padding: 1em;
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+
+    img {
+        height: 30em;
+    }
+}
+
+.film-pined-gender {
+    display: flex;
+    gap: 0.5em;
+    span {
+        color: #f5a22c;
+        background-color: dimgray;
+        padding: 0.5em;
+    }
+}
