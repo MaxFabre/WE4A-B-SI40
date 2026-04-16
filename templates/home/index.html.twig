@@ -1,19 +1,20 @@
 {% extends 'base.html.twig' %}
 
-{% block pageTitle "Cinéma" %}
-
 {% block container %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
+    <h1>Film à la une !</h1>
+    {% include 'partials/film_carousel.html.twig' %}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/samguy/Documents/WEB/WE4A-B-SI40/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>/home/samguy/Documents/WEB/WE4A-B-SI40/templates/home/index.html.twig</code></li>
-    </ul>
-</div>
+    <!-- Films à l'affiche -->
+    <h1>Films à l'affiche</h1>
+    <div>
+
+    </div>
+    <hr/>
+
+    <!-- Films qui pourrait vous plaire -->
+    <h1>Film qui pourrait vous plaire</h1>
+    <div>
+
+    </div>
 {% endblock %}

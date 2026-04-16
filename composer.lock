@@ -7043,16 +7043,16 @@
         },
         {
             "name": "symfony/twig-bundle",
-            "version": "v7.4.4",
+            "version": "v7.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/twig-bundle.git",
-                "reference": "e8829e02ff96a391ed0703bac9e7ff0537480b6b"
+                "reference": "ba1e06d7ff1ebb1d1799b6608d925f4eaba88d95"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/twig-bundle/zipball/e8829e02ff96a391ed0703bac9e7ff0537480b6b",
-                "reference": "e8829e02ff96a391ed0703bac9e7ff0537480b6b",
+                "url": "https://api.github.com/repos/symfony/twig-bundle/zipball/ba1e06d7ff1ebb1d1799b6608d925f4eaba88d95",
+                "reference": "ba1e06d7ff1ebb1d1799b6608d925f4eaba88d95",
                 "shasum": ""
             },
             "require": {
@@ -7109,7 +7109,7 @@
             "description": "Provides a tight integration of Twig into the Symfony full-stack framework",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/twig-bundle/tree/v7.4.4"
+                "source": "https://github.com/symfony/twig-bundle/tree/v7.4.8"
             },
             "funding": [
                 {
@@ -7129,7 +7129,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-06T12:34:24+00:00"
+            "time": "2026-03-24T13:12:05+00:00"
         },
         {
             "name": "symfony/type-info",
