@@ -39,7 +39,7 @@ final class FilmController extends AbstractController {
             return $this->redirectToRoute('admin.film.index');
         }
 
-        return $this->render('film/create.html.twig', [
+        return $this->render('admin_pages/film/create.html.twig', [
             'filmForm' => $filmForm,
         ]);
     }
@@ -58,7 +58,7 @@ final class FilmController extends AbstractController {
             return $this->redirectToRoute('admin.film.index');
         }
 
-        return $this->render('film/edit.html.twig', [
+        return $this->render('admin_pages/film/edit.html.twig', [
             'film' => $film,
             'filmForm' => $filmForm,
         ]);

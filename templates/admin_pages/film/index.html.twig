@@ -1,20 +1,22 @@
 {% extends 'admin_pages/base.html.twig' %}
 
-{% block title %}Outils{% endblock %}
+{% block title %}Outils - Films{% endblock %}
 
 {% block main %}
     <div class="row">
         <a href="{{ url('admin.film.create') }}">Nouveau film</a>
-        <table class="col-md-6">
-            <tr><th>Titre</th><th>Actions</th></tr>
+        <table class="table table-striped col-md-6">
+            <tr><th>ID</th><th>Titre</th><th></th></tr>
             {% for film in films %}
-                <tr><td>{{ film.title }}</td>
+                <tr>
+                    <td>{{ film.id }}</td>
+                    <td>{{ film.title }}</td>
                     <td>
-                        <div class="d-flex">
-                            <a id="edit" href="{{ url('admin.film.edit', parameters = {id: film.id} ) }}">Éditer</a>
+                        <div class="d-flex justify-content-evenly">
+                            <a class="btn btn-primary" id="edit" href="{{ url('admin.film.edit', parameters = {id: film.id} ) }}">Éditer</a>
                             <form method="post" action="{{ url('admin.film.delete', parameters = {id: film.id} ) }}">
                                 <input type="hidden" name="_method" value="DELETE"/>
-                                <input type="submit" value="Supprimer" id="delete"/>
+                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
                             </form>
                         </div>
                     </td>

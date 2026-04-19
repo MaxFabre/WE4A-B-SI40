@@ -1,6 +1,18 @@
 body {
 }
 
+.center {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
 nav {
     position: fixed;
 }
@@ -86,6 +98,19 @@ nav {
 
 .tools-menu {
     position: absolute;
-    background-color: #f5a22c;
+    background-color: lavender; /* juste pour visu*/
     left: 0;
+
+    ul {
+        list-style: none;
+
+        li {
+
+        }
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
 }

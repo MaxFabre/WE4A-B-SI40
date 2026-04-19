@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Film;
 use App\Repository\FilmRepository;
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,8 +21,16 @@ final class AdminPagesController extends AbstractController {
     #[Route('/film', name: '.film.index')]
     public function filmList(FilmRepository $repository): Response{
         $films = $repository->findAll();
-        return $this->render('admin_pages/films.html.twig', [
+        return $this->render('admin_pages/film/index.html.twig', [
             'films' => $films,
+        ]);
+    }
+
+    #[Route('/user', name: '.user.index')]
+    public function userList(UserRepository $repository): Response{
+        $users = $repository->findAll();
+        return $this->render('admin_pages/user/index.html.twig', [
+            'users' => $users,
         ]);
     }
 }

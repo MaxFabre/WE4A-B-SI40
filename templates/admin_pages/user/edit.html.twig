@@ -1,0 +1,8 @@
+{% extends 'admin_pages/base.html.twig'%}
+
+{% block title %}Éditer {{ user.username }}{% endblock %}
+
+{% block main %}
+    {{ form_errors(form) }}
+    {{ form(form) }}
+{% endblock %}
