@@ -26,10 +26,14 @@
                 <div class="header-user-connection">
                     <!-- Option de connexion -->
                     <div>
-                        <div>{{ app.user.username }}</div>
-                        <div><span>Outils</span> • <span><a href="/logout">Déconnexion</a></span></div>
+                        <div><a href="{{ url('account.index', parameters = {'id': app.user.id}) }}" style="text-decoration: none; color: inherit">{{ app.user.username }}</a></div>
+                        <div>
+                            {% if is_granted('ROLE_MODERATOR') or is_granted('ROLE_FUND_MANAGER') or is_granted('ROLE_ADMIN') %}
+                                <span><a href="{{ url('admin.index') }}">Outils</a></span> •
+                            {% endif %}<span><a href="/logout">Déconnexion</a></span>
+                        </div>
                     </div>
-                    <a href="{{ url('account', parameters = {'id': app.user.id}) }}" style="background-image: url('/resources/images/profil_pictures/{{ app.user.person.photo }}')" class="round-crop"></a>
+                    <a href="{{ url('account.index', parameters = {'id': app.user.id}) }}" style="background-image: url({{ asset(path=app.user.person.photo , packageName = 'profil_pictures') }})" class="round-crop"></a>
                     <a href="/notifications">{{ ux_icon('header:bell') }}</a>
                     <a href="/cart">{{ ux_icon('header:shopping-cart') }}</a>
                 </div>

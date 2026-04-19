@@ -13,6 +13,9 @@ framework:
             placeholders:
                 base_path: /resources/placeholders
 
+            profil_pictures:
+                base_path: /resources/images/profil_pictures
+
 when@test:
     framework:
         test: true

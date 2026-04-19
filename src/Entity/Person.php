@@ -86,4 +86,23 @@ class Person {
         $this->photoFile = $photoFile;
         return $this;
     }
+
+    public function __serialize(): array {
+        return [
+            'id' => $this->id,
+            'firstname' => $this->firstname,
+            'lastname' => $this->lastname,
+            'birthdate' => $this->birthdate,
+            'photo' => $this->photo
+        ];
+    }
+
+    public function __unserialize(array $data): void {
+        $this->id = $data['id'];
+        $this->firstname = $data['firstname'];
+        $this->lastname = $data['lastname'];
+        $this->birthdate = $data['birthdate'];
+        $this->photo = $data['photo'];
+        $this->photoFile = null;
+    }
 }
