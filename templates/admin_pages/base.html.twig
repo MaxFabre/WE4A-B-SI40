@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Outils{% endblock %}
+
+{% block container %}
+    <aside class="tools-menu">
+        <ul>
+            <li>index jsp quoi mettre en titre</li>
+            {% if is_granted('ROLE_MODERATOR') %}
+                <li>Modération des commentaires</li>
+            {% endif %}
+            {% if is_granted('ROLE_FUND_MANAGER') %}
+                <li><a href="{{ url('admin.film.index') }}">Gestion des films</a></li>
+                <li>Trucs financiers</li>
+            {% endif %}
+            {% if is_granted('ROLE_ADMIN') %}
+                <li>Gestion utilisateurs</li>
+            {% endif %}
+        </ul>
+    </aside>
+
+    <div>
+        {% block main %}{% endblock %}
+    </div>
+{% endblock %}

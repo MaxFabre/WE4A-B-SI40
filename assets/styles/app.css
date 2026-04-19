@@ -1,6 +1,10 @@
 body {
 }
 
+nav {
+    position: fixed;
+}
+
 .nav {
     li {
         display: inline-block;
@@ -50,6 +54,7 @@ body {
 
 .profil-info {
     color: azure;
+    text-decoration: none;
 }
 
 .carousel-inner {
@@ -77,4 +82,10 @@ body {
         background-color: dimgray;
         padding: 0.5em;
     }
+}
+
+.tools-menu {
+    position: absolute;
+    background-color: #f5a22c;
+    left: 0;
 }
