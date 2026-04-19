@@ -8,7 +8,7 @@
         <table class="col-md-6">
             <tr><th>Titre</th><th>Actions</th></tr>
             {% for film in films %}
-                <tr><td>{{ film.name }}</td>
+                <tr><td>{{ film.title }}</td>
                     <td>
                         <div class="d-flex">
                             <a id="edit" href="{{ url('admin.film.edit', parameters = {id: film.id} ) }}">Éditer</a>
