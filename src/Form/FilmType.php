@@ -20,8 +20,8 @@ use Vich\UploaderBundle\Form\Type\VichFileType;
 class FilmType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options): void {
         $builder
-            ->add('name', TextType::class, [
-                'label' => 'Nom',
+            ->add('title', TextType::class, [
+                'label' => 'Titre',
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description'
