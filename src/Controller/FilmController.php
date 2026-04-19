@@ -23,8 +23,7 @@ final class FilmController extends AbstractController {
         return $this->render('film/detail.html.twig', []);
     }*/
 
-    //Route à changer en fonctions des permissions et des rôles
-    #[Route('/film/create', name: 'film.create', methods: ['GET', 'POST'])]
+    #[Route('/tools/film/create', name: 'admin.film.create', methods: ['GET', 'POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager): Response {
         $film = new Film();
         $filmForm = $this->createForm(FilmType::class, $film);
@@ -37,7 +36,7 @@ final class FilmController extends AbstractController {
 
             //Redirection avec message:
             $this->addFlash('success', 'Le film à bien été créé.');
-            return $this->redirectToRoute('film.index');
+            return $this->redirectToRoute('admin.film.index');
         }
 
         return $this->render('film/create.html.twig', [
@@ -45,7 +44,7 @@ final class FilmController extends AbstractController {
         ]);
     }
 
-    #[Route('/film/edit/{id}', name: 'film.edit', methods: ['GET', 'POST'])]
+    #[Route('/tools/film/edit/{id}', name: 'admin.film.edit', methods: ['GET', 'POST'])]
     public function edit(Film $film, Request $request, EntityManagerInterface $entityManager): Response {
         $filmForm = $this->createForm(FilmType::class, $film);
         $filmForm->handleRequest($request);
@@ -56,7 +55,7 @@ final class FilmController extends AbstractController {
 
             //Redirection avec message:
             $this->addFlash('success','Le film à bien été modifié.');
-            return $this->redirectToRoute('film.index');
+            return $this->redirectToRoute('admin.film.index');
         }
 
         return $this->render('film/edit.html.twig', [
@@ -65,11 +64,11 @@ final class FilmController extends AbstractController {
         ]);
     }
 
-    #[Route('/film/{id}', name: 'film.delete', methods: ['DELETE'])]
+    #[Route('/admin/film/{id}', name: 'admin.film.delete', methods: ['DELETE'])]
     public function delete(Film $film, EntityManagerInterface $entityManager) {
         $entityManager->remove($film);
         $entityManager->flush();
         $this->addFlash('success', 'Le film à bien été supprimé.');
-        return $this->redirectToRoute('admin.carousel.index');
+        return $this->redirectToRoute('admin.film.index');
     }
 }

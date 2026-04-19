@@ -12,8 +12,9 @@ security:
                 property: email
 
     role_hierarchy:
-        ROLE_ADMIN: ROLE_USER
-        ROLE_SUPER_ADMIN: [ ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH ]
+        ROLE_MODERATOR: ROLE_USER
+        ROLE_FUND_MANAGER: ROLE_USER
+        ROLE_ADMIN: [ROLE_MODERATOR, ROLE_FUND_MANAGER]
 
     firewalls:
         dev:
@@ -40,8 +41,7 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/tools, roles: [ROLE_MODERATOR, ROLE_FUND_MANAGER, ROLE_ADMIN] }
 
 when@test:
     security:

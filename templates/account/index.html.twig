@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Profil de Frieren<!-- A remplacer par le nom d'utilisateur -->{% endblock %}
+{% block title %}Profil de {{ user.username }}{% endblock %}
 
 {% block container %}
     <div>
         <div class="profil-banner">
-            <img class="profile-picture" src="{{ asset(path='user.jpg', packageName = 'placeholders') }}" alt="Image de profile"/>
+            <img class="profile-picture" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}" alt="Image de profile"/>
             <div class="profil-info">
-                <h1>Username</h1>
-                <h2>Prénom Nom</h2>
+                <h1>{{ user.username }}</h1>
+                <h2>{{ user.person.firstname }} {{ user.person.lastname }}</h2>
             </div>
         </div>
     </div>
