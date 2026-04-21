@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Film;
 use App\Repository\FilmRepository;
+use App\Repository\GenderRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,10 +20,12 @@ final class AdminPagesController extends AbstractController {
     }
 
     #[Route('/film', name: '.film.index')]
-    public function filmList(FilmRepository $repository): Response{
-        $films = $repository->findAll();
+    public function filmList(FilmRepository $filmRepository, GenderRepository $genderRepository): Response{
+        $films = $filmRepository->findAll();
+        $genders = $genderRepository->findAll();
         return $this->render('admin_pages/film/index.html.twig', [
             'films' => $films,
+            'genders' => $genders,
         ]);
     }
 
@@ -31,6 +34,13 @@ final class AdminPagesController extends AbstractController {
         $users = $repository->findAll();
         return $this->render('admin_pages/user/index.html.twig', [
             'users' => $users,
+        ]);
+    }
+
+    #[Route('/logs', name: '.logs')]
+    public function logs() {
+        return $this->render('admin_pages/logs.html.twig', [
+            //'logs' => $logs,
         ]);
     }
 }

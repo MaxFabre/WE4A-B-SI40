@@ -5,17 +5,23 @@
 {% block container %}
     <aside class="tools-menu">
         <ul>
-            <li><a href="{{ url('admin.index') }}">{{ ux_icon('dashboard:settings') }} index jsp quoi mettre en titre</a></li>
+            <li><strong><a href="{{ url('admin.index') }}">{{ ux_icon('dashboard:settings') }} Dashboard</a></strong></li>
             {% if is_granted('ROLE_MODERATOR') %}
-                <li>{{ ux_icon('dashboard:chat') }} Modération des commentaires</li>
+                <strong>{{ ux_icon('dashboard:chat') }} Modération</strong>
+                <li>Commentaires</li>
             {% endif %}
             {% if is_granted('ROLE_FUND_MANAGER') %}
-                <li><a href="{{ url('admin.film.index') }}">{{ ux_icon('dashboard:watching') }} Gestion des films</a></li>
-                <li>Trucs financiers</li>
+                <strong>{{ ux_icon('dashboard:watching') }} Gestion des films</strong>
+                <li><a href="{{ url('admin.film.index') }}">Films & Genres</a></li>
+                <strong>Trucs financiers</strong>
+                <li><a>trucs</a></li>
             {% endif %}
             {% if is_granted('ROLE_ADMIN') %}
-                <li><a href="{{ url('admin.user.index') }}">{{ ux_icon('dashboard:group') }} Gestion utilisateurs</a></li>
-                <li><a>{{ ux_icon('dashboard:group') }} Gestion des individus</a></li>
+                <strong>{{ ux_icon('dashboard:group') }} Gestion des individus</strong>
+                <li><a href="{{ url('admin.user.index') }}">Utilisateurs</a></li>
+                <li><a>Personnes</a></li>
+                <strong>{{ ux_icon('dashboard:log') }} Journaux</strong>
+                <li><a href="{{ url('admin.logs') }}">Journaux d'opérations</a></li>
             {% endif %}
         </ul>
     </aside>

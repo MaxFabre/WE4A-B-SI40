@@ -4,24 +4,54 @@
 
 {% block main %}
     <div class="row">
-        <a href="{{ url('admin.film.create') }}">Nouveau film</a>
-        <table class="table table-striped col-md-6">
-            <tr><th>ID</th><th>Titre</th><th></th></tr>
-            {% for film in films %}
-                <tr>
-                    <td>{{ film.id }}</td>
-                    <td>{{ film.title }}</td>
-                    <td>
-                        <div class="d-flex justify-content-evenly">
-                            <a class="btn btn-primary" id="edit" href="{{ url('admin.film.edit', parameters = {id: film.id} ) }}">Éditer</a>
-                            <form method="post" action="{{ url('admin.film.delete', parameters = {id: film.id} ) }}">
-                                <input type="hidden" name="_method" value="DELETE"/>
-                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
+        <div class="col-md-6 col-sm-12 col-xs-12 vertical">
+            <div>
+                <h1>Films</h1>
+                <a class="btn btn-primary" href="{{ url('admin.film.create') }}">Nouveau film</a>
+            </div>
+            <table class="table table-striped col-md-6">
+                <tr><th>ID</th><th>Titre</th><th></th></tr>
+                {% for film in films %}
+                    <tr>
+                        <td>{{ film.id }}</td>
+                        <td>{{ film.title }}</td>
+                        <td>
+                            <div class="d-flex justify-content-evenly">
+                                <a class="btn btn-primary" id="edit" href="{{ url('admin.film.edit', parameters = {id: film.id} ) }}">Éditer</a>
+                                <form method="post" action="{{ url('admin.film.delete', parameters = {id: film.id} ) }}">
+                                    <input type="hidden" name="_method" value="DELETE"/>
+                                    <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="col-md-6 col-sm-12 col-xs-12 vertical">
+            <div>
+                <h1>Genres</h1>
+                <a class="btn btn-primary" href="{{ url('admin.gender.create') }}">Nouveau genre</a>
+            </div>
+            <table class="table table-striped col-md-6">
+                <tr><th>ID</th><th>Nom</th><th></th></tr>
+                {% for gender in genders %}
+                    <tr>
+                        <td>{{ gender.id }}</td>
+                        <td>{{ gender.name }}</td>
+                        <td>
+                            <div class="d-flex justify-content-evenly">
+                                <a class="btn btn-primary" id="edit" href="{{ url('admin.gender.edit', parameters = {id: gender.id} ) }}">Éditer</a>
+                                <form method="post" action="{{ url('admin.gender.delete', parameters = {id: gender.id} ) }}">
+                                    <input type="hidden" name="_method" value="DELETE"/>
+                                    <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
     </div>
 {% endblock %}
