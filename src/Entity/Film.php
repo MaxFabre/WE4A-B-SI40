@@ -56,9 +56,25 @@ class Film {
     #[ORM\OneToMany(targetEntity: Programme::class, mappedBy: 'film')]
     private Collection $programmes;
 
+    /**
+     * @var Collection<int, Person>
+     */
+    #[ORM\ManyToMany(targetEntity: Person::class, inversedBy: 'directedFilms')]
+    #[ORM\JoinTable(name: "film_director")]
+    private Collection $directors;
+
+    /**
+     * @var Collection<int, Person>
+     */
+    #[ORM\ManyToMany(targetEntity: Person::class, inversedBy: 'playedFilms')]
+    #[ORM\JoinTable(name: "film_actor")]
+    private Collection $actors;
+
     public function __construct() {
         $this->genres = new ArrayCollection();
         $this->programmes = new ArrayCollection();
+        $this->directors = new ArrayCollection();
+        $this->actors = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -239,6 +255,48 @@ class Film {
                 $programme->setFilm(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Person>
+     */
+    public function getDirectors(): Collection {
+        return $this->directors;
+    }
+
+    public function addDirector(Person $director): static {
+        if (!$this->directors->contains($director)) {
+            $this->directors->add($director);
+        }
+
+        return $this;
+    }
+
+    public function removeDirector(Person $director): static {
+        $this->directors->removeElement($director);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Person>
+     */
+    public function getActors(): Collection {
+        return $this->actors;
+    }
+
+    public function addActor(Person $actor): static {
+        if (!$this->actors->contains($actor)) {
+            $this->actors->add($actor);
+        }
+
+        return $this;
+    }
+
+    public function removeActor(Person $actor): static {
+        $this->actors->removeElement($actor);
 
         return $this;
     }
