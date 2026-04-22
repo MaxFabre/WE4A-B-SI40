@@ -2,6 +2,8 @@
 
 {% block title %}Nouveau genre{% endblock %}
 
-{% block container %}
+{% block main %}
+    <h1>Nouveau Genre:</h1>
+    {{ form_errors(genreForm) }}
     {{ form(genreForm) }}
 {% endblock %}
