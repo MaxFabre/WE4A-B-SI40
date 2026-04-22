@@ -33,7 +33,10 @@ class FilmType extends AbstractType {
                 'label' => 'Slug'
             ])
             ->add('price', NumberType::class, [
-                'label' => 'Prix'
+                'label' => 'Prix',
+                'scale' => 2,
+                'input' => 'string'
+
             ])
             ->add('coverFile', VichFileType::class, [
                 'label' => 'Affiche',

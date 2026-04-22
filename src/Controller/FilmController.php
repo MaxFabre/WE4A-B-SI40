@@ -6,6 +6,7 @@ use App\Entity\Film;
 use App\Form\FilmType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -30,13 +31,20 @@ final class FilmController extends AbstractController {
 
         $filmForm->handleRequest($request);
         if ($filmForm->isSubmitted() && $filmForm->isValid()) {
-            //Enregistrement en db:
-            $entityManager->persist($film);
-            $entityManager->flush();
+            try {
 
-            //Redirection avec message:
-            $this->addFlash('success', 'Le film à bien été créé.');
-            return $this->redirectToRoute('admin.film.index');
+                //Enregistrement en db:
+                $entityManager->persist($film);
+                $entityManager->flush();
+
+                //Redirection avec message:
+                $this->addFlash('success', 'Le film à bien été créé.');
+                return $this->redirectToRoute('admin.film.index');
+            }
+            catch (\Doctrine\DBAL\Exception\DriverException $e) {
+                // Problème de taille là
+                $filmForm->addError(new FormError('Y a un problème quelque part dans les données...'));
+            }
         }
 
         return $this->render('admin_pages/film/create.html.twig', [

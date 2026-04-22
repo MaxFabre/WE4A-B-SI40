@@ -21,11 +21,30 @@ final class AdminPagesController extends AbstractController {
 
     #[Route('/film', name: '.film.index')]
     public function filmList(FilmRepository $filmRepository, GenderRepository $genderRepository): Response{
-        $films = $filmRepository->findAll();
-        $genders = $genderRepository->findAll();
+        $sort = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('sort', 'id_asc');
+
+        $films = match ($sort) {
+            'title_asc' => $filmRepository->findBy([], ['title' => 'ASC']),
+            'title_desc' => $filmRepository->findBy([], ['title' => 'DESC']),
+            'id_desc' => $filmRepository->findBy([], ['id' => 'DESC']),
+            default => $filmRepository->findBy([], ['id' => 'ASC']),
+        };
+
+
+        $sortGender = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('sort', 'id_asc');
+
+        $genders = match ($sortGender) {
+            'gender_asc' => $genderRepository->findBy([], ['name' => 'ASC']),
+            'gender_desc' => $genderRepository->findBy([], ['name' => 'DESC']),
+            'id_desc' => $genderRepository->findBy([], ['id' => 'DESC']),
+            default => $genderRepository->findBy([], ['id' => 'ASC']),
+        };
+
+
         return $this->render('admin_pages/film/index.html.twig', [
             'films' => $films,
             'genders' => $genders,
+            'sort' => $sort,
         ]);
     }
 

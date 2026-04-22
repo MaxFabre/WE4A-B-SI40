@@ -110,3 +110,30 @@ nav {
         color: inherit;
     }
 }
+
+.horizontal-div {
+    display: flex;
+    gap: 1em;
+}
+
+.horizontal-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    gap: 1rem;
+}
+
+
+.partie-droite {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+
+.partie-gauche {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

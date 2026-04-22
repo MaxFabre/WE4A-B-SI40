@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints\Image;
 use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
 use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: FilmRepository::class)]
 #[Uploadable]
@@ -48,8 +50,15 @@ class Film {
     #[ORM\ManyToMany(targetEntity: Gender::class, mappedBy: 'films')]
     private Collection $genders;
 
+    /**
+     * @var Collection<int, Programme>
+     */
+    #[ORM\OneToMany(targetEntity: Programme::class, mappedBy: 'film')]
+    private Collection $programmes;
+
     public function __construct() {
         $this->genders = new ArrayCollection();
+        $this->programmes = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -105,6 +114,49 @@ class Film {
 
         return $this;
     }
+    #[Assert\Callback]
+    public function validatePrice(ExecutionContextInterface $context): void {//Fonction appelée automatiquement en cas de validation d'un formulaire qui va set un price. ça affichera le message d'erreur jsute en dessous du champ.
+        if ($this->price === null || $this->price === '') {
+            return;
+        }
+
+        $precision = 4; // Set plus haut dans la taille de la donnée
+        $scale = 2;      // Same
+
+        $value = (string) $this->price;
+        // On gère les différents séparateurs
+        $value = str_replace(',', '.', $value);
+
+        if (!preg_match('/^-?\d+(\.\d+)?$/', $value)) { // Si ça ne commence pas
+            $context->buildViolation('Le prix doit être un nombre valide.')
+                ->atPath('price')
+                ->addViolation();
+            return;
+        }
+
+        $negative = $value[0] === '-'; // Si jamais y a un -, on l'enlève
+        if ($negative) {
+            $value = substr($value, 1);
+        }
+
+        [$intPart, $decPart] = array_pad(explode('.', $value, 2), 2, '');
+        $intPart = ltrim($intPart, '0');
+        $intDigits = $intPart === '' ? 0 : strlen($intPart);
+        $decDigits = strlen(rtrim($decPart, '0'));
+
+        $maxIntDigits = $precision - $scale;
+        if ($intDigits > $maxIntDigits) {
+            $context->buildViolation(sprintf('La partie entière du prix est trop longue (max %d chiffres).', $maxIntDigits))
+                ->atPath('price')
+                ->addViolation();
+        }
+
+        if ($decDigits > $scale) {
+            $context->buildViolation(sprintf('Le prix ne doit pas avoir plus de %d décimales.', $scale))
+                ->atPath('price')
+                ->addViolation();
+        }
+    }
 
     public function getCoverPath(): ?string {
         return $this->coverPath;
@@ -114,6 +166,20 @@ class Film {
         $this->coverPath = $cover_path;
 
         return $this;
+    }
+
+    #[Assert\Callback]
+    public function validateCoverPath(ExecutionContextInterface $context): void { //Fonction appelée automatiquement en cas de validation d'un formulaire qui va set un price. ça affichera le message d'erreur jsute en dessous du champ.
+
+        $maxSize = 255;
+        $value = (string) $this->coverPath;
+
+        if (strlen($value) > $maxSize) {
+            $context->buildViolation(sprintf('Le chemin du cover est trop long (max %d caractères).', $maxSize))
+                ->atPath('coverPath')
+                ->addViolation();
+            return;
+        }
     }
 
     public function getCoverFile(): ?File {
@@ -133,8 +199,7 @@ class Film {
         return $this->genders;
     }
 
-    public function addGender(Gender $gender): static
-    {
+    public function addGender(Gender $gender): static {
         if (!$this->genders->contains($gender)) {
             $this->genders->add($gender);
             $gender->addFilm($this);
@@ -143,10 +208,36 @@ class Film {
         return $this;
     }
 
-    public function removeGender(Gender $gender): static
-    {
+    public function removeGender(Gender $gender): static {
         if ($this->genders->removeElement($gender)) {
             $gender->removeTest($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Programme>
+     */
+    public function getProgrammes(): Collection {
+        return $this->programmes;
+    }
+
+    public function addProgramme(Programme $programme): static {
+        if (!$this->programmes->contains($programme)) {
+            $this->programmes->add($programme);
+            $programme->setFilm($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProgramme(Programme $programme): static {
+        if ($this->programmes->removeElement($programme)) {
+            // set the owning side to null (unless already changed)
+            if ($programme->getFilm() === $this) {
+                $programme->setFilm(null);
+            }
         }
 
         return $this;
