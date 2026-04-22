@@ -45,10 +45,10 @@ class Film {
     private ?File $coverFile = null;
 
     /**
-     * @var Collection<int, Gender>
+     * @var Collection<int, Genre>
      */
-    #[ORM\ManyToMany(targetEntity: Gender::class, mappedBy: 'films')]
-    private Collection $genders;
+    #[ORM\ManyToMany(targetEntity: Genre::class, mappedBy: 'films')]
+    private Collection $genres;
 
     /**
      * @var Collection<int, Programme>
@@ -57,7 +57,7 @@ class Film {
     private Collection $programmes;
 
     public function __construct() {
-        $this->genders = new ArrayCollection();
+        $this->genres = new ArrayCollection();
         $this->programmes = new ArrayCollection();
     }
 
@@ -193,24 +193,24 @@ class Film {
     }
 
     /**
-     * @return Collection<int, Gender>
+     * @return Collection<int, Genre>
      */
-    public function getGender(): Collection {
-        return $this->genders;
+    public function getgenre(): Collection {
+        return $this->genres;
     }
 
-    public function addGender(Gender $gender): static {
-        if (!$this->genders->contains($gender)) {
-            $this->genders->add($gender);
-            $gender->addFilm($this);
+    public function addgenre(Genre $genre): static {
+        if (!$this->genres->contains($genre)) {
+            $this->genres->add($genre);
+            $genre->addFilm($this);
         }
 
         return $this;
     }
 
-    public function removeGender(Gender $gender): static {
-        if ($this->genders->removeElement($gender)) {
-            $gender->removeTest($this);
+    public function removegenre(Genre $genre): static {
+        if ($this->genres->removeElement($genre)) {
+            $genre->removeTest($this);
         }
 
         return $this;

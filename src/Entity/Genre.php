@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\GenderRepository;
+use App\Repository\GenreRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: GenderRepository::class)]
-class Gender{
+#[ORM\Entity(repositoryClass: GenreRepository::class)]
+class Genre{
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -20,7 +20,7 @@ class Gender{
     /**
      * @var Collection<int, Film>
      */
-    #[ORM\ManyToMany(targetEntity: Film::class, inversedBy: 'genders')]
+    #[ORM\ManyToMany(targetEntity: Film::class, inversedBy: 'genres')]
     private Collection $films;
 
     public function __construct() {

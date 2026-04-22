@@ -56,27 +56,27 @@
                             <select id="sort" name="sort" class="form-select" onchange="this.form.submit()">
                                 <option value="id_asc" {{ sort == 'id_asc' ? 'selected' : '' }}>ID croissant</option>
                                 <option value="id_desc" {{ sort == 'id_desc' ? 'selected' : '' }}>ID décroissant</option>
-                                <option value="gender_asc" {{ sort == 'gender_asc' ? 'selected' : '' }}>Genre A → Z</option>
-                                <option value="gender_desc" {{ sort == 'gender_desc' ? 'selected' : '' }}>Genre Z → A</option>
+                                <option value="genre_asc" {{ sort == 'genre_asc' ? 'selected' : '' }}>Genre A → Z</option>
+                                <option value="genre_desc" {{ sort == 'genre_desc' ? 'selected' : '' }}>Genre Z → A</option>
                             </select>
                         </form>
                     </div>
                     <div class="partie-droite">
-                        <a class="btn btn-primary" href="{{ url('admin.gender.create') }}">Nouveau genre</a>
+                        <a class="btn btn-primary" href="{{ url('admin.genre.create') }}">Nouveau genre</a>
                     </div>
 
 
                 </div>
             <table class="table table-striped col-md-6">
                 <tr><th>ID</th><th>Nom</th><th></th></tr>
-                {% for gender in genders %}
+                {% for genre in genres %}
                     <tr>
-                        <td>{{ gender.id }}</td>
-                        <td>{{ gender.name }}</td>
+                        <td>{{ genre.id }}</td>
+                        <td>{{ genre.name }}</td>
                         <td>
                             <div class="d-flex justify-content-evenly">
-                                <a class="btn btn-primary" id="edit" href="{{ url('admin.gender.edit', parameters = {id: gender.id} ) }}">Éditer</a>
-                                <form method="post" action="{{ url('admin.gender.delete', parameters = {id: gender.id} ) }}">
+                                <a class="btn btn-primary" id="edit" href="{{ url('admin.genre.edit', parameters = {id: genre.id} ) }}">Éditer</a>
+                                <form method="post" action="{{ url('admin.genre.delete', parameters = {id: genre.id} ) }}">
                                     <input type="hidden" name="_method" value="DELETE"/>
                                     <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
                                 </form>

@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Film;
 use App\Repository\FilmRepository;
-use App\Repository\GenderRepository;
+use App\Repository\GenreRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +20,7 @@ final class AdminPagesController extends AbstractController {
     }
 
     #[Route('/film', name: '.film.index')]
-    public function filmList(FilmRepository $filmRepository, GenderRepository $genderRepository): Response{
+    public function filmList(FilmRepository $filmRepository, GenreRepository $genreRepository): Response{
         $sort = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('sort', 'id_asc');
 
         $films = match ($sort) {
@@ -31,19 +31,19 @@ final class AdminPagesController extends AbstractController {
         };
 
 
-        $sortGender = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('sort', 'id_asc');
+        $sortgenre = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('sort', 'id_asc');
 
-        $genders = match ($sortGender) {
-            'gender_asc' => $genderRepository->findBy([], ['name' => 'ASC']),
-            'gender_desc' => $genderRepository->findBy([], ['name' => 'DESC']),
-            'id_desc' => $genderRepository->findBy([], ['id' => 'DESC']),
-            default => $genderRepository->findBy([], ['id' => 'ASC']),
+        $genres = match ($sortgenre) {
+            'genre_asc' => $genreRepository->findBy([], ['name' => 'ASC']),
+            'genre_desc' => $genreRepository->findBy([], ['name' => 'DESC']),
+            'id_desc' => $genreRepository->findBy([], ['id' => 'DESC']),
+            default => $genreRepository->findBy([], ['id' => 'ASC']),
         };
 
 
         return $this->render('admin_pages/film/index.html.twig', [
             'films' => $films,
-            'genders' => $genders,
+            'genres' => $genres,
             'sort' => $sort,
         ]);
     }
