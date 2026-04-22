@@ -1,0 +1,9 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Nouveau film{% endblock %}
+
+{% block main %}
+    <h1>Nouveau Film:</h1>
+    {{ form_errors(filmForm) }}
+    {{ form(filmForm) }}
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Nouveau genre{% endblock %}
+
+{% block main %}
+    <h1>Nouveau Genre:</h1>
+    {{ form_errors(genreForm) }}
+    {{ form(genreForm) }}
+{% endblock %}

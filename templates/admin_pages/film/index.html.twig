@@ -1,0 +1,90 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Films{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-md-6 col-sm-12 col-xs-12 vertical">
+            <h1>Films</h1>
+            <div class="horizontal-container">
+
+                <div class="partie-droite">
+                    <form method="get" class="my-3">
+                        <label for="sort" class="form-label">Trier les films</label>
+                        <select id="sort" name="sort" class="form-select" onchange="this.form.submit()">
+                            <option value="id_asc" {{ sort == 'id_asc' ? 'selected' : '' }}>ID croissant</option>
+                            <option value="id_desc" {{ sort == 'id_desc' ? 'selected' : '' }}>ID décroissant</option>
+                            <option value="title_asc" {{ sort == 'title_asc' ? 'selected' : '' }}>Titre A → Z</option>
+                            <option value="title_desc" {{ sort == 'title_desc' ? 'selected' : '' }}>Titre Z → A</option>
+                        </select>
+                    </form>
+                </div>
+
+                <div class="partie-gauche">
+                    <a class="btn btn-primary" href="{{ url('admin.film.create') }}">Nouveau film</a>
+                </div>
+            </div>
+
+
+            <table class="table table-striped col-md-6">
+                <tr><th>ID</th><th>Titre</th><th></th></tr>
+                {% for film in films %}
+                    <tr>
+                        <td>{{ film.id }}</td>
+                        <td>{{ film.title }}</td>
+                        <td>
+                            <div class="d-flex justify-content-evenly">
+                                <a class="btn btn-primary" id="edit" href="{{ url('admin.film.edit', parameters = {id: film.id} ) }}">Éditer</a>
+                                <form method="post" action="{{ url('admin.film.delete', parameters = {id: film.id} ) }}">
+                                    <input type="hidden" name="_method" value="DELETE"/>
+                                    <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="col-md-6 col-sm-12 col-xs-12 vertical">
+
+                <h1>Genres</h1>
+                <div class="horizontal-container">
+                    <div class="partie-gauche">
+                        <form method="get" class="my-3">
+                            <label for="sort" class="form-label">Trier les films</label>
+                            <select id="sort" name="sort" class="form-select" onchange="this.form.submit()">
+                                <option value="id_asc" {{ sort == 'id_asc' ? 'selected' : '' }}>ID croissant</option>
+                                <option value="id_desc" {{ sort == 'id_desc' ? 'selected' : '' }}>ID décroissant</option>
+                                <option value="genre_asc" {{ sort == 'genre_asc' ? 'selected' : '' }}>Genre A → Z</option>
+                                <option value="genre_desc" {{ sort == 'genre_desc' ? 'selected' : '' }}>Genre Z → A</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="partie-droite">
+                        <a class="btn btn-primary" href="{{ url('admin.genre.create') }}">Nouveau genre</a>
+                    </div>
+
+
+                </div>
+            <table class="table table-striped col-md-6">
+                <tr><th>ID</th><th>Nom</th><th></th></tr>
+                {% for genre in genres %}
+                    <tr>
+                        <td>{{ genre.id }}</td>
+                        <td>{{ genre.name }}</td>
+                        <td>
+                            <div class="d-flex justify-content-evenly">
+                                <a class="btn btn-primary" id="edit" href="{{ url('admin.genre.edit', parameters = {id: genre.id} ) }}">Éditer</a>
+                                <form method="post" action="{{ url('admin.genre.delete', parameters = {id: genre.id} ) }}">
+                                    <input type="hidden" name="_method" value="DELETE"/>
+                                    <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}

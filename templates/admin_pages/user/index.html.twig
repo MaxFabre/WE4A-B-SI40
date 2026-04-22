@@ -1,0 +1,32 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Utilisateurs{% endblock %}
+
+{% block main %}
+    <div>
+        <a class="btn btn-primary" href="{{ url('admin.user.create') }}">Nouvel utilisateur</a>
+    </div>
+    <div>
+        <table class="table table-striped">
+            <tr><th>ID</th><th>Prénom</th><th>Nom</th><th>Surnom</th><th>Email</th><th></th></tr>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.person.firstname }}</td>
+                    <td>{{ user.person.lastname }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <div class="d-flex justify-content-evenly">
+                            <a class="btn btn-primary" id="edit" href="{{ url('admin.user.edit', parameters = {id: user.id} ) }}">Éditer</a>
+                            <form method="post" action="{{ url('admin.user.delete', parameters = {id: user.id} ) }}">
+                                <input type="hidden" name="_method" value="DELETE"/>
+                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

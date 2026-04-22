@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints\Image;
 use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
 use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: FilmRepository::class)]
 #[Uploadable]
@@ -43,13 +45,36 @@ class Film {
     private ?File $coverFile = null;
 
     /**
-     * @var Collection<int, Gender>
+     * @var Collection<int, Genre>
      */
-    #[ORM\ManyToMany(targetEntity: Gender::class, mappedBy: 'films')]
-    private Collection $genders;
+    #[ORM\ManyToMany(targetEntity: Genre::class, mappedBy: 'films')]
+    private Collection $genres;
+
+    /**
+     * @var Collection<int, Programme>
+     */
+    #[ORM\OneToMany(targetEntity: Programme::class, mappedBy: 'film')]
+    private Collection $programmes;
+
+    /**
+     * @var Collection<int, Person>
+     */
+    #[ORM\ManyToMany(targetEntity: Person::class, inversedBy: 'directedFilms')]
+    #[ORM\JoinTable(name: "film_director")]
+    private Collection $directors;
+
+    /**
+     * @var Collection<int, Person>
+     */
+    #[ORM\ManyToMany(targetEntity: Person::class, inversedBy: 'playedFilms')]
+    #[ORM\JoinTable(name: "film_actor")]
+    private Collection $actors;
 
     public function __construct() {
-        $this->genders = new ArrayCollection();
+        $this->genres = new ArrayCollection();
+        $this->programmes = new ArrayCollection();
+        $this->directors = new ArrayCollection();
+        $this->actors = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -105,6 +130,49 @@ class Film {
 
         return $this;
     }
+    #[Assert\Callback]
+    public function validatePrice(ExecutionContextInterface $context): void {//Fonction appelée automatiquement en cas de validation d'un formulaire qui va set un price. ça affichera le message d'erreur jsute en dessous du champ.
+        if ($this->price === null || $this->price === '') {
+            return;
+        }
+
+        $precision = 4; // Set plus haut dans la taille de la donnée
+        $scale = 2;      // Same
+
+        $value = (string) $this->price;
+        // On gère les différents séparateurs
+        $value = str_replace(',', '.', $value);
+
+        if (!preg_match('/^-?\d+(\.\d+)?$/', $value)) { // Si ça ne commence pas
+            $context->buildViolation('Le prix doit être un nombre valide.')
+                ->atPath('price')
+                ->addViolation();
+            return;
+        }
+
+        $negative = $value[0] === '-'; // Si jamais y a un -, on l'enlève
+        if ($negative) {
+            $value = substr($value, 1);
+        }
+
+        [$intPart, $decPart] = array_pad(explode('.', $value, 2), 2, '');
+        $intPart = ltrim($intPart, '0');
+        $intDigits = $intPart === '' ? 0 : strlen($intPart);
+        $decDigits = strlen(rtrim($decPart, '0'));
+
+        $maxIntDigits = $precision - $scale;
+        if ($intDigits > $maxIntDigits) {
+            $context->buildViolation(sprintf('La partie entière du prix est trop longue (max %d chiffres).', $maxIntDigits))
+                ->atPath('price')
+                ->addViolation();
+        }
+
+        if ($decDigits > $scale) {
+            $context->buildViolation(sprintf('Le prix ne doit pas avoir plus de %d décimales.', $scale))
+                ->atPath('price')
+                ->addViolation();
+        }
+    }
 
     public function getCoverPath(): ?string {
         return $this->coverPath;
@@ -114,6 +182,20 @@ class Film {
         $this->coverPath = $cover_path;
 
         return $this;
+    }
+
+    #[Assert\Callback]
+    public function validateCoverPath(ExecutionContextInterface $context): void { //Fonction appelée automatiquement en cas de validation d'un formulaire qui va set un price. ça affichera le message d'erreur jsute en dessous du champ.
+
+        $maxSize = 255;
+        $value = (string) $this->coverPath;
+
+        if (strlen($value) > $maxSize) {
+            $context->buildViolation(sprintf('Le chemin du cover est trop long (max %d caractères).', $maxSize))
+                ->atPath('coverPath')
+                ->addViolation();
+            return;
+        }
     }
 
     public function getCoverFile(): ?File {
@@ -127,27 +209,94 @@ class Film {
     }
 
     /**
-     * @return Collection<int, Gender>
+     * @return Collection<int, Genre>
      */
-    public function getGender(): Collection {
-        return $this->genders;
+    public function getgenre(): Collection {
+        return $this->genres;
     }
 
-    public function addGender(Gender $gender): static
-    {
-        if (!$this->genders->contains($gender)) {
-            $this->genders->add($gender);
-            $gender->addFilm($this);
+    public function addgenre(Genre $genre): static {
+        if (!$this->genres->contains($genre)) {
+            $this->genres->add($genre);
+            $genre->addFilm($this);
         }
 
         return $this;
     }
 
-    public function removeGender(Gender $gender): static
-    {
-        if ($this->genders->removeElement($gender)) {
-            $gender->removeTest($this);
+    public function removegenre(Genre $genre): static {
+        if ($this->genres->removeElement($genre)) {
+            $genre->removeTest($this);
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Programme>
+     */
+    public function getProgrammes(): Collection {
+        return $this->programmes;
+    }
+
+    public function addProgramme(Programme $programme): static {
+        if (!$this->programmes->contains($programme)) {
+            $this->programmes->add($programme);
+            $programme->setFilm($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProgramme(Programme $programme): static {
+        if ($this->programmes->removeElement($programme)) {
+            // set the owning side to null (unless already changed)
+            if ($programme->getFilm() === $this) {
+                $programme->setFilm(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Person>
+     */
+    public function getDirectors(): Collection {
+        return $this->directors;
+    }
+
+    public function addDirector(Person $director): static {
+        if (!$this->directors->contains($director)) {
+            $this->directors->add($director);
+        }
+
+        return $this;
+    }
+
+    public function removeDirector(Person $director): static {
+        $this->directors->removeElement($director);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Person>
+     */
+    public function getActors(): Collection {
+        return $this->actors;
+    }
+
+    public function addActor(Person $actor): static {
+        if (!$this->actors->contains($actor)) {
+            $this->actors->add($actor);
+        }
+
+        return $this;
+    }
+
+    public function removeActor(Person $actor): static {
+        $this->actors->removeElement($actor);
 
         return $this;
     }

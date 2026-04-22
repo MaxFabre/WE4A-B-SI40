@@ -1,6 +1,18 @@
 body {
 }
 
+.center {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
 nav {
     position: fixed;
 }
@@ -74,7 +86,7 @@ nav {
     }
 }
 
-.film-pined-gender {
+.film-pined-genre {
     display: flex;
     gap: 0.5em;
     span {
@@ -86,6 +98,42 @@ nav {
 
 .tools-menu {
     position: absolute;
-    background-color: #f5a22c;
+    background-color: lavender; /* juste pour visu*/
     left: 0;
+
+    ul {
+        list-style: none;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+}
+
+.horizontal-div {
+    display: flex;
+    gap: 1em;
+}
+
+.horizontal-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    gap: 1rem;
+}
+
+
+.partie-droite {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+
+.partie-gauche {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }

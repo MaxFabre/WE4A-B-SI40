@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Film;
-use App\Entity\Gender;
+use App\Entity\Genre;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -33,7 +33,10 @@ class FilmType extends AbstractType {
                 'label' => 'Slug'
             ])
             ->add('price', NumberType::class, [
-                'label' => 'Prix'
+                'label' => 'Prix',
+                'scale' => 2,
+                'input' => 'string'
+
             ])
             ->add('coverFile', VichFileType::class, [
                 'label' => 'Affiche',
@@ -41,8 +44,8 @@ class FilmType extends AbstractType {
                 'allow_delete' => true,
                 'delete_label' => 'Supprimer',
             ])
-            ->add('gender', EntityType::class, [
-                'class' => Gender::class,
+            ->add('genre', EntityType::class, [
+                'class' => Genre::class,
                 'label' => 'Genre',
                 'choice_label' => 'name',
                 'multiple' => true,
