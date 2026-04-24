@@ -13,6 +13,7 @@
             {% if is_granted('ROLE_FUND_MANAGER') %}
                 <strong>{{ ux_icon('dashboard:watching') }} Gestion des films</strong>
                 <li><a href="{{ url('admin.film.index') }}">Films & Genres</a></li>
+                <li><a href="{{ url('admin.carousel.index') }}">Films à l'affiche</a></li>
                 <strong>Trucs financiers</strong>
                 <li><a>trucs</a></li>
             {% endif %}

@@ -1,41 +1,31 @@
 <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
 
     <div class="carousel-indicators">
-        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"></button>
-        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"></button>
+        {% for item in pinnedFilms %}
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index-1 }}" class="{% if loop.index==1 %}active{% endif %}"></button>
+        {% endfor %}
     </div>
 
     <div class="carousel-inner carousel-frame">
-        <div class="carousel-item active">
-            <div class="film-pined">
-                <img src="{{ asset(path='affiche.png', packageName = 'placeholders') }}" alt="Affiche de film"/>
-                <div>
-                    <h2>Titre du film</h2>
-                    <strong>durée</strong>
-                    <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et ex in massa suscipit facilisis tincidunt vel enim. Phasellus aliquet sollicitudin augue nec finibus. Ut finibus iaculis vehicula. Nam condimentum rhoncus tincidunt. Interdum et malesuada fames ac ante ipsum primis in faucibus. Sed lacus risus, pellentesque ac congue quis, posuere sed mi. Aenean dictum est in semper fermentum.
-
-                        Proin vulputate ultrices dapibus. Cras ut lectus commodo, mollis dui a, bibendum sem. Sed sit amet ex sed ligula auctor convallis et nec magna. Maecenas cursus ante dui, et feugiat sem facilisis quis. Morbi sodales eget nibh vel eleifend. Aliquam nec est magna. Duis vehicula lectus et odio facilisis sodales. Ut est ipsum, accumsan sit amet nisi sed, elementum sodales nisl.
-
-                        Nullam lorem augue, tincidunt eget magna vitae, tincidunt volutpat massa. Cras rutrum sem ac risus placerat sagittis. Phasellus ut blandit orci. Cras consequat dolor at tortor venenatis scelerisque. Nullam porta egestas velit nec pulvinar. Mauris eget velit nulla. Curabitur mollis metus elit, in porta neque dictum sit amet. Ut rhoncus consequat risus id elementum. Aenean non feugiat sapien. Quisque gravida, nulla quis efficitur fermentum, diam eros tempor leo, non feugiat dolor tellus vitae justo. Donec mattis ornare tellus, eget accumsan augue dignissim et. Duis placerat quam eget justo pellentesque malesuada. Fusce eget eleifend arcu, et imperdiet mi. Praesent sit amet fermentum eros. </p>
-                    <div class="film-pined-genre"><span>genre 1</span><span>genre 2</span></div>
+        {% for item in pinnedFilms %}
+            <div class="carousel-item {% if loop.index==1 %}active{% endif %}">
+                <div class="film-pined">
+                    <a href="{{ url('film.show', parameters = {slug: item.film.slug}) }}"><img src="{{ asset(path=item.film.coverPath, packageName = 'films_cover') }}" alt="Affiche du film {{ item.film.title }}"/></a>
+                    <div>
+                        <h2><a href="{{ url('film.show', parameters = {slug: item.film.slug}) }}">{{ item.film.title }}</a></h2>
+                        {% set hours = (item.film.duration // 60) %}
+                        {% set mins = (item.film.duration % 60) %}
+                        <strong>{{ ux_icon('horloge') }} {{ hours }}h{{ mins }} </strong>
+                        <p>{{ item.film.description }}</p>
+                        <div class="film-pined-genre">
+                            {% for genre in item.film.genre %}
+                            <span>{{ genre.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="carousel-item">
-            <div class="film-pined">
-                <img src="{{ asset(path='affiche.png', packageName = 'placeholders') }}" alt="Affiche de film"/>
-                <div>
-                    <h2>Titre de l'autre film</h2>
-                    <strong>durée</strong>
-                    <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et ex in massa suscipit facilisis tincidunt vel enim. Phasellus aliquet sollicitudin augue nec finibus. Ut finibus iaculis vehicula. Nam condimentum rhoncus tincidunt. Interdum et malesuada fames ac ante ipsum primis in faucibus. Sed lacus risus, pellentesque ac congue quis, posuere sed mi. Aenean dictum est in semper fermentum.
-
-                        Proin vulputate ultrices dapibus. Cras ut lectus commodo, mollis dui a, bibendum sem. Sed sit amet ex sed ligula auctor convallis et nec magna. Maecenas cursus ante dui, et feugiat sem facilisis quis. Morbi sodales eget nibh vel eleifend. Aliquam nec est magna. Duis vehicula lectus et odio facilisis sodales. Ut est ipsum, accumsan sit amet nisi sed, elementum sodales nisl.
-
-                        Nullam lorem augue, tincidunt eget magna vitae, tincidunt volutpat massa. Cras rutrum sem ac risus placerat sagittis. Phasellus ut blandit orci. Cras consequat dolor at tortor venenatis scelerisque. Nullam porta egestas velit nec pulvinar. Mauris eget velit nulla. Curabitur mollis metus elit, in porta neque dictum sit amet. Ut rhoncus consequat risus id elementum. Aenean non feugiat sapien. Quisque gravida, nulla quis efficitur fermentum, diam eros tempor leo, non feugiat dolor tellus vitae justo. Donec mattis ornare tellus, eget accumsan augue dignissim et. Duis placerat quam eget justo pellentesque malesuada. Fusce eget eleifend arcu, et imperdiet mi. Praesent sit amet fermentum eros. </p>
-                    <div class="film-pined-genre"><span>genre 1</span><span>genre 2</span></div>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 
     <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">

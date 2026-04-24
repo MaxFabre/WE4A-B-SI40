@@ -16,6 +16,9 @@ framework:
             profil_pictures:
                 base_path: /resources/images/profil_pictures
 
+            films_cover:
+                base_path: /resources/images/films_cover
+
 when@test:
     framework:
         test: true
