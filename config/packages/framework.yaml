@@ -8,6 +8,8 @@ framework:
     #esi: true
     #fragments: true
 
+    http_method_override: true
+
     assets:
         packages:
             placeholders:
@@ -18,6 +20,9 @@ framework:
 
             films_cover:
                 base_path: /resources/images/films_cover
+
+            images:
+                base_path: /resources/images/
 
 when@test:
     framework:
