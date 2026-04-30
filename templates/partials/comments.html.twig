@@ -1,0 +1,37 @@
+<div class="vertical">
+    <h2>Commentaires:</h2>
+    <!-- Section d'ajout de commentaires -->
+    {% if app.user %}
+        <div class="comment">
+            <h3>Laisser un commentaire:</h3>
+            {{ form_errors(form) }}
+            {{ form(form) }}
+        </div>
+    {% endif %}
+
+    <div class="comments-area">
+
+        {% for comment in comments %}
+            <article>
+                <h3>{{ comment.title }} • {{ comment.note }}/20</h3>
+                <p>{{ comment.content }}</p>
+                <div>
+                    <strong><a href="{{ url('account.index', parameters = {id: comment.author.id}) }}">{{ comment.author.username }}</a></strong> • {{ comment.updatedAt|date("d/m/Y") }}
+                    {% if app.user and app.user!=comment.author %}
+                        • <form method="post" action="{{ url('comment.report', {id: comment.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('report' ~ comment.id) }}">
+                        <input class="text-danger" type="submit" value="Signaler"/>
+                    </form>
+                    {% endif %}
+                    {% if is_granted("ROLE_MODERATOR") or app.user==comment.author %}
+                        • <form method="post" action="{{ url('comment.delete', {id: comment.id}) }}">
+                            <input type="hidden" name="_method" value="DELETE"/>
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                            <input class="text-danger" type="submit" value="Supprimer"/>
+                        </form>
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</div>

@@ -1,0 +1,21 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Commentaires{% endblock %}
+
+{% block main %}
+    <div>
+        <h1>Signalements:</h1>
+
+        <table class="table table-striped">
+            <tr><th>ID</th><th>Auteur</th><th>Titre</th><th>Signalements</th><th></th></tr>
+            {% for comment in comments %}
+                <tr>
+                    <td>{{ comment.id }}</td>
+                    <td><a href="{{ url('account.index', parameters = {id: comment.author_id}) }}">{{ comment.author }}</a></td>
+                    <td>{{ comment.title }}</td><td>{{ comment.nb_reports }}</td>
+                    <td><a class="btn btn-primary" href="{{ url('admin.comment-reports.show', parameters = {id: comment.id}) }}">Modérer</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

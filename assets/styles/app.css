@@ -4,13 +4,22 @@ body {
 .center {
     display: flex;
     justify-content: center;
-    align-content: center;
+    align-items: center;
 }
 
 .vertical {
     display: flex;
     flex-direction: column;
     gap: 1em;
+}
+
+
+.horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    gap: 1rem;
 }
 
 nav {
@@ -41,6 +50,39 @@ nav {
         background-repeat: no-repeat;
         background-size: cover;
         text-decoration: none;
+    }
+}
+
+.overlay {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    cursor: pointer;
+}
+
+.warning {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    padding: 1em;
+    border-radius: 1.5em;
+    background-color: azure;
+
+    font-size: large;
+    box-shadow: 0 0 0 2px white, 0.3em 0.3em 1em rgb(10 10 10 / 60%);
+
+    div {
+        display: flex;
+        justify-content: space-evenly;
     }
 }
 
@@ -140,37 +182,51 @@ nav {
 }
 
 .comments-area {
-
     article {
         padding: 1em;
+        margin-top: 1em;
         border-top: 0.5em solid #1d3043;
         background-color: #354a5f;
         color: azure;
+
+        a{
+            text-decoration: none;
+            color: inherit;
+        }
+
+        div {
+            display: flex;
+            flex-direction: row;
+            gap: 1em;
+
+            input[type="submit"] {
+                border: none;
+                background-color: inherit;
+            }
+        }
     }
 
 
 }
 
-.new-comment {
+.comment {
+    padding: 1em;
+    border-top: 0.5em solid #1d3043;
+    border-left: 0.5em solid #354a5f;
+    border-right: 0.5em solid #354a5f;
+    border-bottom: 0.5em solid #354a5f;
 
     textarea {
         resize: none;
     }
 }
 
-.horizontal-div {
-    display: flex;
-    gap: 1em;
+.table {
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
 }
-
-.horizontal {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    gap: 1rem;
-}
-
 
 .partie-droite {
     display: flex;

@@ -1,0 +1,16 @@
+<dialog id="dialog-delete" popover>
+    <div class="overlay">
+        <div class="warning">
+            <h1>{{ ux_icon('dashboard:alert') }} ATTENTION !</h1>
+            <p>Êtes-vous sûr de vouloir <strong>supprimer</strong> cet élément ?
+                <br/><small>Cette action est irréversible.</small></p>
+            <div>
+                <button id="cancel-btn" class="btn btn-primary" popovertarget="dialog-delete" popovertargetaction="hide">Non</button>
+                <form action="{{ url(dialogRoute) }}" method="post">
+                    <input id="id" name="id" type="hidden" value="{{ dialogObjectId }}"/>
+                    <input id="confirm-btn" class="btn btn-danger" type="submit" value="Oui"/>
+                </form>
+            </div>
+        </div>
+    </div>
+</dialog>

@@ -25,41 +25,47 @@ final class FilmController extends AbstractController {
 
     #[Route('/film/{slug}', name: 'film.show', methods: ['GET', 'POST'])]
     public function show(string $slug, FilmRepository $filmRepository, CommentRepository $commentRepository, Request $request, EntityManagerInterface $entityManager): Response {
-        //Chargement du film et de ses commentaires:
-        $film = $filmRepository->findBy(['slug' => $slug]);
-        $comments = $commentRepository->findBy(['film' => $film]);
-
-        //Formulaire de nouveau commentaire:
+        //Initialisation:
+        $film = $filmRepository->findOneBy(['slug' => $slug]);
         $newComment = new Comment();
         $form = $this->createForm(CommentType::class, $newComment);
-
-        //Publication du commentaire:
         $form->handleRequest($request);
+
+        //Enregistrement d'un nouveau commentaire:
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 //Remplissage des champs cachés:
-                $newComment->setFilm($film[0]);
+                $newComment->setFilm($film);
                 $newComment->setAuthor($this->getUser());
                 $newComment->setCreatedAt(new \DateTimeImmutable());
                 $newComment->setUpdatedAt(new \DateTimeImmutable());
                 $newComment->setIsVisible(true);
 
-                //Enregistrement en db:
+                //Enregistrement en DB:
                 $entityManager->persist($newComment);
                 $entityManager->flush();
 
-                //Redirection avec message:
-                $this->addFlash('success', 'Le commentaire à bien été créé.');
-            }
-            catch (\Doctrine\DBAL\Exception\DriverException $e) {
-                // Problème de taille là
+                $this->addFlash('success', 'Le commentaire a bien été créé.');
+
+                //Rechargement de la page:
+                return $this->redirectToRoute('film.show', [
+                    'slug' => $slug
+                ]);
+
+            } catch (\Doctrine\DBAL\Exception\DriverException $e) {
                 $form->addError(new FormError('Y a un problème quelque part dans les données...'));
             }
         }
 
+        //Chargements des commentaires:
+        $comments = $commentRepository->findBy(
+            ['film' => $film, "is_visible" => true],
+            ['created_at' => 'DESC']
+        );
+
         //Chargement du template:
         return $this->render('film/show.html.twig', [
-            'film' => $film[0],
+            'film' => $film,
             'comments' => $comments,
             'form' => $form->createView(),
         ]);

@@ -70,11 +70,19 @@ class Film {
     #[ORM\JoinTable(name: "film_actor")]
     private Collection $actors;
 
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'film', orphanRemoval: true)]
+    private Collection $comments;
+
+
     public function __construct() {
         $this->genres = new ArrayCollection();
         $this->programmes = new ArrayCollection();
         $this->directors = new ArrayCollection();
         $this->actors = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -297,6 +305,36 @@ class Film {
 
     public function removeActor(Person $actor): static {
         $this->actors->removeElement($actor);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setFilm($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getFilm() === $this) {
+                $comment->setFilm(null);
+            }
+        }
 
         return $this;
     }
