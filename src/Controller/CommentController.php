@@ -21,13 +21,16 @@ final class CommentController extends AbstractController {
         $filmSlug = $comment->getFilm()->getSlug();
 
         //Vérification des droits:
-        if ($this->getUser() == $comment->getAuthor() || $this->isGranted('ROLE_MODERATOR')) {
+        if ($this->getUser() === $comment->getAuthor() || $this->isGranted('ROLE_MODERATOR')) {
 
             //Vérification du formulaire:
             if ($this->isCsrfTokenValid('delete'.$comment->getId(), $request->request->get('_token'))) {
 
-                //Suppression en DB:
-                $entityManager->remove($comment);
+                //Soft delete:
+                $comment->setIsVisible(false);
+
+                //Enregistrement en DB:
+                $entityManager->persist($comment);
                 $entityManager->flush();
                 $this->addFlash('success', 'Le commentaire à bien été supprimé.');
             }

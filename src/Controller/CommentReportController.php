@@ -43,22 +43,48 @@ final class CommentReportController extends AbstractController {
         $comment = $commentRepository->find($request->get('id'));
         $reports = $commentReportRepository->findBy(["comment" => $comment]);
 
-        //Soft delete the comment:
+        //Soft delete:
         $comment->SetIsVisible(false);
 
-        //Close all the reports:
+        //Clôturer tous les signalements:
         foreach ($reports as $report) {
             $report->setIsActive(false);
             $report->setStatut("Validé");
             $report->addModerator($this->getUser());
+
+            //Pré-enregistrement en DB:
+            $entityManager->persist($report);
         }
 
-        //Enregistrer en DB:
+        //Enregistrement en DB:
         $entityManager->persist($comment);
-        $entityManager->persist($report);
         $entityManager->flush();
 
-        //Return the index page:
+        //Retour à la page d'index:
+        return $this->redirectToRoute('admin.comment-reports.index');
+    }
+
+    #[Route('/refuse/{id}', name: '.refuse', methods: ['POST'])]
+    public function refuse(CommentRepository $commentRepository, CommentReportRepository $commentReportRepository, Request $request, EntityManagerInterface $entityManager): Response {
+        //Initialisation:
+        $comment = $commentRepository->find($request->get('id'));
+        $reports = $commentReportRepository->findBy(["comment" => $comment]);
+
+        //Clôturer tous les signalements:
+        foreach ($reports as $report) {
+            $report->setIsActive(false);
+            $report->setStatut("Refusé");
+            $report->addModerator($this->getUser());
+
+            //Pré-enrigstrement en DB:
+            $entityManager->persist($report);
+        }
+
+        //Enregistrement en DB:
+        $entityManager->persist($comment);
+        $entityManager->flush();
+
+        //Retour à la page d'index:
         return $this->redirectToRoute('admin.comment-reports.index');
     }
 }
