@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ film.title }}{% endblock %}
+
+{% block container %}
+    <div class="vertical">
+        <h1>{{ film.title }}</h1>
+        <div class="film-show">
+            <div class="film-show-side">
+                <img src="{{ asset(path=film.coverPath, packageName = 'films_cover') }}" alt="Affiche du film {{ film.title }}"/>
+                <!-- mettre les langues des versions disponibles -->
+                <img style="height:1.5em;" src="{{ asset(path='vf.png', packageName = 'images') }}" alt=""/> <img style="height:1.5em;" src="{{ asset(path='ve.png', packageName = 'images') }}" alt=""/>
+                <table>
+                    <tr>
+                        <th>Genres</th>
+                        <td>
+                            {% for genre in film.genre %}
+                                {{ genre.name }}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Durée</th>
+                        {% set hours = (film.duration // 60) %}
+                        {% set mins = (film.duration % 60) %}
+                        <td>{{ hours }}h{{ mins }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="vertical">
+                <h2>Description:</h2>
+                <p>{{ film.description }}</p>
+
+                <h2>Réalisateurs:</h2>
+                {% if film.directors is not null %}
+                    {% for director in film.directors %}
+                        {{ director.firstname }}
+                    {% endfor %}
+                {% else %}
+                    <p>Non renseigné.</p>
+                {% endif %}
+
+                <h2>Acteurs:</h2>
+                {% if film.actors is not null %}
+                    {% for actor in film.actors %}
+                        {{ actor.firstname }}
+                    {% endfor %}
+                {% else %}
+                    <p>Non renseigné.</p>
+                {% endif %}
+            </div>
+        </div>
+        <hr/>
+        {% include 'partials/comments.html.twig' %}
+    </div>
+{% endblock %}
