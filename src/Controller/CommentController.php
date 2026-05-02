@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Comment;
 use App\Entity\CommentReport;
 use App\Entity\Film;
+use App\Repository\CommentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Flow\FormFlowInterface;
@@ -61,5 +62,22 @@ final class CommentController extends AbstractController {
 
         //Retour vers la page du film:
         return $this->redirectToRoute('film.show', ['slug' => $comment->getFilm()->getSlug()]);
+    }
+
+    #[Route('/tools/comment/', name: 'admin.comment.index', methods: ['GET'])]
+    public function list(CommentRepository $repository): Response {
+        //Initilisation:
+        $sort = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('sort', 'id_asc');
+        $visible = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('visible', 'true');
+
+        //Récupération des commentaires par filtre:
+        $comments = $repository->findByFilters($sort, $visible);
+
+        //Génération du template:
+        return $this->render('admin_pages/comment/list-comments.html.twig', [
+            'comments' => $comments,
+            'sort' => $sort,
+            'visible' => $visible,
+        ]);
     }
 }

@@ -31,6 +31,35 @@ class CommentReportRepository extends ServiceEntityRepository {
         return $resultSet->fetchAllAssociative();
     }
 
+    public function findByFilters(string $sort, string $state): array {
+        $qb = $this->createQueryBuilder('r');
+
+        //Test sur les types de signalements demandés:
+        if ($state !== 'all') {
+            $qb->andWhere('r.statut = :state')->setParameter('state', $state);
+        }
+
+        //Jointure avec public.comment:
+        $qb->join('r.comment', 'c');
+
+        //Récupération du type de tri:
+        [$field, $order] = explode('_', $sort);
+        $order = strtoupper($order);
+
+        //Vérification des champs:
+        $allowedFields = [
+            'id' => 'r.id',
+            'date' => 'r.created_at',
+            'title' => 'c.title',
+        ];
+        if (isset($allowedFields[$field])) {
+            $qb->orderBy($allowedFields[$field], $order);
+        }
+
+        //Retour des résultats:
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return CommentReport[] Returns an array of CommentReport objects
     //     */

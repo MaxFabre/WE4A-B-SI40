@@ -14,6 +14,32 @@ class CommentRepository extends ServiceEntityRepository {
         parent::__construct($registry, Comment::class);
     }
 
+    public function findByFilters(string $sort, string $visible): array {
+        $qb = $this->createQueryBuilder('c');
+
+        //Test sur la visibilité des commentaires:
+        if ($visible !== 'all') {
+            $qb->andWhere('c.is_visible = :visible')->setParameter('visible', $visible);
+        }
+
+        //Récupération du type de tri:
+        [$field, $order] = explode('_', $sort);
+        $order = strtoupper($order);
+
+        //Vérification des champs:
+        $allowedFields = [
+            'id' => 'c.id',
+            'date' => 'c.created_at',
+            'title' => 'c.title',
+        ];
+        if (isset($allowedFields[$field])) {
+            $qb->orderBy($allowedFields[$field], $order);
+        }
+
+        //Retour des résultats:
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return Comment[] Returns an array of Comment objects
     //     */

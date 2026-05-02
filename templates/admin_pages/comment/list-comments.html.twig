@@ -1,0 +1,48 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Commentaires{% endblock %}
+
+{% block main %}
+    <div>
+        <h1>Signalements:</h1>
+
+        <div>
+            <form method="get" class="my-3">
+                <label for="sort" class="form-label">Trier par:</label>
+                <select id="sort" name="sort" class="form-select" onchange="this.form.submit()">
+                    <option value="id_asc" {{ sort == 'id_asc' ? 'selected' : '' }}>ID croissant</option>
+                    <option value="id_desc" {{ sort == 'id_desc' ? 'selected' : '' }}>ID décroissant</option>
+                    <option value="title_asc" {{ sort == 'title_asc' ? 'selected' : '' }}>Titre A → Z</option>
+                    <option value="title_desc" {{ sort == 'title_desc' ? 'selected' : '' }}>Titre Z → A</option>
+                    <option value="date_asc" {{ sort == 'date_asc' ? 'selected' : '' }}>Date croissant</option>
+                    <option value="date_desc" {{ sort == 'date_desc' ? 'selected' : '' }}>Date décroissant</option>
+                </select>
+                <label for="visible" class="form-label">Avec corbeille:</label>
+                <select id="visible" name="visible" class="form-select" onchange="this.form.submit()">
+                    <option value="true" {{ visible == 'true' ? 'selected' :'' }}>Non</option>
+                    <option value="all" {{ visible == 'all' ? 'selected' :'' }}>Oui</option>
+                    <option value="false" {{ visible == 'false' ? 'selected' :'' }}>Exclusivement</option>
+                </select>
+            </form>
+        </div>
+
+        {% if comments %}
+            <table class="table table-striped">
+                <tr><th>ID</th><th>Titre</th><th>Auteur</th><th>Création</th><th>Mise à jour</th><th>Film</th><th>Statut</th></tr>
+                {% for comment in comments %}
+                    <tr>
+                        <td>{{ comment.id }}</td>
+                        <td>{{ comment.title }}</td>
+                        <td><a href="{{ url('account.index', parameters = {id: comment.author.id}) }}">{{ comment.author.username }}</a></td>
+                        <td>{{ comment.createdAt|date('d/m/Y h:m') }}</td>
+                        <td>{{ comment.updatedAt|date('d/m/Y h:m') }}</td>
+                        <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.film.title }}</a></td>
+                        <td>{% if comment.isVisible %}Visible{% else %}Supprimé{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <em>Aucun signalements à afficher.</em>
+        {% endif %}
+    </div>
+{% endblock %}
