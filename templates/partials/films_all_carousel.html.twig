@@ -1,0 +1,68 @@
+<div class="films-carousel-wrapper" id="allFilmsCarouselWrapper">
+    <button class="carousel-control-prev" aria-label="Scroll left">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+
+    <div class="films-carousel-container" id="filmsCarouselContainer">
+        <div class="films-carousel" id="filmsCarousel">
+            {% for film in allFilms %}
+                <a href="{{ url('film.show', parameters = {slug: film.slug}) }}" class="film-cover-card">
+                    <div class="film-cover-wrapper">
+                        {% if film.coverPath %}
+                            <img src="{{ asset(path=film.coverPath, packageName = 'films_cover') }}" alt="Affiche du film {{ film.title }}" class="film-cover-img"/>
+                        {% else %}
+                            <div class="film-no-cover">No Cover</div>
+                        {% endif %}
+                        <div class="film-cover-overlay">
+                            <div class="film-title-hover">
+                                <h3>{{ film.title }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <button class="carousel-control-next" aria-label="Scroll right">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const wrapper = document.getElementById('allFilmsCarouselWrapper');
+        const carouselContainer = document.getElementById('filmsCarouselContainer');
+        const leftArrow = wrapper.querySelector('.carousel-control-prev');
+        const rightArrow = wrapper.querySelector('.carousel-control-next');
+        const scrollAmount = 400; // pixels to scroll per click
+
+        // Left arrow click
+        leftArrow.addEventListener('click', function() {
+            carouselContainer.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+
+        // Right arrow click
+        rightArrow.addEventListener('click', function() {
+            carouselContainer.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+
+        // Scroll wheel support
+        carouselContainer.addEventListener('wheel', function(event) {
+            if (event.deltaY !== 0) {
+                event.preventDefault();
+                carouselContainer.scrollBy({
+                    left: event.deltaY,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+</script>
+
