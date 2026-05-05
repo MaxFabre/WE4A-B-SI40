@@ -1,0 +1,42 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Modérer {{ comment.title }}{% endblock %}
+
+{% block main %}
+    <div>
+        <h1>Modérer {{ comment.title }}</h1>
+
+        <div class="row">
+            <div class="col-sm-6 col-md-12 col-lg-6 comment">
+                <h2>{{ comment.title }}</h2>
+                <small>De: <a href="{{ url('account.index', parameters = {id: comment.author.id}) }}">{{ comment.author.username }}</a></small>
+                <p>{{ comment.content }}</p>
+                <hr>
+                <div class="d-flex gap-2">
+                    <strong>Supprimer ?</strong>
+                    <form method="post" action="{{ url('admin.comment-reports.refuse', parameters = {id: comment.id}) }}">
+                        <input id="id" name="id" type="hidden" value="{{ comment.id }}"/>
+                        <input class="btn btn-primary" type="submit" value="Non"/>
+                    </form>
+                    <button popovertarget="dialog-delete" class="btn btn-danger">Oui</button>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-md-12 col-lg-6">
+                <h2>Liste des signalements:</h2>
+                <table class="table table-striped">
+                    <tr>
+                        <th>ID</th><th>Date</th><th>Réclamant</th><th>Statut</th>
+                    </tr>
+                    {% for report in reports %}
+                        <tr>
+                            <td>{{ report.id }}</td><td>{{ comment.createdAt|date('h:i - d/m/Y') }}</td><td>{{ report.complainant.username }}</td><td>{{ report.statut }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% include 'partials/warning.html.twig' %}
+{% endblock %}

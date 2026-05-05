@@ -1,0 +1,34 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Films à l'affiche{% endblock %}
+
+{% block main %}
+    <div>
+        <h1>Films à l'affiche</h1>
+        <div class="row">
+            {{ form_start(form) }}
+            <div class="col">{{ form_row(form.position) }}</div><div class="col">{{ form_row(form.film) }}</div><div class="col">{{ form_row(form.submit) }}</div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+    <table class="table table-striped">
+        <tr><th>Film ID</th><th>Titre</th><th>Position</th><th></th></tr>
+        {% for film in films %}
+            <tr>
+                <td>{{ film.film.id }}</td>
+                <td>{{ film.film.title }}</td>
+                <td>{{ film.position }}</td>
+                <td>
+                    <div class="d-flex justify-content-evenly">
+                        {% if loop.index!=1 %}<a class="btn btn-primary" href="{{ url('admin.carousel.down', parameters = {id: film.id}) }}">{{ ux_icon('dashboard:up-arrow') }}</a>{% endif %}
+                        {% if loop.index!=loop.length %}<a class="btn btn-primary" href="{{ url('admin.carousel.up', parameters = {id: film.id}) }}">{{ ux_icon('dashboard:down-arrow') }}</a>{% endif %}
+                        <form method="post" action="{{ url('admin.carousel.delete', parameters = {id: film.id} ) }}">
+                            <input type="hidden" name="_method" value="DELETE"/>
+                            <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

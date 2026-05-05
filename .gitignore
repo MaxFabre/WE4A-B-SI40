@@ -22,5 +22,11 @@
 /assets/vendor/
 ###< symfony/asset-mapper ###
 
-###< IDE ###
+###> Images ###
+/public/resources/images/films_cover
+/public/resources/images/profil_pictures
+###< Images ###
+
+###> IDE ###
 .idea/
+###< IDE ###

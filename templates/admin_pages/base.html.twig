@@ -7,8 +7,10 @@
         <ul>
             <li><strong><a href="{{ url('admin.index') }}">{{ ux_icon('dashboard:settings') }} Dashboard</a></strong></li>
             {% if is_granted('ROLE_MODERATOR') %}
-                <strong>{{ ux_icon('dashboard:chat') }} Modération</strong>
-                <li>Commentaires</li>
+                <strong>{{ ux_icon('dashboard:chat') }} Commentaires</strong>
+                <li><a href="{{ url('admin.reports.index') }}">Derniers Signalements</a></li>
+                <li><a href="{{ url('admin.reports.list') }}">Tous les Signalements</a></li>
+                <li><a href="{{ url('admin.comment.index') }}">Tous les commentaires</a></li>
             {% endif %}
             {% if is_granted('ROLE_FUND_MANAGER') %}
                 <strong>{{ ux_icon('dashboard:watching') }} Gestion des films</strong>

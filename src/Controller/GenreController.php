@@ -59,9 +59,11 @@ final class GenreController extends AbstractController {
 
     #[Route('/delete/{id}', name: '.delete', methods: ['DELETE'])]
     public function delete(Genre $genre, Request $request, EntityManagerInterface $entityManager): Response {
-        $entityManager->remove($genre);
-        $entityManager->flush();
-        $this->addFlash('success', 'Le genre de film à bien été supprimé.');
+        if ($this->isCsrfTokenValid('delete'.$genre->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($genre);
+            $entityManager->flush();
+            $this->addFlash('success', 'Le genre de film à bien été supprimé.');
+        }
         return $this->redirectToRoute('admin.film.index');
     }
 }

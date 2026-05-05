@@ -10,11 +10,6 @@
 controllers:
     resource: routing.controllers
 
-home:
-    path: '/'
-    methods: GET
-    controller: App\Controller\HomeController::index
-
 #Authentification
 login.view:
     path: '/login'

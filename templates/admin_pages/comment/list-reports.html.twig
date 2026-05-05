@@ -1,0 +1,48 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Commentaires{% endblock %}
+
+{% block main %}
+    <div>
+        <h1>Signalements:</h1>
+
+        <div>
+            <form method="get" class="my-3">
+                <label for="sort" class="form-label">Trier par:</label>
+                <select id="sort" name="sort" class="form-select" onchange="this.form.submit()">
+                    <option value="id_asc" {{ sort == 'id_asc' ? 'selected' : '' }}>ID croissant</option>
+                    <option value="id_desc" {{ sort == 'id_desc' ? 'selected' : '' }}>ID décroissant</option>
+                    <option value="title_asc" {{ sort == 'title_asc' ? 'selected' : '' }}>Titre A → Z</option>
+                    <option value="title_desc" {{ sort == 'title_desc' ? 'selected' : '' }}>Titre Z → A</option>
+                    <option value="date_asc" {{ sort == 'date_asc' ? 'selected' : '' }}>Date croissant</option>
+                    <option value="date_desc" {{ sort == 'date_desc' ? 'selected' : '' }}>Date décroissant</option>
+                </select>
+                <label for="state" class="form-label">Statut:</label>
+                <select id="state" name="state" class="form-select" onchange="this.form.submit()">
+                    <option value="Tous" {{ state == 'all' ? 'selected' :'' }}>Tous</option>
+                    <option value="En attente" {{ state == 'En attente' ? 'selected' :'' }}>En attente</option>
+                    <option value="Validé" {{ state == 'Validé' ? 'selected' :'' }}>Validé</option>
+                    <option value="Refusé" {{ state == 'Refusé' ? 'selected' :'' }}>Refusé</option>
+                </select>
+            </form>
+        </div>
+
+        {% if reports %}
+            <table class="table table-striped">
+                <tr><th>ID</th><th>Titre</th><th>Auteur</th><th>Date</th><th>Réclamant</th><th>Statut</th></tr>
+                {% for report in reports %}
+                    <tr>
+                        <td>{{ report.id }}</td>
+                        <td>{{ report.comment.title }}</td>
+                        <td><a href="{{ url('account.index', parameters = {id: report.comment.author.id}) }}">{{ report.comment.author.username }}</a></td>
+                        <td>{{ report.createdAt|date('d/m/Y h:m') }}</td>
+                        <td><a href="{{ url('account.index', parameters = {id: report.complainant.id}) }}">{{ report.complainant.username }}</a></td>
+                        <td>{{ report.statut }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <em>Aucun signalements à afficher.</em>
+        {% endif %}
+    </div>
+{% endblock %}

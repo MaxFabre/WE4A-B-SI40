@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Film;
+use App\Repository\CarouselItemRepository;
 use App\Repository\FilmRepository;
 use App\Repository\GenreRepository;
 use App\Repository\ProgrammeRepository;
