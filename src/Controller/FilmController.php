@@ -9,7 +9,6 @@ use App\Form\FilmType;
 use App\Repository\FilmRepository;
 use App\Repository\GenreRepository;
 use App\Repository\CommentRepository;
-use App\Repository\FilmRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -17,9 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/tools/film', name: 'admin.film')]
 final class FilmController extends AbstractController {
-    #[Route('/', name: '.index')]
+    #[Route('/admin/film/', name: 'admin.film.index')]
     public function filmList(FilmRepository $filmRepository, GenreRepository $genreRepository): Response{
         $sortFilm = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('sortFilm', 'id_asc');
 
@@ -97,7 +95,7 @@ final class FilmController extends AbstractController {
         ]);
     }
 
-    #[Route('/tools/film/create', name: '.create', methods: ['GET', 'POST'])]
+    #[Route('/tools/film/create', name: 'admin.film.create', methods: ['GET', 'POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager): Response {
         $film = new Film();
         $filmForm = $this->createForm(FilmType::class, $film);
@@ -125,7 +123,7 @@ final class FilmController extends AbstractController {
         ]);
     }
 
-    #[Route('/tools/film/edit/{id}', name: '.edit', methods: ['GET', 'POST'])]
+    #[Route('/tools/film/edit/{id}', name: 'admin.film.edit', methods: ['GET', 'POST'])]
     public function edit(Film $film, Request $request, EntityManagerInterface $entityManager): Response {
         $filmForm = $this->createForm(FilmType::class, $film);
         $filmForm->handleRequest($request);
