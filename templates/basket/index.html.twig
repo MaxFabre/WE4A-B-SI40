@@ -1,0 +1,209 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello BasketController!{% endblock %}
+
+{% block container %}
+    <div class="row">
+        <h1>Contenu du panier</h1>
+        <table class="table table-striped col-md-6">
+            <tr><th></th><th class="center-content">Titre du film</th><th>Date</th><th>Horaire</th><th>Places</th></tr>
+            {% for reservation in app.user.baskets[0].reservations %}
+                <tr>
+                    <td class="imagePreview"> <img src="{{ asset(path=reservation.programme.film.coverPath, packageName='films_cover') }}" alt="affiche du film" class="imagePreview"/></td>
+                    <td class="column-wrap">{{ reservation.programme.film.title }}</td>
+                    <td class="column-wrap">{{ reservation.programme.date ? reservation.programme.date|date('d/m/Y') }}</td>
+                    <td class="column-wrap">{{ reservation.programme.date ? reservation.programme.date|date('H:i') : ''}} - {{ reservation.programme.date ? reservation.programme.date|date_modify('+' ~ reservation.programme.film.duration ~ ' minutes')|date('H:i') : '' }}</td>
+                    {% set placesPremiereClasse = 0 %}
+                    {% set placesSecondeClasse = 0 %}
+                    {% for seat in reservation.seats %}
+                            {% if (seat.class == 1)%}
+                                {% set placesPremiereClasse = placesPremiereClasse + 1 %}
+                            {% endif %}
+                            {% if (seat.class == 2)%}
+                                {% set placesSecondeClasse = placesSecondeClasse + 1 %}
+                            {% endif %}
+
+
+
+                    {% endfor %}
+                    {% set intPremiereClasse = 0 %}
+                    {% set intSecondeClasse = 0 %}
+                    {% set selected = "selected" %}
+                    <td class="column-wrap">Première classe :
+
+                        <form method="post"
+                              action="{{ path('reservation_update_seats', {id: reservation.id}) }}"
+                              id="form-seats-{{ reservation.id }}">
+                            <input type="hidden" name="_method" value="POST">
+
+
+
+
+                            <select name="selectPremiereClasse" class="form-select w-auto d-inline-block" onchange="document.getElementById('form-seats-{{ reservation.id }}').submit()" >
+                                <option value="0"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >0</option>
+
+                                <option value="1"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >1</option>
+
+                                <option value="2"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >2</option>
+
+                                <option value="3"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >3</option>
+
+                                <option value="4"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >4</option>
+
+                                <option value="5"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >5</option>
+
+                                <option value="6"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >6</option>
+
+                                <option value="7"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >7</option>
+
+                                <option value="8"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >8</option>
+
+                                <option value="9"
+                                    {% if (intPremiereClasse == placesPremiereClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intPremiereClasse = intPremiereClasse + 1 %}
+                                >9</option>
+                            </select>
+                        </form>
+                        <br>
+                        <form method="post"
+                              action="{{ path('reservation_update_seats', {id: reservation.id}) }}"
+                              id="form-seats-{{ reservation.id }}">
+                            <input type="hidden" name="_method" value="POST">
+                            Seconde classe :
+                            <select name = "selectSecondeClasse" class="form-select w-auto d-inline-block" onchange="document.getElementById('form-seats-{{ reservation.id }}').submit()">
+                                <option value="0"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >0</option>
+
+                                <option value="1"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >1</option>
+
+                                <option value="2"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >2</option>
+
+                                <option value="3"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >3</option>
+
+                                <option value="4"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >4</option>
+
+                                <option value="5"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >5</option>
+
+                                <option value="6"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >6</option>
+
+                                <option value="7"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >7</option>
+
+                                <option value="8"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >8</option>
+
+                                <option value="9"
+                                    {% if (intSecondeClasse == placesSecondeClasse) %}
+                                        {{ selected }}
+                                    {% endif %}
+                                    {% set intSecondeClasse = intSecondeClasse + 1 %}
+                                >9</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td></td>
+
+
+{#                    <td>#}
+{#                        <div class="d-flex justify-content-evenly">#}
+{#    #}{#                        <a class="btn btn-primary" id="edit" href="{{ url('admin.film.edit', parameters = {id: film.id} ) }}">Éditer</a>#}
+{#                            <form method="post" action="{{ url('admin.reservation.delete', parameters = {id: reservation.id} ) }}">#}
+{#                                <input type="hidden" name="_method" value="DELETE"/>#}
+{#                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>#}
+{#                            </form>#}
+{#                        </div>#}
+{#                    </td>#}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

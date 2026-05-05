@@ -26,6 +26,12 @@ nav {
     position: fixed;
 }
 
+.center-content {
+
+    justify-content: center;
+    align-items: center;
+}
+
 .nav {
     li {
         display: inline-block;
@@ -239,4 +245,22 @@ nav {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.imagePreview {
+    width: 6em;
+    flex-wrap: wrap;
+    img {
+        width: 5em;
+    }
+}
+
+.column-wrap{
+    width: 1%;
+    white-space: nowrap;
+}
+
+.ligne-sieges {
+    display: flex;
+    gap: 1em;
 }
