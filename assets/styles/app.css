@@ -13,8 +13,22 @@ body {
     gap: 1em;
 }
 
+.horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    gap: 1rem;
+}
+
 nav {
     position: fixed;
+}
+
+.center-content {
+
+    justify-content: center;
+    align-items: center;
 }
 
 .nav {
@@ -111,20 +125,6 @@ nav {
     }
 }
 
-.horizontal-div {
-    display: flex;
-    gap: 1em;
-}
-
-.horizontal-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    gap: 1rem;
-}
-
-
 .partie-droite {
     display: flex;
     align-items: center;
@@ -136,4 +136,22 @@ nav {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.imagePreview {
+    width: 6em;
+    flex-wrap: wrap;
+    img {
+        width: 5em;
+    }
+}
+
+.column-wrap{
+    width: 1%;
+    white-space: nowrap;
+}
+
+.ligne-sieges {
+    display: flex;
+    gap: 1em;
 }

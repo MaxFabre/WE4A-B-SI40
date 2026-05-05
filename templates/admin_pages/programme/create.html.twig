@@ -1,0 +1,10 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Programmation{% endblock %}
+
+{% block main %}
+    <h1> Nouvelle programmation </h1>
+        {{ form_errors(programmeForm) }}
+        {{ form(programmeForm) }}
+
+{% endblock %}

@@ -40,4 +40,15 @@ class ProgrammeRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+    // src/Repository/ProgrammeRepository.php
+
+    public function findByFilmTitle(string $direction = 'ASC') //Comme on peux pas trier avec un FindBy sur une clef étrangère, on doit créer la query manuellemetn avec une fonction
+    {
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.film', 'f')
+            ->addSelect('f')
+            ->orderBy('f.title', $direction)
+            ->getQuery()
+            ->getResult();
+    }
 }

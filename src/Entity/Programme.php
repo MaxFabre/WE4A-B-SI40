@@ -36,6 +36,9 @@ class Programme
     #[ORM\JoinColumn(nullable: false)]
     private ?Lang $lang = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isClosed = null;
+
     public function __construct() {
         $this->reservations = new ArrayCollection();
     }
@@ -107,6 +110,18 @@ class Programme
 
     public function setLang(?Lang $lang): static {
         $this->lang = $lang;
+
+        return $this;
+    }
+
+    public function isClosed(): ?bool
+    {
+        return $this->isClosed;
+    }
+
+    public function setIsClosed(?bool $isClosed): static
+    {
+        $this->isClosed = $isClosed;
 
         return $this;
     }

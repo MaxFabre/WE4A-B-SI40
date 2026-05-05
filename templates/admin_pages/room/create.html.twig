@@ -1,0 +1,10 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Salle{% endblock %}
+
+{% block main %}
+    <h1> Nouvelle salle </h1>
+        {{ form_errors(roomForm) }}
+        {{ form(roomForm) }}
+
+{% endblock %}

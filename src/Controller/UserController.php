@@ -4,14 +4,23 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/admin/users', name: 'admin.user')]
+#[Route('/tools/users', name: 'admin.user')]
 final class UserController extends AbstractController {
+
+    #[Route('/', name: '.index')]
+    public function userList(UserRepository $repository): Response{
+        $users = $repository->findAll();
+        return $this->render('admin_pages/user/index.html.twig', [
+            'users' => $users,
+        ]);
+    }
     #[Route('/create', name: '.create')]
     public function create(Request $request, EntityManagerInterface $entityManager): Response {
         $user = new User();
