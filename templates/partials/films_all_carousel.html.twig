@@ -1,0 +1,105 @@
+<div class="films-carousel-container">
+    <div class="films-carousel">
+        {% for film in allFilms %}
+            <a href="{{ url('film.show', parameters = {slug: film.slug}) }}" class="film-cover-card">
+                <div class="film-cover-wrapper">
+                    {% if film.coverPath %}
+                        <img src="{{ asset(path=film.coverPath, packageName = 'films_cover') }}" alt="Affiche du film {{ film.title }}" class="film-cover-img"/>
+                    {% else %}
+                        <div class="film-no-cover">No Cover</div>
+                    {% endif %}
+                    <div class="film-cover-overlay">
+                        <div class="film-title-hover">
+                            <h3>{{ film.title }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .films-carousel-container {
+        margin: 20px 0;
+        overflow-x: auto;
+    }
+
+    .films-carousel {
+        display: flex;
+        gap: 20px;
+        padding: 10px;
+        min-width: min-content;
+    }
+
+    .film-cover-card {
+        flex-shrink: 0;
+        text-decoration: none;
+        position: relative;
+        display: block;
+    }
+
+    .film-cover-wrapper {
+        position: relative;
+        width: 180px;
+        height: 270px;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .film-cover-wrapper:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .film-cover-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .film-no-cover {
+        width: 100%;
+        height: 100%;
+        background-color: #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        font-weight: bold;
+    }
+
+    .film-cover-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .film-cover-card:hover .film-cover-overlay {
+        opacity: 1;
+    }
+
+    .film-title-hover {
+        color: white;
+        text-align: center;
+        padding: 10px;
+    }
+
+    .film-title-hover h3 {
+        margin: 0;
+        font-size: 1.1em;
+        line-height: 1.4;
+    }
+</style>
+
