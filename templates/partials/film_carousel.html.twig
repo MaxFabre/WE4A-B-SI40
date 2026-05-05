@@ -1,4 +1,4 @@
-<div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+<div id="carouselExampleIndicators" class="carousel slide featured-carousel" data-bs-ride="carousel">
 
     <div class="carousel-indicators">
         {% for item in pinnedFilms %}
@@ -6,24 +6,34 @@
         {% endfor %}
     </div>
 
-    <div class="carousel-inner carousel-frame">
+    <div class="carousel-inner carousel-frame featured-carousel-inner">
         {% for item in pinnedFilms %}
             <div class="carousel-item {% if loop.index==1 %}active{% endif %}">
-                <div class="film-pined">
-                    <a href="{{ url('film.show', parameters = {slug: item.film.slug}) }}"><img src="{{ asset(path=item.film.coverPath, packageName = 'films_cover') }}" alt="Affiche du film {{ item.film.title }}"/></a>
-                    <div>
+                <article class="film-pined featured-carousel-card">
+                    <a href="{{ url('film.show', parameters = {slug: item.film.slug}) }}" class="featured-carousel-cover-link">
+                        <div class="film-cover-wrapper featured-carousel-cover">
+                            {% if item.film.coverPath %}
+                                <img src="{{ asset(path=item.film.coverPath, packageName = 'films_cover') }}" alt="Affiche du film {{ item.film.title }}" class="film-cover-img"/>
+                            {% else %}
+                                <div class="film-no-cover">No Cover</div>
+                            {% endif %}
+                        </div>
+                    </a>
+                    <div class="featured-carousel-content">
                         <h2><a href="{{ url('film.show', parameters = {slug: item.film.slug}) }}">{{ item.film.title }}</a></h2>
-                        {% set hours = (item.film.duration // 60) %}
-                        {% set mins = (item.film.duration % 60) %}
-                        <strong>{{ ux_icon('horloge') }} {{ hours }}h{{ mins }} </strong>
+                        {% if item.film.duration %}
+                            {% set hours = (item.film.duration // 60) %}
+                            {% set mins = (item.film.duration % 60) %}
+                            <strong>{{ ux_icon('horloge') }} {{ hours }}h{{ mins }} </strong>
+                        {% endif %}
                         <p>{{ item.film.description }}</p>
-                        <div class="film-pined-genre">
+                        <div class="film-pined-genre featured-carousel-genres">
                             {% for genre in item.film.genre %}
                             <span>{{ genre.name }}</span>
                             {% endfor %}
                         </div>
                     </div>
-                </div>
+                </article>
             </div>
         {% endfor %}
     </div>
