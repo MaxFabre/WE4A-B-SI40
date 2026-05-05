@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PersonRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
@@ -33,6 +35,24 @@ class Person {
     #[UploadableField(mapping: 'profil_pictures', fileNameProperty: 'photo')]
     #[Image]
     private ?File $photoFile = null;
+
+    /**
+     * @var Collection<int, Film>
+     */
+    #[ORM\ManyToMany(targetEntity: Film::class, mappedBy: 'directors')]
+    private Collection $directedFilms;
+
+    /**
+     * @var Collection<int, Film>
+     */
+    #[ORM\ManyToMany(targetEntity: Film::class, mappedBy: 'actors')]
+    private Collection $playedFilms;
+
+    public function __construct()
+    {
+        $this->directedFilms = new ArrayCollection();
+        $this->playedFilms = new ArrayCollection();
+    }
 
     public function getId(): ?int {
         return $this->id;
@@ -104,5 +124,59 @@ class Person {
         $this->birthdate = $data['birthdate'];
         $this->photo = $data['photo'];
         $this->photoFile = null;
+    }
+
+    /**
+     * @return Collection<int, Film>
+     */
+    public function getDirectedFilms(): Collection
+    {
+        return $this->directedFilms;
+    }
+
+    public function addDirectedFilm(Film $directedFilm): static
+    {
+        if (!$this->directedFilms->contains($directedFilm)) {
+            $this->directedFilms->add($directedFilm);
+            $directedFilm->addDirector($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDirectedFilm(Film $directedFilm): static
+    {
+        if ($this->directedFilms->removeElement($directedFilm)) {
+            $directedFilm->removeDirector($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Film>
+     */
+    public function getPlayedFilms(): Collection
+    {
+        return $this->playedFilms;
+    }
+
+    public function addPlayedFilm(Film $playedFilm): static
+    {
+        if (!$this->playedFilms->contains($playedFilm)) {
+            $this->playedFilms->add($playedFilm);
+            $playedFilm->addActor($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlayedFilm(Film $playedFilm): static
+    {
+        if ($this->playedFilms->removeElement($playedFilm)) {
+            $playedFilm->removeActor($this);
+        }
+
+        return $this;
     }
 }
