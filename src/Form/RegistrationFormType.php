@@ -20,9 +20,19 @@ class RegistrationFormType extends AbstractType {
         $builder
             ->add('email', EmailType::class, [
                 'label' => 'Email',
+                'required' => true,
+                'attr' => [
+                    'placeholder' => 'Email',
+                ]
             ])
             ->add('username', TextType::class, [
                 'label' => 'Nom d\'utilisateur',
+                'required' => true,
+                'attr' => [
+                    'placeholder' => 'Nom d\'utilisateur',
+                    'minlength' => 3,
+                    'maxlength' => 50,
+                ]
             ])
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'Mot de passe',
@@ -32,13 +42,12 @@ class RegistrationFormType extends AbstractType {
                 'attr' => ['autocomplete' => 'new-password'],
                 'constraints' => [
                     new NotBlank(
-                        message: 'Please enter a password',
+                        message: 'Entrez un mot de passe',
                     ),
                     new Length(
-                        min: 6,
-                        minMessage: 'Votre mot de passe doit contenir au moins {{ limit }} caractères.',
+                        min: 6, max: 255,
                         // max length allowed by Symfony for security reasons
-                        max: 4096,
+                        minMessage: 'Votre mot de passe doit contenir au moins {{ limit }} caractères.',
                     ),
                 ],
             ])

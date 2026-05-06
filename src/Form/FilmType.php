@@ -42,6 +42,7 @@ class FilmType extends AbstractType {
                 'label' => 'Affiche',
                 'required' => false,
                 'allow_delete' => true,
+                'download_label' => false,
                 'delete_label' => 'Supprimer',
             ])
             ->add('genre', EntityType::class, [

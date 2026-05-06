@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Éditer le compte{% endblock %}
+
+{% block container %}
+    <div class="row profil-edit">
+        <div class="col-md-3 col-sm-12">
+            <h2>Photo de profile</h2>
+            <div class="center"><img class="profil-picture" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}" alt="Image de profile"/></div>
+            {{ form_errors(photoForm) }}
+            {{ form(photoForm) }}
+        </div>
+
+        <div class="col-md-8 col-sm-12">
+            <h2>Informations personnelles</h2>
+            {{ form_errors(personalDataFrom) }}
+            {{ form(personalDataFrom) }}
+        </div>
+
+        <div class="col-md-5 col-sm-12">
+            <h2>Adresse Email</h2>
+            {{ form_errors(emailForm) }}
+            {{ form(emailForm) }}
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+            <h2>Mot de passe</h2>
+            {{ form_errors(passwordForm) }}
+            {{ form(passwordForm) }}
+        </div>
+    </div>
+{% endblock %}

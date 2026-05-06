@@ -3,17 +3,20 @@
 namespace App\Form;
 
 use App\Entity\Person;
+use App\Entity\User;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\BirthdayType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Vich\UploaderBundle\Form\Type\VichFileType;
 
-class PersonFormType extends AbstractType {
+class EditAccountDataType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options): void {
         $builder
             ->add('firstname', TextType::class, [
+                'property_path' => 'person.firstname',
                 'label' => 'Prénom',
                 'required' => true,
                 'attr' => [
@@ -23,7 +26,8 @@ class PersonFormType extends AbstractType {
                 ]
             ])
             ->add('lastname', TextType::class, [
-                'label' => 'Nom',
+                'property_path' => 'person.lastname',
+                'label' => 'Prénom',
                 'required' => true,
                 'attr' => [
                     'placeholder' => 'Tapez ici',
@@ -31,22 +35,28 @@ class PersonFormType extends AbstractType {
                     'maxlength' => 50,
                 ]
             ])
+            ->add('username', TextType::class, [
+                'label' => 'Nom d\'utilisateur',
+                'attr' => [
+                    'placeholder' => 'Tapez ici',
+                    'minlength' => 3,
+                    'maxlength' => 50,
+                ]
+            ])
             ->add('birthdate', BirthdayType::class, [
+                'property_path' => 'person.birthdate',
                 'label' => 'Date de naissance',
                 'required' => true,
             ])
-            ->add('photoFile', VichFileType::class, [
-                'label' => 'Photo',
-                'required' => false,
-                'allow_delete' => true,
-                'allow_download' => false,
-                'delete_label' => 'Supprimer',
-            ]);
+            ->add('submit', SubmitType::class, [
+                'label' => 'Modifier mes informations',
+            ])
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void {
         $resolver->setDefaults([
-            'data_class' => Person::class,
+            'data_class' => User::class,
         ]);
     }
 }

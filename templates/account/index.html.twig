@@ -5,7 +5,7 @@
 {% block container %}
     <div>
         <div class="profil-banner">
-            <img class="profile-picture" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}" alt="Image de profile"/>
+            <img class="profil-picture" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}" alt="Image de profile"/>
             <div class="profil-info">
                 <h1>{{ user.username }}</h1>
                 <h2>{{ user.person.firstname }} {{ user.person.lastname }}</h2>

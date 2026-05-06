@@ -1,0 +1,25 @@
+.profil-banner {
+    margin-top: 1em;
+    padding: 1em;
+    display: flex;
+    background-color: red;
+    gap: 1em;
+}
+
+.profil-picture {
+    height: 12em;
+    width: 12em;
+}
+
+.profil-info {
+    color: azure;
+    text-decoration: none;
+}
+
+.profil-edit {
+    padding-top: 1em;
+    gap: 1em;
+    div {
+        background-color: #f8f6f6;
+    }
+}
