@@ -6,8 +6,9 @@ use App\Entity\Comment;
 use App\Entity\Film;
 use App\Form\CommentType;
 use App\Form\FilmType;
-use App\Repository\CommentRepository;
 use App\Repository\FilmRepository;
+use App\Repository\GenreRepository;
+use App\Repository\CommentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -16,10 +17,33 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class FilmController extends AbstractController {
-    #[Route('/film', name: 'film.index', methods: ['GET'])]
-    public function index(): Response {
-        return $this->render('film/index.html.twig', [
-            'controller_name' => 'FilmController',
+    #[Route('/admin/film/', name: 'admin.film.index')]
+    public function filmList(FilmRepository $filmRepository, GenreRepository $genreRepository): Response{
+        $sortFilm = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('sortFilm', 'id_asc');
+
+        $films = match ($sortFilm) {
+            'title_asc' => $filmRepository->findBy([], ['title' => 'ASC']),
+            'title_desc' => $filmRepository->findBy([], ['title' => 'DESC']),
+            'id_desc' => $filmRepository->findBy([], ['id' => 'DESC']),
+            default => $filmRepository->findBy([], ['id' => 'ASC']),
+        };
+
+
+        $sortGenre = $this->container->get('request_stack')->getCurrentRequest()?->query->getString('sortGenre', 'id_asc');
+
+        $genres = match ($sortGenre) {
+            'genre_asc' => $genreRepository->findBy([], ['name' => 'ASC']),
+            'genre_desc' => $genreRepository->findBy([], ['name' => 'DESC']),
+            'id_desc' => $genreRepository->findBy([], ['id' => 'DESC']),
+            default => $genreRepository->findBy([], ['id' => 'ASC']),
+        };
+
+
+        return $this->render('admin_pages/film/index.html.twig', [
+            'films' => $films,
+            'genres' => $genres,
+            'sortFilm' => $sortFilm,
+            'sortGenre' => $sortGenre,
         ]);
     }
 

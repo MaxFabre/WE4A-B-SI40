@@ -1,0 +1,48 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Salle{% endblock %}
+
+{% block main %}
+    <div class="col-md-6 col-sm-12 col-xs-12 vertical">
+        <h1>Salles :</h1>
+        <div class="horizontal">
+
+            <div class="partie-droite">
+                <form method="get" class="my-3">
+                    <label for="sortRoom" class="form-label">Trier les salles</label>
+                    <select id="sortRoom" name="sortRoom" class="form-select" onchange="this.form.submit()">
+                        <option value="id_asc" {{ sortRoom == 'id_asc' ? 'selected' : '' }}>Id croissante</option>
+                        <option value="id_desc" {{ sortRoom == 'id_desc' ? 'selected' : '' }}>Id décroissante</option>
+                        <option value="capacity_asc" {{ sortRoom == 'capacity_asc' ? 'selected' : '' }}>Capacité croissante</option>
+                        <option value="capacity_desc" {{ sortRoom == 'capacity_desc' ? 'selected' : '' }}>Capacité décroissante</option>
+                    </select>
+                </form>
+            </div>
+
+            <div class="partie-gauche">
+                <a class="btn btn-primary" href="{{ url('admin.room.create') }}">Nouvelle Salle</a>
+            </div>
+        </div>
+
+
+        <table class="table table-striped col-md-6">
+            <tr><th>ID</th><th>Nom</th><th>Capacité</th></tr>
+            {% for room in rooms %}
+                <tr>
+                    <td>{{ room.id }}</td>
+                    <td>{{ room.name }}</td>
+                    <td>{{ room.capacity }}</td>
+                    <td>
+                        <div class="d-flex justify-content-evenly">
+                            <a class="btn btn-primary" id="edit" href="{{ url('admin.room.edit', parameters = {id: room.id} ) }}">Éditer</a>
+                            <form method="post" action="{{ url('admin.room.delete', parameters = {id: room.id} ) }}">
+                                <input type="hidden" name="_method" value="DELETE"/>
+                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Seats - chooser{% endblock %}
+
+{% block container%}
+    <div>
+        <h1>Choisissez un siège</h1>
+        <h3>Séance du
+            {{ reservation.programme.date ? reservation.programme.date|date('d/m/Y') }}
+             à
+            {{ reservation.programme.date ? reservation.programme.date|date('H:i') }}
+             pour
+            "{{ reservation.programme.film.title }}"
+
+        </h3>
+        <div class="center-content">
+            {% set room = reservation.programme.room %}
+            {% set siegesParRang = room.capacity//5 %}
+            {% set arraySieges = [] %}
+
+            {% set rangActuel = 0 %}
+            <div class="ligne-sieges">
+            {% for seat in room.seats %}
+                {% if(rangActuel == siegesParRang) %}
+                    </div>
+
+                    <div class="ligne-sieges">
+                    {% set rangActuel = 0 %}
+                {% endif %}
+                {% if (seat in reservation.seats)%}
+                    <div onclick="">{{ux_icon("seats:seat",{fill: 'lightgreen'})}}</div>
+                {% else %}
+                    <div onclick="">{{ux_icon("seats:seat", {class: 'size-4'})}}</div>
+                {% endif %}
+
+                {% set rangActuel = rangActuel+1  %}
+            {%endfor%}
+                    </div>
+        </div>
+
+
+{#        {% for seat in reservation.seats %}#}
+{#            {{ seat.number }}#}
+{#            {{ seat.id }}#}
+{#        {% endfor %}#}
+    </div>
+{#    {% set reservation = reservations|filter( r=> r.id == id)|first  %}#}
+
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Programmation{% endblock %}
+
+{% block main %}
+    <div class="col-md-6 col-sm-12 col-xs-12 vertical">
+        <h1>Programmes</h1>
+        <div class="horizontal">
+
+            <div class="partie-droite">
+                <form method="get" class="my-3">
+                    <label for="sortProgramme" class="form-label">Trier les programmes</label>
+                    <select id="sortProgramme" name="sortProgramme" class="form-select" onchange="this.form.submit()">
+                        <option value="date_asc" {{ sortProgramme == 'date_asc' ? 'selected' : '' }}>Date croissante</option>
+                        <option value="date_desc" {{ sortProgramme == 'date_desc' ? 'selected' : '' }}>Date décroissante</option>
+                        <option value="film_asc" {{ sortProgramme == 'film_asc' ? 'selected' : '' }}>Titre A → Z</option>
+                        <option value="film_desc" {{ sortProgramme == 'film_desc' ? 'selected' : '' }}>Titre Z → A</option>
+                    </select>
+                </form>
+            </div>
+
+            <div class="partie-gauche">
+                <a class="btn btn-primary" href="{{ url('admin.programme.create') }}">Nouvelle programmation</a>
+            </div>
+        </div>
+
+
+        <table class="table table-striped col-md-6">
+            <tr><th>Date</th><th>Heure début</th><th>Heure de fin</th><th>Film</th><th>Salle</th><th>Places réservées</th><th>Places totales</th></tr>
+            {% for programme in programmes %}
+                <tr>
+                    <td>{{ programme.date ? programme.date|date('d/m/Y') : '' }}</td>
+                    <td>{{ programme.date ? programme.date|date('H:i') : '' }}</td>
+                    <td>{{ programme.date ? programme.date|date_modify('+' ~ programme.film.duration ~ ' minutes')|date('H:i') : '' }}</td>
+                    <td>{{ programme.film.title }}</td>
+                    <td>{{ programme.room.name }}</td>
+                        {% set placesReservees = 0 %}
+                        {% for reservation in programme.reservations %}
+                                {% for seat in reservation.seats %}
+                                    {% set placesReservees = placesReservees + 1 %}
+
+                                {% endfor %}
+                        {% endfor %}
+                    <td>{{ placesReservees }}</td>
+                    <td>{{ programme.room.capacity }}</td>
+                    <td>
+                        <div class="d-flex justify-content-evenly">
+                            <a class="btn btn-primary" id="edit" href="{{ url('admin.programme.edit', parameters = {id: programme.id} ) }}">Éditer</a>
+                            <form method="post" action="{{ url('admin.programme.delete', parameters = {id: programme.id} ) }}">
+                                <input type="hidden" name="_method" value="DELETE"/>
+                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

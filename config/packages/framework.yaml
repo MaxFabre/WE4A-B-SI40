@@ -18,11 +18,11 @@ framework:
             profil_pictures:
                 base_path: /resources/images/profil_pictures
 
+            images:
+                base_path: /resources/images
+
             films_cover:
                 base_path: /resources/images/films_cover
-
-            images:
-                base_path: /resources/images/
 
 when@test:
     framework:
