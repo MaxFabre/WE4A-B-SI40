@@ -48,8 +48,13 @@ class Person {
     #[ORM\ManyToMany(targetEntity: Film::class, mappedBy: 'actors')]
     private Collection $playedFilms;
 
-    public function __construct()
-    {
+    #[ORM\Column]
+    private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $updated_at = null;
+
+    public function __construct() {
         $this->directedFilms = new ArrayCollection();
         $this->playedFilms = new ArrayCollection();
     }
@@ -134,8 +139,7 @@ class Person {
         return $this->directedFilms;
     }
 
-    public function addDirectedFilm(Film $directedFilm): static
-    {
+    public function addDirectedFilm(Film $directedFilm): static {
         if (!$this->directedFilms->contains($directedFilm)) {
             $this->directedFilms->add($directedFilm);
             $directedFilm->addDirector($this);
@@ -144,8 +148,7 @@ class Person {
         return $this;
     }
 
-    public function removeDirectedFilm(Film $directedFilm): static
-    {
+    public function removeDirectedFilm(Film $directedFilm): static {
         if ($this->directedFilms->removeElement($directedFilm)) {
             $directedFilm->removeDirector($this);
         }
@@ -156,13 +159,11 @@ class Person {
     /**
      * @return Collection<int, Film>
      */
-    public function getPlayedFilms(): Collection
-    {
+    public function getPlayedFilms(): Collection {
         return $this->playedFilms;
     }
 
-    public function addPlayedFilm(Film $playedFilm): static
-    {
+    public function addPlayedFilm(Film $playedFilm): static {
         if (!$this->playedFilms->contains($playedFilm)) {
             $this->playedFilms->add($playedFilm);
             $playedFilm->addActor($this);
@@ -171,11 +172,30 @@ class Person {
         return $this;
     }
 
-    public function removePlayedFilm(Film $playedFilm): static
-    {
+    public function removePlayedFilm(Film $playedFilm): static {
         if ($this->playedFilms->removeElement($playedFilm)) {
             $playedFilm->removeActor($this);
         }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(?\DateTimeImmutable $created_at): static {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updated_at): static {
+        $this->updated_at = $updated_at;
 
         return $this;
     }
