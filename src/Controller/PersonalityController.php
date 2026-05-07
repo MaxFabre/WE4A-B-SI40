@@ -31,7 +31,6 @@ final class PersonalityController extends AbstractController {
     public function list(PersonRepository $repository): Response {
         //Récuperation des personalités:
         $personalities = $repository->findAllPersonalities();
-
         //Génération du template:
         return $this->render('admin_pages/personality/index.html.twig', [
             'personalities' => $personalities,

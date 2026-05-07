@@ -16,7 +16,20 @@ class PersonRepository extends ServiceEntityRepository {
         parent::__construct($registry, Person::class);
     }
 
-    public function findAllPersonalities(): QueryBuilder {
+    public function findAllPersonalities() {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql='
+            SELECT * FROM person
+            WHERE id NOT IN (
+                SELECT person_id FROM public.user
+            );
+            ';
+
+        $resultSet = $conn->executeQuery($sql);
+        return $resultSet->fetchAllAssociative(); }
+
+    public function findAllPersonalitiesForm(): QueryBuilder {
         $sub = $this->getEntityManager()
             ->createQueryBuilder()
             ->select('IDENTITY(u.person)')

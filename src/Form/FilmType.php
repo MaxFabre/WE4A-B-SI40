@@ -61,7 +61,7 @@ class FilmType extends AbstractType {
                 'required' => false,
                 'by_reference' => false,
                 'query_builder' => fn(PersonRepository $repository)
-                => $repository->findAllPersonalities(),
+                => $repository->findAllPersonalitiesForm(),
             ])
             ->add('actors', EntityType::class, [
                 'class' => Person::class,
@@ -71,7 +71,7 @@ class FilmType extends AbstractType {
                 'required' => false,
                 'by_reference' => false,
                 'query_builder' => fn(PersonRepository $repository)
-                => $repository->findAllPersonalities(),
+                => $repository->findAllPersonalitiesForm(),
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Enregistrer',
