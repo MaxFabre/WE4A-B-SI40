@@ -27,24 +27,28 @@
                     </tr>
                 </table>
             </div>
-            <div class="vertical">
+            <div class="vertical film-personalities">
                 <h2>Description:</h2>
                 <p>{{ film.description }}</p>
 
                 <h2>Réalisateurs:</h2>
-                {% if film.directors is not null %}
-                    {% for director in film.directors %}
-                        {{ director.firstname }}
-                    {% endfor %}
+                {% if film.directors is not empty %}
+                    <ul>
+                        {% for director in film.directors %}
+                            <li><a href="{{ url('personality.show', parameters = {id: director.id}) }}">{{ director.firstname }} {{ director.lastname }}</a></li>
+                        {% endfor %}
+                    </ul>
                 {% else %}
                     <p>Non renseigné.</p>
                 {% endif %}
 
                 <h2>Acteurs:</h2>
-                {% if film.actors is not null %}
-                    {% for actor in film.actors %}
-                        {{ actor.firstname }}
-                    {% endfor %}
+                {% if film.actors is not empty %}
+                    <ul>
+                        {% for actor in film.actors %}
+                            <li><a href="{{ url('personality.show', parameters = {id: actor.id}) }}">{{ actor.firstname }} {{ actor.lastname }}</a></li>
+                        {% endfor %}
+                    </ul>
                 {% else %}
                     <p>Non renseigné.</p>
                 {% endif %}

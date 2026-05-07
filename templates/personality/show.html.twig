@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ personality.firstname }} {{ personality.lastname }}{% endblock %}
+
+{% block container %}
+    <div class="row person">
+        <div class="col-md-3 col-sm-12 person-info">
+            <img class="" src="{{ asset(path=personality.photo , packageName = 'profil_pictures') }}"
+                 alt="Image de profile"/>
+            <div class="">
+                <h1>{{ personality.firstname }} {{ personality.lastname }}</h1>
+                <p>Né le {{ personality.birthdate|date('d/m/Y') }}</p>
+            </div>
+        </div>
+
+        <div class="col-md-9 col-sm-12">
+            {% if directedFilms is not empty%}
+                <div>
+                    <h1>Films Réalisés</h1>
+                    {% include 'partials/films_all_carousel.html.twig' with {
+                        allFilms: directedFilms
+                    } only %}
+                </div>
+            {% endif %}
+
+            {% if playedFilms is not empty %}
+                <div>
+                    <h1>Films joués</h1>
+                    {% include 'partials/films_all_carousel.html.twig' with {
+                        allFilms: playedFilms
+                    } only %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
