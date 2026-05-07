@@ -39,7 +39,7 @@ class PersonFormType extends AbstractType {
                 'label' => 'Photo',
                 'required' => false,
                 'allow_delete' => true,
-                'allow_download' => false,
+                'download_label' => false,
                 'delete_label' => 'Supprimer',
             ]);
     }
