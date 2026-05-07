@@ -2,13 +2,85 @@
 
 {% block title %}Profil de {{ user.username }}{% endblock %}
 
+{% set view_all = app.user and app.user==user or is_granted('ROLE_MODERATOR') or is_granted('ROLE_FUND_MANAGER') or is_granted('ROLE_ADMIN') %}
+
 {% block container %}
-    <div>
-        <div class="profil-banner">
-            <img class="profile-picture" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}" alt="Image de profile"/>
-            <div class="profil-info">
-                <h1>{{ user.username }}</h1>
-                <h2>{{ user.person.firstname }} {{ user.person.lastname }}</h2>
+    <div class="row person">
+        <div class="col-md-3 col-sm-12 person-info">
+            <img class="" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}"
+                 alt="Image de profile"/>
+            <div class="">
+                <div class="d-flex justify-content-between align-self-center">
+                    <h1>{{ user.username }}</h1>
+                    {% if view_all %}
+                        <a href="{{ url('account.edit', parameters = {id: app.user.id}) }}">{{ ux_icon('setting') }}</a>
+                    {% endif %}
+                </div>
+                {% if view_all %}
+                    <h2>{{ user.person.firstname }} {{ user.person.lastname }}</h2>
+                {% endif %}
+                <p>A rejoint le {{ user.person.createdAt|date('d/m/y') }}</p>
+            </div>
+        </div>
+
+        <div class="col-md-9 col-sm-12">
+            {% if view_all %}
+                <div>
+                    <h1>Films vues</h1>
+                    <em>mettre films vus en fonctions des réservations</em>
+                </div>
+            {% endif %}
+
+            <div>
+                <h1>Commentaires</h1>
+                {% for comment in user.getComments %}
+                    <table class="table">
+                        <tr><th>Film</th><th>Titre</th><th>Note</th></tr>
+                        <tr>
+                            <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.film.title }}</a></td>
+                            <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.title }}</a></td>
+                            <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.note }}/20</a></td>
+                        </tr>
+                    </table>
+                {% endfor %}
+    <div class="row person">
+        <div class="col-md-3 col-sm-12 person-info">
+            <img class="" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}"
+                 alt="Image de profile"/>
+            <div class="">
+                <div class="d-flex justify-content-between align-self-center">
+                    <h1>{{ user.username }}</h1>
+                    {% if view_all %}
+                        <a href="{{ url('account.edit', parameters = {id: app.user.id}) }}">{{ ux_icon('setting') }}</a>
+                    {% endif %}
+                </div>
+                {% if view_all %}
+                    <h2>{{ user.person.firstname }} {{ user.person.lastname }}</h2>
+                {% endif %}
+                <p>A rejoint le {{ user.person.createdAt|date('d/m/y') }}</p>
+            </div>
+        </div>
+
+        <div class="col-md-9 col-sm-12">
+            {% if view_all %}
+                <div>
+                    <h1>Films vues</h1>
+                    <em>mettre films vus en fonctions des réservations</em>
+                </div>
+            {% endif %}
+
+            <div>
+                <h1>Commentaires</h1>
+                {% for comment in user.getComments %}
+                    <table class="table">
+                        <tr><th>Film</th><th>Titre</th><th>Note</th></tr>
+                        <tr>
+                            <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.film.title }}</a></td>
+                            <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.title }}</a></td>
+                            <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.note }}/20</a></td>
+                        </tr>
+                    </table>
+                {% endfor %}
             </div>
         </div>
     </div>

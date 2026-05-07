@@ -103,6 +103,9 @@ final class FilmController extends AbstractController {
         $filmForm->handleRequest($request);
         if ($filmForm->isSubmitted() && $filmForm->isValid()) {
             try {
+                //Champs cachés:
+                $film->setCreatedAt(new \DateTimeImmutable());
+                $film->setUpdatedAt(new \DateTimeImmutable());
 
                 //Enregistrement en db:
                 $entityManager->persist($film);
@@ -129,6 +132,10 @@ final class FilmController extends AbstractController {
         $filmForm->handleRequest($request);
 
         if ($filmForm->isSubmitted() && $filmForm->isValid()) {
+            //Champs cachés:
+            $film->setCreatedAt(new \DateTimeImmutable());
+            $film->setUpdatedAt(new \DateTimeImmutable());
+
             //Enregistrement en db:
             $entityManager->flush();
 

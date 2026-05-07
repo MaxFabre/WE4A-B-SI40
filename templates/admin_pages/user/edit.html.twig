@@ -3,6 +3,7 @@
 {% block title %}Éditer {{ user.username }}{% endblock %}
 
 {% block main %}
+    <h1>Éditer {{ user.username }}</h1>
     {{ form_errors(form) }}
     {{ form(form) }}
 {% endblock %}

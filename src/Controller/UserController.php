@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\RegistrationFormType;
+use App\Form\AdminUserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,7 +24,7 @@ final class UserController extends AbstractController {
     #[Route('/create', name: '.create')]
     public function create(Request $request, EntityManagerInterface $entityManager): Response {
         $user = new User();
-        $form = $this->createForm(RegistrationFormType::class, $user);
+        $form = $this->createForm(AdminUserType::class, $user);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -44,10 +44,13 @@ final class UserController extends AbstractController {
 
     #[Route('/edit/{id}', name: '.edit', methods: ['GET', 'POST'])]
     public function edit(User $user, Request $request, EntityManagerInterface $entityManager): Response {
-        $form = $this->createForm(RegistrationFormType::class, $user);
+        $form = $this->createForm(AdminUserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            //Gestion des champs cachés:
+            $user->getPerson()->setUpdatedAt(new \DateTimeImmutable());
+
             //Enregistrement en db:
             $entityManager->flush();
 
