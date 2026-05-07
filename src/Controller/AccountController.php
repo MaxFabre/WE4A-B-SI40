@@ -18,6 +18,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class AccountController extends AbstractController {
     #[Route('/{id}', name: '.index', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function index(User $user): Response {
+
+        //Génération du template:
         return $this->render('account/index.html.twig', [
             'controller_name' => 'AccountController',
             'user' => $user,

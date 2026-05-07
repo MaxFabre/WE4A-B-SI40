@@ -23,7 +23,7 @@
                         <input class="text-danger" type="submit" value="Signaler"/>
                     </form>
                     {% endif %}
-                    {% if is_granted("ROLE_MODERATOR") or app.user==comment.author %}
+                    {% if app.user==comment.author %}
                         • <form method="post" action="{{ url('comment.delete', {id: comment.id}) }}">
                             <input type="hidden" name="_method" value="DELETE"/>
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">

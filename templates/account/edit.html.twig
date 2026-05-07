@@ -3,10 +3,10 @@
 {% block title %}Éditer le compte{% endblock %}
 
 {% block container %}
-    <div class="row profil-edit">
+    <div class="row person-edit">
         <div class="col-md-3 col-sm-12">
             <h2>Photo de profile</h2>
-            <div class="center"><img class="profil-picture" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}" alt="Image de profile"/></div>
+            <div class="center"><img class="person-picture" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}" alt="Image de profile"/></div>
             {{ form_errors(photoForm) }}
             {{ form(photoForm) }}
         </div>
