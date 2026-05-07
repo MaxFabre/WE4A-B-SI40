@@ -12,7 +12,9 @@
             <div class="">
                 <div class="d-flex justify-content-between align-self-center">
                     <h1>{{ user.username }}</h1>
-                    <a href="{{ url('account.edit', parameters = {id: app.user.id}) }}">{{ ux_icon('setting') }}</a>
+                    {% if view_all %}
+                        <a href="{{ url('account.edit', parameters = {id: app.user.id}) }}">{{ ux_icon('setting') }}</a>
+                    {% endif %}
                 </div>
                 {% if view_all %}
                     <h2>{{ user.person.firstname }} {{ user.person.lastname }}</h2>
