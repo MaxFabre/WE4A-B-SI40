@@ -1,0 +1,84 @@
+/* Film display, comments, and content area styles */
+
+.film-show {
+    margin-top: 1em;
+    display: flex;
+    justify-content: space-around;
+    gap: 2em;
+}
+
+.film-show-side {
+    padding: 0.5em;
+    border-top: 1em solid #1d3043;
+    background-color: #354a5f;
+    color: azure;
+
+    img {
+        height: 30em;
+    }
+
+    ul {
+        list-style: none;
+    }
+}
+
+.tools-menu {
+    position: absolute;
+    background-color: lavender;
+    left: 0;
+
+    ul {
+        list-style: none;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+}
+
+.comments-area {
+    article {
+        padding: 1em;
+        margin-top: 1em;
+        border-top: 0.5em solid #1d3043;
+        background-color: #354a5f;
+        color: azure;
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        div {
+            display: flex;
+            flex-direction: row;
+            gap: 1em;
+
+            input[type="submit"] {
+                border: none;
+                background-color: inherit;
+            }
+        }
+    }
+}
+
+.comment {
+    padding: 1em;
+    border-top: 0.5em solid #1d3043;
+    border-left: 0.5em solid #354a5f;
+    border-right: 0.5em solid #354a5f;
+    border-bottom: 0.5em solid #354a5f;
+
+    textarea {
+        resize: none;
+    }
+}
+
+.table {
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+}
+
