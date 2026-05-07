@@ -1,0 +1,9 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Nouvelle personnalité{% endblock %}
+
+{% block main %}
+    <h1>Nouvelle Personnalité:</h1>
+    {{ form_errors(form) }}
+    {{ form(form) }}
+{% endblock %}

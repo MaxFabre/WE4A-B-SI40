@@ -22,7 +22,7 @@
             {% if is_granted('ROLE_ADMIN') %}
                 <strong>{{ ux_icon('dashboard:group') }} Gestion des individus</strong>
                 <li><a href="{{ url('admin.user.index') }}">Utilisateurs</a></li>
-                <li><a>Personnes</a></li>
+                <li><a href="{{ url('admin.personality.index') }}">Personnalité</a></li>
                 <strong>{{ ux_icon('dashboard:log') }} Journaux</strong>
                 <li><a href="{{ url('admin.logs') }}">Journaux d'opérations</a></li>
             {% endif %}

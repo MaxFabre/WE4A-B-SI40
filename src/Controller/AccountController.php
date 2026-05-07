@@ -16,11 +16,10 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/account', name: 'account')]
 class AccountController extends AbstractController {
-    #[Route('/{id}', name: '.index', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function index(User $user): Response {
-
+    #[Route('/{id}', name: '.show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function show(User $user): Response {
         //Génération du template:
-        return $this->render('account/index.html.twig', [
+        return $this->render('account/show.html.twig', [
             'controller_name' => 'AccountController',
             'user' => $user,
         ]);
