@@ -9,7 +9,6 @@ use App\Form\FilmType;
 use App\Repository\FilmRepository;
 use App\Repository\GenreRepository;
 use App\Repository\CommentRepository;
-use App\Repository\FilmRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
