@@ -51,6 +51,10 @@ class PersonalityType extends AbstractType {
                 'choice_label' => 'title',
                 'multiple' => true,
                 'required' => false,
+                'by_reference' => false,
+                'attr' => [
+                    'film-tom-select' => 'true',
+                ],
             ])
             ->add('playedFilms', EntityType::class, [
                 'class' => Film::class,
@@ -58,6 +62,10 @@ class PersonalityType extends AbstractType {
                 'choice_label' => 'title',
                 'multiple' => true,
                 'required' => false,
+                'by_reference' => false,
+                'attr' => [
+                    'film-tom-select' => 'true',
+                ],
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Enregistrer',
