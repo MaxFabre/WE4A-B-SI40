@@ -56,22 +56,24 @@ class FilmType extends AbstractType {
             ->add('directors', EntityType::class, [
                 'class' => Person::class,
                 'label' => 'Réalisateurs',
-                'choice_label' => 'lastname',
+                'choice_label' => 'fullname',
                 'multiple' => true,
                 'required' => false,
                 'by_reference' => false,
-                'query_builder' => fn(PersonRepository $repository)
-                => $repository->findAllPersonalitiesForm(),
+                'attr' => [
+                    'personality-tom-select' => 'true',
+                ],
             ])
             ->add('actors', EntityType::class, [
                 'class' => Person::class,
-                'label' => 'Réalisateurs',
-                'choice_label' => 'lastname',
+                'label' => 'Acteurs',
+                'choice_label' => 'fullname',
                 'multiple' => true,
                 'required' => false,
                 'by_reference' => false,
-                'query_builder' => fn(PersonRepository $repository)
-                => $repository->findAllPersonalitiesForm(),
+                'attr' => [
+                    'personality-tom-select' => 'true',
+                ],
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Enregistrer',

@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints\Image;
 use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
 use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
@@ -20,21 +21,27 @@ class Film {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['film.details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['film.details'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['film.details'])]
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['film.details'])]
     private ?int $duration = null;
 
     #[ORM\Column(length: 60)]
+    #[Groups(['film.details'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 2, nullable: true)]
+    #[Groups(['film.details'])]
     private ?string $price = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -45,9 +52,11 @@ class Film {
     private ?File $coverFile = null;
 
     /**
+     * @OA\Property(type="collection")
      * @var Collection<int, Genre>
      */
     #[ORM\ManyToMany(targetEntity: Genre::class, mappedBy: 'films')]
+    #[Groups(['film.details'])]
     private Collection $genres;
 
     /**
@@ -61,6 +70,7 @@ class Film {
      */
     #[ORM\ManyToMany(targetEntity: Person::class, inversedBy: 'directedFilms')]
     #[ORM\JoinTable(name: "film_director")]
+    #[Groups(['film.details'])]
     private Collection $directors;
 
     /**
@@ -68,6 +78,7 @@ class Film {
      */
     #[ORM\ManyToMany(targetEntity: Person::class, inversedBy: 'playedFilms')]
     #[ORM\JoinTable(name: "film_actor")]
+    #[Groups(['film.details'])]
     private Collection $actors;
 
     /**

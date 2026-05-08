@@ -2,7 +2,7 @@
 
 # Front-End
 
-## Requirements
+## Dépendances
 Utiliser ces commandes afin d'obtenir les packages:
 Vous pouvez tout installer d'un coup avec `composer install`
 
@@ -14,11 +14,15 @@ Vous pouvez tout installer d'un coup avec `composer install`
 
 ## Back-End:
 `composer require symfony/security-bundle`  
-`composer require symfony/orm-pack`
+`composer require symfony/orm-pack`  
 `composer require --dev symfony/maker-bundle`  
 `composer require form validator`  
 `composer require vich/uploader-bundle`  
-`composer require symfony/serializer-pack`
+`composer require symfony/serializer-pack`  
+`composer require symfony/asset-mapper`
+`composer require symfony/serializer-pack`  
 
-## Resources
-Les resources (CSS, images et autres) sont à placer dans le dossier public (celui qui est chargé par le client).
+## Point de vigilance
+A chaque modification des fichiers géré par Asset-Mapper (tel que app.js), ou chaque pull:
+`php bin/console cache:clear`  
+`php bin/console asset-map compile`
