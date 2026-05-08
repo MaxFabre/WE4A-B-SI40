@@ -159,4 +159,20 @@ final class FilmController extends AbstractController {
         }
         return $this->redirectToRoute('admin.film.index');
     }
+
+    #[Route('/films', name: 'film.index')]
+    public function index(FilmRepository $filmRepository): Response
+    {
+        $films = $filmRepository->findBy([], ['title' => 'ASC']);
+
+        return $this->render('film/index.html.twig', [
+            'films' => $films,
+        ]);
+    }
+
+    #[Route('/film', name: 'film.redirect', methods: ['GET'])]
+    public function redirectToIndex(): Response
+    {
+        return $this->redirectToRoute('film.index', [], 301);
+    }
 }
