@@ -160,7 +160,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     public function addBasket(Basket $basket): static {
         if (!$this->baskets->contains($basket)) {
             $this->baskets->add($basket);
-            $basket->setCustomer($this);
+            $basket->setUser($this);
         }
 
         return $this;
@@ -169,8 +169,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     public function removeBasket(Basket $basket): static {
         if ($this->baskets->removeElement($basket)) {
             // set the owning side to null (unless already changed)
-            if ($basket->getCustomer() === $this) {
-                $basket->setCustomer(null);
+            if ($basket->getUser() === $this) {
+                $basket->setUser(null);
             }
         }
 

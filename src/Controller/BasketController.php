@@ -3,22 +3,42 @@
 namespace App\Controller;
 
 use App\Entity\Basket;
+use App\Repository\BasketRepository;
 use App\Repository\ReservationRepository;
 use App\Entity\Reservation;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Entity\User;
+
 
 final class BasketController extends AbstractController
 {
     #[Route('/basket', name: 'basket.index', methods: ['GET'])]
-    public function index(): Response
+    public function index(EntityManagerInterface $entityManager, BasketRepository $basketRepository): Response
     {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $basket = $basketRepository->findBasketByUserId($user->getId());
+
+        if (!$basket instanceof Basket) {
+            $basket = new Basket();
+            $basket->setDate(new \DateTime());
+            $entityManager->persist($basket);
+            $entityManager->flush();
+        }
+
         return $this->render('basket/index.html.twig', [
             'controller_name' => 'BasketController',
+            'basket' => $basket,
         ]);
     }
 
@@ -28,35 +48,26 @@ final class BasketController extends AbstractController
             return $this->render('film/detail.html.twig', []);
         }*/
 
-//    #[Route('/tools/basket/create', name: 'admin.basket.create', methods: ['GET', 'POST'])]
-//    public function create(Request $request, EntityManagerInterface $entityManager, Reservation $reservation): Response {
-//        $basket = new Basket();
-////        $filmForm = $this->createForm(FilmType::class, $film);
-////
-////        $filmForm->handleRequest($request);
-////        if ($filmForm->isSubmitted() && $filmForm->isValid()) {
-////            try {
-////
-////                //Enregistrement en db:
-////                $entityManager->persist($film);
-////                $entityManager->flush();
-////
-////                //Redirection avec message:
-////                $this->addFlash('success', 'Le film à bien été créé.');
-////                return $this->redirectToRoute('admin.film.index');
-////            }
-////            catch (\Doctrine\DBAL\Exception\DriverException $e) {
-////                // Problème de taille là
-////                $filmForm->addError(new FormError('Y a un problème quelque part dans les données...'));
-////            }
-//
-////        }
-//
-////        return $this->render('admin_pages/film/create.html.twig', [
-////            'filmForm' => $filmForm,
-////        ]);
-//        return $this->redirectToRoute('admin.basket.index'); //en attendant
-//    }
+    #[Route('/basket/create', name: 'basket.create', methods: ['GET', 'POST'])]
+    public function create(Request $request, EntityManagerInterface $entityManager): Response {
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('danger', 'Vous devez être connecté pour créer un panier.');
+
+            return $this->redirectToRoute('app_login');
+        }
+
+        $basket = new Basket();
+        $basket->setDate(new \DateTime());
+        $basket->setIsActive(true);
+        $basket->setStatus('active');
+        $basket->setUser($user);
+
+        $entityManager->persist($basket);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('basket.index');
+    }
 
 //    #[Route('/tools/film/edit/{id}', name: 'admin.film.edit', methods: ['GET', 'POST'])]
 //    public function edit(Film $film, Request $request, EntityManagerInterface $entityManager): Response {
@@ -87,18 +98,22 @@ final class BasketController extends AbstractController
 //    }
 
     #[Route('/basket/add/{id}', name: 'basket.add', methods: ['POST'])]
-    public function add(Reservation $reservation, EntityManagerInterface $entityManager): Response {
+    public function add(Reservation $reservation, EntityManagerInterface $entityManager, BasketRepository $basketRepository): Response {
         $user = $this->getUser();
 
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
 
-        $basket = $user->getBasket();
+        $basket = $basketRepository->findBasketByUserId($user->getId());
 
         if (!$basket) {
             $basket = new Basket();
+            $basket->setDate(new \DateTime());
+            $basket->setIsActive(true);
+            $basket->setStatus('active');
             $basket->setUser($user);
+
             $entityManager->persist($basket);
         }
 

@@ -76,10 +76,24 @@ final class ProgrammeController extends AbstractController {
 
 
     #[Route('/{id}', name: '.delete', methods: ['DELETE'])]
-    public function delete(Programme $programme, EntityManagerInterface $entityManager) {
-        $entityManager->remove($programme);
-        $entityManager->flush();
-        $this->addFlash('success', 'La programmation à bien été supprimé.');
+    public function delete(Programme $programme, Request $request, EntityManagerInterface $entityManager) {
+
+        if ($this->isCsrfTokenValid('delete'.$programme->getId(), $request->request->get('_token'))) {
+
+            foreach ($programme->getReservations()->toArray() as $reservation) {
+
+                foreach ($reservation->getSeats()->toArray() as $seat) {
+                    $reservation->removeSeat($seat);
+                }
+                if ($reservation->getBasket() !== null) {
+                    $reservation->getBasket()->removeReservation($reservation);
+                }
+                $entityManager->remove($reservation);
+            }
+            $entityManager->remove($programme);
+            $entityManager->flush();
+            $this->addFlash('success', 'La programmation et ses réservations ont bien été supprimées.');
+        }
         return $this->redirectToRoute('admin.programme.index');
     }
 }

@@ -28,6 +28,9 @@ class Reservation
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     private ?Basket $basket = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isValidated = null;
+
     public function __construct() {
         $this->seats = new ArrayCollection();
     }
@@ -75,6 +78,18 @@ class Reservation
     public function setBasket(?Basket $basket): static
     {
         $this->basket = $basket;
+
+        return $this;
+    }
+
+    public function isValidated(): ?bool
+    {
+        return $this->isValidated;
+    }
+
+    public function setIsValidated(?bool $isValidated): static
+    {
+        $this->isValidated = $isValidated;
 
         return $this;
     }

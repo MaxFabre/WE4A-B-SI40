@@ -93,3 +93,35 @@ body {
     gap: 0.5rem;
 }
 
+.imagePreview {
+    width: 6em;
+    flex-wrap: wrap;
+    img {
+        width: 5em;
+    }
+}
+
+.horizontal-left {
+
+    display: flex;
+    gap: 2rem;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    white-space: nowrap;
+
+}
+
+.horizontal-left .column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: auto;
+    border-radius: 1em;
+    border-color: black;
+    border-style: solid;
+    border-width: 0.2em;
+    padding: 1em;
+    white-space: normal;
+    min-width: 180px;
+}

@@ -1,13 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello BasketController!{% endblock %}
+{% block title %}Panier{% endblock %}
 
 {% block container %}
     <div class="row">
         <h1>Contenu du panier</h1>
         <table class="table table-striped col-md-6">
-            <tr><th></th><th class="center-content">Titre du film</th><th>Date</th><th>Horaire</th><th>Places</th></tr>
-            {% for reservation in app.user.baskets[0].reservations %}
+            <tr><th></th><th class="center-content">Titre du film</th><th>Date</th><th>Horaire</th><th>Places</th><th>Prix</th><th></th></tr>
+            {% set totalPanier = 0 %}
+            {% for reservation in basket.reservations %}
                 <tr>
                     <td class="imagePreview"> <img src="{{ asset(path=reservation.programme.film.coverPath, packageName='films_cover') }}" alt="affiche du film" class="imagePreview"/></td>
                     <td class="column-wrap">{{ reservation.programme.film.title }}</td>
@@ -190,20 +191,40 @@
                             </select>
                         </form>
                     </td>
-                    <td></td>
+                    <td>
+                        {% if (placesPremiereClasse !== 0) %}
+                            {{ placesPremiereClasse }} x {{ placesPremiereClasse*reservation.programme.film.price*1.5+0.0 }}€
+                        {% endif %}
+                        <br>
+                        {% if (placesSecondeClasse !== 0) %}
+                            {{ placesSecondeClasse }} x {{ placesSecondeClasse*reservation.programme.film.price*1+0.0 }}€
+                        {% endif %}
+                        <br><br><br>
+                        Total : {{ (placesPremiereClasse+placesSecondeClasse)*reservation.programme.film.price*2.5+0.0 }}€
+                        {% set totalPanier = totalPanier +  (placesPremiereClasse+placesSecondeClasse)*reservation.programme.film.price*2.5%}
+                    </td>
 
 
-{#                    <td>#}
-{#                        <div class="d-flex justify-content-evenly">#}
-{#    #}{#                        <a class="btn btn-primary" id="edit" href="{{ url('admin.film.edit', parameters = {id: film.id} ) }}">Éditer</a>#}
-{#                            <form method="post" action="{{ url('admin.reservation.delete', parameters = {id: reservation.id} ) }}">#}
-{#                                <input type="hidden" name="_method" value="DELETE"/>#}
-{#                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>#}
-{#                            </form>#}
-{#                        </div>#}
-{#                    </td>#}
+                    <td>
+                        <div class="d-flex justify-content-evenly">
+                            <form method="post" action="{{ url('reservation.delete', {id: reservation.id}) }}">
+                                <input type="hidden" name="_method" value="DELETE"/>
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.id) }}">
+                                <input class="btn btn-danger" type="submit" value="Supprimer"/>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
             {% endfor %}
+
+            <tr>
+                <td></td><td></td><td></td><td></td><td></td><td>
+                    Total du panier :
+                    <br>
+                    {{ totalPanier }}€
+
+                </td>
+            </tr>
         </table>
     </div>
 {% endblock %}

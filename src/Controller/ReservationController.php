@@ -10,6 +10,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Entity\Programme;
+use App\Repository\BasketRepository;
+use App\Entity\Basket;
+use App\Entity\User;
 
 final class ReservationController extends AbstractController
 {
@@ -89,4 +93,63 @@ final class ReservationController extends AbstractController
 
         ]);
     }
+
+    #[Route('/reservation/create/{id}', name: 'reservation.create', methods: ['POST'])]
+    public function create(Programme $programme, BasketRepository $basketRepository, EntityManagerInterface $entityManager): Response {
+
+        $filmSlug = $programme->getFilm()->getSlug();
+        if ($programme->isClosed()) {
+            $this->addFlash('danger', 'Cette séance est fermée à la réservation.');//Erreur si séance fermée
+            return $this->redirectToRoute('film.show', ['slug' => $filmSlug]);
+        }
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            $this->addFlash('danger', 'Vous devez être connecté pour réserver.');//En cas de déconnexion
+            return $this->redirectToRoute('app_login');
+        }
+
+        $basket = $basketRepository->findBasketByUserId($user->getId());
+
+        if (!$basket instanceof Basket) {
+            $basket = new Basket();
+            $basket->setDate(new \DateTime());
+            $basket->setIsActive(true);
+            $basket->setStatus('active');
+            $basket->setUser($user);
+
+            $entityManager->persist($basket);
+        }
+
+        foreach ($basket->getReservations() as $reservationPanier) {
+            if ($reservationPanier->getProgramme() === $programme) {
+                $reservation = $reservationPanier;
+            }
+        }
+        if (!isset($reservation)) {
+            $reservation = new Reservation();
+            $reservation->setProgramme($programme);
+            $reservation->setBasket($basket);
+            $entityManager->persist($reservation);
+            $entityManager->flush();
+        }
+
+
+
+
+
+        return $this->redirectToRoute('reservation_choose_seats', [
+            'id' => $reservation->getId(),
+        ]);
+    }
+
+    #[Route('/reservation/{id}', name: 'reservation.delete', methods: ['DELETE'])]
+    public function delete(Reservation $reservation, Request $request, EntityManagerInterface $entityManager) {
+        if ($this->isCsrfTokenValid('delete'.$reservation->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($reservation);
+            $entityManager->flush();
+            $this->addFlash('success', 'La réservation à bien été supprimé.');
+        }
+        return $this->redirectToRoute('basket.index');
+    }
+
 }

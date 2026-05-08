@@ -35,9 +35,10 @@
                     <td>
                         <div class="d-flex justify-content-evenly">
                             <a class="btn btn-primary" id="edit" href="{{ url('admin.room.edit', parameters = {id: room.id} ) }}">Éditer</a>
-                            <form method="post" action="{{ url('admin.room.delete', parameters = {id: room.id} ) }}">
+                            <form method="post" action="{{ url('admin.room.delete', {id: room.id}) }}">
                                 <input type="hidden" name="_method" value="DELETE"/>
-                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ room.id) }}">
+                                <input class="btn btn-danger" type="submit" value="Supprimer"/>
                             </form>
                         </div>
                     </td>

@@ -1,0 +1,48 @@
+.sieges {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+.ecran{
+    display: flex;
+    flex-direction: column;
+    background-color: black;
+    width: 20rem;
+    height: 1rem;
+}
+
+.seat {
+    cursor: pointer;
+}
+.seat.selected svg {
+    fill: lightgreen !important;
+}
+
+.seat.reserved svg {
+    fill: red !important;
+}
+
+.size-3 {
+    width: 2rem;
+    height: 2rem;
+}
+
+.ligne-sieges {
+    display: flex;
+    gap: 2rem;
+}
+
+.center-content {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.border-first-class{
+    border: 2px solid red;
+    display: inline-block;
+    padding: 4px;
+    box-sizing: content-box;
+}
+

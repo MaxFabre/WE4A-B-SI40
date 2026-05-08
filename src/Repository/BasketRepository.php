@@ -40,4 +40,25 @@ class BasketRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function findBasketByUserId($userId): ?Basket
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "SELECT b.id
+                FROM basket AS b
+                WHERE b.user_id = :userId
+                AND b.is_active = true
+                LIMIT 1";
+
+        $result = $conn->fetchAssociative($sql, [
+            'userId' => $userId,
+        ]);
+
+        if (!$result) {
+            return null;
+        }
+
+        return $this->find($result['id']);
+    }
 }
