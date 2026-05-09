@@ -14,9 +14,21 @@ class HomeController extends AbstractController {
     public function index(CarouselItemRepository $carouselItemRepository, FilmRepository $filmRepository): Response {
         $pinnedFilms = $carouselItemRepository->findBy([], ['position' => 'ASC']);
         $allFilms = $filmRepository->findAll();
+        $films = [];
+
+        foreach ($allFilms as $film) {
+            foreach ($film->getProgrammes() as $programme){
+                if (!$programme->isClosed() AND $programme->getDate()>date('Y-m-d H:i:s')){
+                    $films[] = $film;
+                    break;
+                }
+            }
+        }
+
+
         return $this->render('home/index.html.twig', [
             'pinnedFilms' => $pinnedFilms,
-            'allFilms' => $allFilms,
+            'allFilms' => $films,
         ]);
     }
 
