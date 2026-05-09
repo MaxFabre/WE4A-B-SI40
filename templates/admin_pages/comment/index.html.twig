@@ -12,9 +12,9 @@
                 {% for comment in comments %}
                     <tr>
                         <td>{{ comment.id }}</td>
-                        <td><a href="{{ url('account.index', parameters = {id: comment.author_id}) }}">{{ comment.author }}</a></td>
+                        <td><a href="{{ url('account.show', parameters = {id: comment.author_id}) }}">{{ comment.author }}</a></td>
                         <td>{{ comment.title }}</td><td>{{ comment.nb_reports }}</td>
-                        <td><a class="btn btn-primary" href="{{ url('admin.comment-reports.show', parameters = {id: comment.id}) }}">Modérer</a></td>
+                        <td><a class="btn btn-primary" href="{{ url('admin.reports.show', parameters = {id: comment.id}) }}">Modérer</a></td>
                     </tr>
                 {% endfor %}
             </table>

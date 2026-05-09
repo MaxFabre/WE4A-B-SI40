@@ -3,34 +3,36 @@
 {% block title %}Outils{% endblock %}
 
 {% block container %}
-    <aside class="tools-menu">
-        <ul>
-            <li><strong><a href="{{ url('admin.index') }}">{{ ux_icon('dashboard:settings') }} Dashboard</a></strong></li>
-            {% if is_granted('ROLE_MODERATOR') %}
-                <strong>{{ ux_icon('dashboard:chat') }} Commentaires</strong>
-                <li><a href="{{ url('admin.reports.index') }}">Derniers Signalements</a></li>
-                <li><a href="{{ url('admin.reports.list') }}">Tous les Signalements</a></li>
-                <li><a href="{{ url('admin.comment.index') }}">Tous les commentaires</a></li>
-            {% endif %}
-            {% if is_granted('ROLE_FUND_MANAGER') %}
-                <strong>{{ ux_icon('dashboard:watching') }} Gestion des films</strong>
-                <li><a href="{{ url('admin.film.index') }}">Films & Genres</a></li>
-                <li><a href="{{ url('admin.programme.index') }}">Programmations</a></li>
-                <li><a href="{{ url('admin.room.index') }}">Salles</a></li>
-                <strong>{{ ux_icon('dashboard:business') }}Trucs financiers</strong>
-                <li><a>trucs</a></li>
-            {% endif %}
-            {% if is_granted('ROLE_ADMIN') %}
-                <strong>{{ ux_icon('dashboard:group') }} Gestion des individus</strong>
-                <li><a href="{{ url('admin.user.index') }}">Utilisateurs</a></li>
-                <li><a href="{{ url('admin.personality.index') }}">Personnalité</a></li>
-                <strong>{{ ux_icon('dashboard:log') }} Journaux</strong>
-                <li><a href="{{ url('admin.logs') }}">Journaux d'opérations</a></li>
-            {% endif %}
-        </ul>
-    </aside>
+    <div class="row">
+        <aside class="tools-menu col-md-2 col-sm-12">
+            <ul>
+                <li><strong><a href="{{ url('admin.index') }}">{{ ux_icon('dashboard:settings') }} Dashboard</a></strong></li>
+                {% if is_granted('ROLE_MODERATOR') %}
+                    <strong>{{ ux_icon('dashboard:chat') }} Commentaires</strong>
+                    <li><a href="{{ url('admin.reports.index') }}">Derniers Signalements</a></li>
+                    <li><a href="{{ url('admin.reports.list') }}">Tous les Signalements</a></li>
+                    <li><a href="{{ url('admin.comment.index') }}">Tous les commentaires</a></li>
+                {% endif %}
+                {% if is_granted('ROLE_FUND_MANAGER') %}
+                    <strong>{{ ux_icon('dashboard:watching') }} Gestion des films</strong>
+                    <li><a href="{{ url('admin.film.index') }}">Films & Genres</a></li>
+                    <li><a href="{{ url('admin.carousel.index') }}">Films à l'affiche</a></li>
+                    <li><a href="{{ url('admin.programme.index') }}">Programmations</a></li>
+                    <li><a href="{{ url('admin.room.index') }}">Salles</a></li>
+                    <li><a href="{{ url('admin.lang.index') }}">Langues</a></li>
+                {% endif %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <strong>{{ ux_icon('dashboard:group') }} Gestion des individus</strong>
+                    <li><a href="{{ url('admin.user.index') }}">Utilisateurs</a></li>
+                    <li><a href="{{ url('admin.personality.index') }}">Personnalité</a></li>
+                    <strong>{{ ux_icon('dashboard:log') }} Journaux</strong>
+                    <li><a href="{{ url('admin.logs') }}">Journaux d'opérations</a></li>
+                {% endif %}
+            </ul>
+        </aside>
 
-    <div class="vertical">
-        {% block main %}{% endblock %}
+        <div class="vertical col-md-9 col-sm-12">
+            {% block main %}{% endblock %}
+        </div>
     </div>
 {% endblock %}

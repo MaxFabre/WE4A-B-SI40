@@ -7,12 +7,11 @@
 {% block container %}
     <div class="row person">
         <div class="col-md-3 col-sm-12 person-info">
-            <img class="" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}"
-                 alt="Image de profile"/>
+            <img class="" src="{{ asset(path=user.person.photo , packageName = 'profil_pictures') }}" alt="Image de profile"/>
             <div class="">
                 <div class="d-flex justify-content-between align-self-center">
                     <h1>{{ user.username }}</h1>
-                    {% if view_all %}
+                    {% if app.user and app.user==user %}
                         <a href="{{ url('account.edit', parameters = {id: app.user.id}) }}">{{ ux_icon('setting') }}</a>
                     {% endif %}
                 </div>
@@ -33,16 +32,16 @@
 
             <div>
                 <h1>Commentaires</h1>
-                {% for comment in user.getComments %}
-                    <table class="table">
-                        <tr><th>Film</th><th>Titre</th><th>Note</th></tr>
+                <table class="table">
+                    <tr><th>Film</th><th>Titre</th><th>Note</th></tr>
+                    {% for comment in user.getComments %}
                         <tr>
                             <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.film.title }}</a></td>
                             <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.title }}</a></td>
                             <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.note }}/20</a></td>
                         </tr>
-                    </table>
-                {% endfor %}
+                    {% endfor %}
+                </table>
             </div>
         </div>
     </div>

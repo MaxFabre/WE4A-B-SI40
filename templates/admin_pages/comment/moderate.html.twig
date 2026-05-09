@@ -9,12 +9,12 @@
         <div class="row">
             <div class="col-sm-6 col-md-12 col-lg-6 comment">
                 <h2>{{ comment.title }}</h2>
-                <small>De: <a href="{{ url('account.index', parameters = {id: comment.author.id}) }}">{{ comment.author.username }}</a></small>
+                <small>De: <a href="{{ url('account.show', parameters = {id: comment.author.id}) }}">{{ comment.author.username }}</a></small>
                 <p>{{ comment.content }}</p>
                 <hr>
                 <div class="d-flex gap-2">
                     <strong>Supprimer ?</strong>
-                    <form method="post" action="{{ url('admin.comment-reports.refuse', parameters = {id: comment.id}) }}">
+                    <form method="post" action="{{ url('admin.reports.refuse', parameters = {id: comment.id}) }}">
                         <input id="id" name="id" type="hidden" value="{{ comment.id }}"/>
                         <input class="btn btn-primary" type="submit" value="Non"/>
                     </form>

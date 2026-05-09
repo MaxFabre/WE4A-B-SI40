@@ -16,11 +16,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\User;
 
 
-final class BasketController extends AbstractController
-{
+final class BasketController extends AbstractController {
     #[Route('/basket', name: 'basket.index', methods: ['GET','POST'])]
-    public function index(EntityManagerInterface $entityManager, BasketRepository $basketRepository): Response
-    {
+    public function index(EntityManagerInterface $entityManager, BasketRepository $basketRepository): Response {
         $user = $this->getUser();
 
         if (!$user instanceof User) {
