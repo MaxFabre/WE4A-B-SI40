@@ -5,11 +5,14 @@
 {% block container %}
     <div class="row">
         <h1>Contenu du panier</h1>
+
+
         {% if basket.reservations is not empty %}
             <table class="table table-striped col-md-6">
                 <tr><th></th><th class="center-content">Titre du film</th><th>Date</th><th>Horaire</th><th>Places</th><th>Prix</th><th></th></tr>
                 {% set totalPanier = 0 %}
                 {% for reservation in basket.reservations %}
+
                     <tr>
                         <td class="imagePreview"> <img src="{{ asset(path=reservation.programme.film.coverPath, packageName='films_cover') }}" alt="affiche du film" class="imagePreview"/></td>
                         <td class="column-wrap">{{ reservation.programme.film.title }}</td>

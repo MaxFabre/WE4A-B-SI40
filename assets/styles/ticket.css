@@ -1,0 +1,19 @@
+.ticket-informations{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 1em;
+    padding: 1em;
+}
+
+.code-qr{
+    svg{
+        width: 20rem;
+        height: 20rem;
+    }
+
+}
