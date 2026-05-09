@@ -6,8 +6,8 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse site-navbar-collapse" id="navbarSupportedContent">
-                <form class="d-flex site-navbar-search" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
+                <form class="d-flex site-navbar-search" role="search" action="/search" method="post">
+                    <input class="form-control me-2" id="query" name="query" type="search" placeholder="Search" aria-label="Search"/>
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 site-navbar-links">
@@ -43,3 +43,22 @@
         </div>
     </nav>
 </header>
+<script>
+    $(document).ready(function() {
+        $('#query').typeahead({
+            source: function(query, result) {
+                $.ajax({
+                    url: "/api/search",
+                    data: 'query=' + query,
+                    dataType: "json",
+                    type: "POST",
+                    success: function(data) {
+                        result($.map(data, function(item) {
+                            return item;
+                        }));
+                    }
+                });
+            }
+        });
+    });
+</script>

@@ -16,6 +16,21 @@ class PersonRepository extends ServiceEntityRepository {
         parent::__construct($registry, Person::class);
     }
 
+    public function findByName(string $name, $onlyPersonalities = true) {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql='SELECT id, firstname, lastname, photo FROM person WHERE (LOWER(firstname) LIKE LOWER(:name) OR LOWER(lastname) LIKE LOWER(:name)) ';
+        if ($onlyPersonalities) {
+            $sql .= 'AND id NOT IN (SELECT person_id FROM public.user);';
+        } else {
+            $sql .= ';';
+        }
+
+        $result = $conn->executeQuery($sql, ['name' => $name.'%']);
+
+        return $result->fetchAllAssociative();
+    }
+
     public function findAllPersonalities() {
         $conn = $this->getEntityManager()->getConnection();
 

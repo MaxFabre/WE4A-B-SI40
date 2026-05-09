@@ -9,13 +9,21 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<Film>
  */
-class FilmRepository extends ServiceEntityRepository
-{
-    public function __construct(ManagerRegistry $registry)
-    {
+class FilmRepository extends ServiceEntityRepository {
+    public function __construct(ManagerRegistry $registry) {
         parent::__construct($registry, Film::class);
     }
 
+    public function findByTitle(string $title) {
+       $conn = $this->getEntityManager()->getConnection();
+
+        $sql ='SELECT * FROM film WHERE LOWER(title) LIKE LOWER(:title);';
+
+        $resultSet = $conn->executeQuery($sql, ['title' => '%'.$title.'%']);
+
+        // returns an array of arrays (i.e. a raw data set)
+        return $resultSet->fetchAllAssociative();
+    }
     //    /**
     //     * @return Film[] Returns an array of Film objects
     //     */

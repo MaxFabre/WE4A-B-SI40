@@ -65,7 +65,7 @@ class FilmType extends AbstractType {
             ])
             ->add('actors', EntityType::class, [
                 'class' => Person::class,
-                'label' => 'Réalisateurs',
+                'label' => 'Acteurs',
                 'choice_label' => 'lastname',
                 'multiple' => true,
                 'required' => false,

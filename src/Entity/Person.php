@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints\Image;
 use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
 use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
@@ -18,12 +19,15 @@ class Person {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['film.details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['film.details'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['film.details'])]
     private ?string $lastname = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
@@ -75,6 +79,10 @@ class Person {
 
     public function getLastname(): ?string {
         return $this->lastname;
+    }
+
+    public function getFullName(): string {
+        return $this->firstname . ' ' . $this->lastname;
     }
 
     public function setLastname(string $lastname): static {

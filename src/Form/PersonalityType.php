@@ -51,13 +51,16 @@ class PersonalityType extends AbstractType {
                 'choice_label' => 'title',
                 'multiple' => true,
                 'required' => false,
+                'by_reference' => false,
             ])
+
             ->add('playedFilms', EntityType::class, [
                 'class' => Film::class,
                 'label' => 'Films joués',
                 'choice_label' => 'title',
                 'multiple' => true,
                 'required' => false,
+                'by_reference' => false,
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Enregistrer',
