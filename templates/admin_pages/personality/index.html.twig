@@ -1,0 +1,34 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Personnalités{% endblock %}
+
+{% block main %}
+    <div>
+        <a class="btn btn-primary" href="{{ url('admin.personality.create') }}">Nouvelle personnalité</a>
+    </div>
+    <div>
+        <table class="table table-striped">
+            <tr><th>ID</th><th>Prénom</th><th>Nom</th><th>Date de naissance</th><th>Créé le</th><th>Dernière Modification</th><th></th></tr>
+            {% for personality in personalities %}
+                <tr>
+                    <td>{{ personality.id }}</td>
+                    <td>{{ personality.firstname }}</td>
+                    <td>{{ personality.lastname }}</td>
+                    <td>{{ personality.birthdate|date('d/m/Y') }}</td>
+                    <td>{{ personality.created_at|date('d/m/y h:m') }}</td>
+                    <td>{{ personality.updated_at|date('d/m/y h:m') }}</td>
+                    <td>
+                        <div class="d-flex justify-content-evenly">
+                            <a class="btn btn-primary" href="{{ url('personality.show', parameters = {id: personality.id}) }}">Voir</a>
+                            <a class="btn btn-primary" id="edit" href="{{ url('admin.personality.edit', parameters = {id: personality.id} ) }}">Éditer</a>
+                            <form method="post" action="{{ url('admin.personality.delete', parameters = {id: personality.id} ) }}">
+                                <input type="hidden" name="_method" value="DELETE"/>
+                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

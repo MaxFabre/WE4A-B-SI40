@@ -1,21 +1,21 @@
 <header>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">Logo</a>
+    <nav class="navbar navbar-expand-lg site-navbar" data-bs-theme="light">
+        <div class="container-fluid site-navbar-shell">
+            <a class="navbar-brand site-navbar-brand" href="/">Logo</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <form class="d-flex" role="search">
+            <div class="collapse navbar-collapse site-navbar-collapse" id="navbarSupportedContent">
+                <form class="d-flex site-navbar-search" role="search">
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 site-navbar-links">
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="/">Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/film">Films</a>
+                        <a class="nav-link" href="/films">Films</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Link</a>
@@ -23,22 +23,22 @@
                 </ul>
             </div>
             {% if app.user %}
-                <div class="header-user-connection">
+                <div class="header-user-connection site-navbar-user">
                     <!-- Option de connexion -->
-                    <div>
-                        <div><a href="{{ url('account.index', parameters = {'id': app.user.id}) }}" style="text-decoration: none; color: inherit">{{ app.user.username }}</a></div>
+                    <div class="site-navbar-user-info">
+                        <div><a href="{{ url('account.show', parameters = {'id': app.user.id}) }}" style="text-decoration: none; color: inherit">{{ app.user.username }}</a></div>
                         <div>
                             {% if is_granted('ROLE_MODERATOR') or is_granted('ROLE_FUND_MANAGER') or is_granted('ROLE_ADMIN') %}
                                 <span><a href="{{ url('admin.index') }}">Outils</a></span> •
                             {% endif %}<span><a href="/logout">Déconnexion</a></span>
                         </div>
                     </div>
-                    <a href="{{ url('account.index', parameters = {'id': app.user.id}) }}" style="background-image: url({{ asset(path=app.user.person.photo , packageName = 'profil_pictures') }})" class="round-crop"></a>
+                    <a href="{{ url('account.show', parameters = {'id': app.user.id}) }}" style="background-image: url({{ asset(path=app.user.person.photo , packageName = 'profil_pictures') }})" class="round-crop"></a>
                     <a href="/notifications">{{ ux_icon('header:bell') }}</a>
                     <a href="/basket">{{ ux_icon('header:shopping-cart') }}</a>
                 </div>
             {% else %}
-                <div><span><a href="/login">Connection</a></span> • <span><a href="/register">Inscription</a></span></div>
+                <div class="site-navbar-auth"><span><a href="/login">Connection</a></span> • <span><a href="/register">Inscription</a></span></div>
             {% endif %}
         </div>
     </nav>

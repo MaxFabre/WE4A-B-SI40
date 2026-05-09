@@ -1,7 +1,16 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello FilmController!{% endblock %}
+{% block title %}Tous les films{% endblock %}
 
 {% block container %}
-    <p>ci vas l'un des templates de lof</p>
+    <h1>Tous les films</h1>
+
+    <div class="films-grid">
+        {% for film in films %}
+            {% include 'partials/film_card.html.twig' with {'film': film} %}
+        {% else %}
+            <p>Aucun film trouvé.</p>
+        {% endfor %}
+    </div>
+
 {% endblock %}

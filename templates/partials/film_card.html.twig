@@ -1,0 +1,34 @@
+<article class="film-card">
+    <a href="{{ url('film.show', {'slug': film.slug}) }}" class="film-cover-card">
+        <div class="film-cover-wrapper">
+            {% if film.coverPath %}
+                <img src="{{ asset(path=film.coverPath, packageName = 'films_cover') }}" alt="Affiche du film {{ film.title }}" class="film-cover-img"/>
+            {% else %}
+                <div class="film-no-cover">No Cover</div>
+            {% endif %}
+            <div class="film-cover-overlay">
+                <div class="film-title-hover">
+                    <h3>{{ film.title }}</h3>
+                </div>
+            </div>
+        </div>
+    </a>
+
+    <div class="film-card-info">
+        <h3 class="film-card-title"><a href="{{ url('film.show', {'slug': film.slug}) }}">{{ film.title }}</a></h3>
+        {% if film.duration %}
+            {% set hours = (film.duration // 60) %}
+            {% set mins = (film.duration % 60) %}
+            <div class="film-duration"><strong>{{ ux_icon('horloge') }} {{ hours }}h{{ mins }}</strong></div>
+        {% endif %}
+
+        <p class="film-card-description">{{ film.description ? (film.description|slice(0,300) ~ (film.description|length > 300 ? '...' : '')) : '' }}</p>
+
+        <div class="film-pined-genre">
+            {% for genre in film.genre %}
+                <span>{{ genre.name }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</article>
+
