@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ticket{% endblock %}
+
+{% block container %}
+
+    <h1>Ticket</h1>
+    <h2>Informations sur la réservation :</h2>
+    <div class="ticket-informations">
+        <u>Film :</u> {{ reservation.programme.film.title }} <br>
+        <u>Date :</u> {{ reservation.programme.date ? reservation.programme.date|date('d/m/Y') }} <br>
+        <u>De :</u> {{ reservation.programme.date ? reservation.programme.date|date('H:i') : ''}} à {{ reservation.programme.date ? reservation.programme.date|date_modify('+' ~ reservation.programme.film.duration ~ ' minutes')|date('H:i') : '' }} <br>
+        <u>Nombre de sièges :</u> {{ reservation.seats|length }}<br>
+        <div class="code-qr">
+            {{  ux_icon('ticket:code-qr') }}
+        </div>
+
+    </div>
+
+{% endblock %}

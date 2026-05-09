@@ -65,11 +65,13 @@ final class UserController extends AbstractController {
         ]);
     }
 
-    #[Route('/admin/film/{id}', name: '.delete', methods: ['DELETE'])]
-    public function delete(User $user, EntityManagerInterface $entityManager) {
-        $entityManager->remove($user);
-        $entityManager->flush();
-        $this->addFlash('success', 'L\'utilisateur à bien été supprimé.');
-        return $this->redirectToRoute('admin.user.index');
+    #[Route('/{id}', name: '.detlete', methods: ['DELETE'])]
+    public function delete(User $user, Request $request, EntityManagerInterface $entityManager) {
+        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($user);
+            $entityManager->flush();
+            $this->addFlash('success', 'L utilisateur à bien été supprimé.');
+        }
+        return $this->redirectToRoute('home.index');
     }
 }

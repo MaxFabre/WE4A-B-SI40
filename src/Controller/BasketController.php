@@ -34,6 +34,14 @@ final class BasketController extends AbstractController {
             $entityManager->flush();
         }
 
+        foreach ($basket->getReservations() as $reservation) {
+            if ($reservation->getSeats()->isEmpty()) {
+                $entityManager->remove($reservation);
+            }
+        }
+
+        $entityManager->flush();
+
         return $this->render('basket/index.html.twig', [
             'controller_name' => 'BasketController',
             'basket' => $basket,
