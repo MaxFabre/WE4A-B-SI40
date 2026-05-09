@@ -2,15 +2,18 @@
 
 namespace App\Form;
 
+use App\Entity\Film;
 use App\Entity\Person;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\BirthdayType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Vich\UploaderBundle\Form\Type\VichFileType;
 
-class PersonFormType extends AbstractType {
+class PersonalityType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options): void {
         $builder
             ->add('firstname', TextType::class, [
@@ -41,10 +44,29 @@ class PersonFormType extends AbstractType {
                 'allow_delete' => true,
                 'download_label' => false,
                 'delete_label' => 'Supprimer',
-            ]);
+            ])
+            ->add('directedFilms', EntityType::class, [
+                'class' => Film::class,
+                'label' => 'Films réalisés',
+                'choice_label' => 'title',
+                'multiple' => true,
+                'required' => false,
+            ])
+            ->add('playedFilms', EntityType::class, [
+                'class' => Film::class,
+                'label' => 'Films joués',
+                'choice_label' => 'title',
+                'multiple' => true,
+                'required' => false,
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => 'Enregistrer',
+            ])
+        ;
     }
 
-    public function configureOptions(OptionsResolver $resolver): void {
+    public function configureOptions(OptionsResolver $resolver): void
+    {
         $resolver->setDefaults([
             'data_class' => Person::class,
         ]);

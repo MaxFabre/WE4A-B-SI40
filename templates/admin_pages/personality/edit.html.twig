@@ -1,0 +1,9 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Éditer {{ personality.firstname }} {{ personality.lastname }}{% endblock %}
+
+{% block main %}
+    <h1>Éditer {{ personality.firstname }} {{ personality.lastname }}</h1>
+    {{ form_errors(form) }}
+    {{ form(form) }}
+{% endblock %}

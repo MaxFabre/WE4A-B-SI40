@@ -22,6 +22,24 @@
     }
 }
 
+.film-personalities {
+    ul {
+        list-style: none;
+    }
+
+    li {
+        display: inline-block;
+    }
+
+    a {
+        font-size: large;
+        padding: 0.3em 0.55em;
+        border-radius: 999px;
+        color: #f5a22c;
+        text-decoration: none;
+    }
+}
+
 .tools-menu {
     position: absolute;
     background-color: lavender;

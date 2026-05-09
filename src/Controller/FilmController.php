@@ -108,6 +108,9 @@ final class FilmController extends AbstractController {
         $filmForm->handleRequest($request);
         if ($filmForm->isSubmitted() && $filmForm->isValid()) {
             try {
+                //Champs cachés:
+                $film->setCreatedAt(new \DateTimeImmutable());
+                $film->setUpdatedAt(new \DateTimeImmutable());
 
                 //Enregistrement en db:
                 $entityManager->persist($film);
@@ -134,6 +137,10 @@ final class FilmController extends AbstractController {
         $filmForm->handleRequest($request);
 
         if ($filmForm->isSubmitted() && $filmForm->isValid()) {
+            //Champs cachés:
+            $film->setCreatedAt(new \DateTimeImmutable());
+            $film->setUpdatedAt(new \DateTimeImmutable());
+
             //Enregistrement en db:
             $entityManager->flush();
 
@@ -156,5 +163,21 @@ final class FilmController extends AbstractController {
             $this->addFlash('success', 'Le film à bien été supprimé.');
         }
         return $this->redirectToRoute('admin.film.index');
+    }
+
+    #[Route('/films', name: 'film.index')]
+    public function index(FilmRepository $filmRepository): Response
+    {
+        $films = $filmRepository->findBy([], ['title' => 'ASC']);
+
+        return $this->render('film/index.html.twig', [
+            'films' => $films,
+        ]);
+    }
+
+    #[Route('/film', name: 'film.redirect', methods: ['GET'])]
+    public function redirectToIndex(): Response
+    {
+        return $this->redirectToRoute('film.index', [], 301);
     }
 }
