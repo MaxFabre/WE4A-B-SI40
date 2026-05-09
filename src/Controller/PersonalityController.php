@@ -89,50 +89,58 @@ final class PersonalityController extends AbstractController {
         ]);
     }
 
-    #[Route('tools/personality/delete/{id}', name: 'admin.personality.delete')]
-    public function delete(Person $person, EntityManagerInterface $entityManager): Response {
-        $entityManager->remove($person);
-        $entityManager->flush();
-        $this->addFlash('success', 'La personnalité à bien été supprimé.');
-        return $this->redirectToRoute('admin.personality.index');
+    #[Route('/delete/{id}', name: '.delete', methods: ['DELETE'])]
+    public function delete(Person $person, Request $request, EntityManagerInterface $entityManager): Response {
+        if ($this->isCsrfTokenValid('delete'.$person->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($person);
+            $entityManager->flush();
+            $this->addFlash('success', 'La personnalités à bien été supprimée.');
+        }
+        return $this->redirectToRoute('admin.lang.index');
     }
 
     #[Route('tools/personality/film', name: 'admin.personality.film', methods: ['GET', 'POST'])]
     public function linkFilm(Request $request, EntityManagerInterface $entityManager): Response {
-        // Si la méthode est POST, on traite les données
+        //Traitement du formulaire:
         if ($request->isMethod('POST')) {
-            $filmIds = $request->request->all('films'); // Récupère le tableau des IDs de films
-            $personIds = $request->request->all('personalities'); // Récupère le tableau des IDs de personnalités
+            //Récuperation des ID pour les film et les personnalités:
+            $filmIds = $request->request->all('films');
+            $personIds = $request->request->all('personalities');
             $type = $request->request->get('type');
 
-            // Détermination de la table cible
-            $tableName = ($type === 'actor') ? 'film_actor' : 'film_director';
+            //Sélection de la bonne table:
+            if ($type == 'actor') {
+                $tableName = 'film_actor';
+            } elseif ($type == 'director') {
+                $tableName = 'film_director';
+            }
 
+            //Si les champs ne sont pas vide on prépare les requêtes en DB:
             if (!empty($filmIds) && !empty($personIds)) {
                 $connection = $entityManager->getConnection();
 
+                //Pour chaque film on ajoute les personnalités:
                 foreach ($filmIds as $filmId) {
                     foreach ($personIds as $personId) {
-                        $connection->executeStatement("
-    INSERT INTO $tableName (film_id, person_id)
-    VALUES (:film, :person)
-    ON CONFLICT (film_id, person_id) DO NOTHING
-", [
+                        $connection->executeStatement("INSERT INTO $tableName (film_id, person_id) VALUES (:film, :person) ON CONFLICT (film_id, person_id) DO NOTHING", [
                             'film' => $filmId,
                             'person' => $personId
                         ]);
                     }
                 }
 
+                //Retour avec succés:
                 $this->addFlash('success', 'Les liens ont été enregistrés avec succès.');
             } else {
+
+                //Retour avec erreur:
                 $this->addFlash('error', 'Veuillez sélectionner au moins un film et une personnalité.');
             }
-
+            //Redirection vers la page d'index:
             return $this->redirectToRoute('admin.personality.index');
         }
 
-        // Si c'est un GET, on affiche simplement la vue
+        //Génération du template:
         return $this->render('admin_pages/personality/film.html.twig');
     }
 }

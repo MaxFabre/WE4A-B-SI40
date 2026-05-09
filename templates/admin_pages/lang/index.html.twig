@@ -1,0 +1,30 @@
+{% extends 'admin_pages/base.html.twig' %}
+
+{% block title %}Outils - Langue{% endblock %}
+
+{% block main %}
+    <div>
+        <a class="btn btn-primary" href="{{ url('admin.lang.create') }}">Nouvelle langue</a>
+    </div>
+    <div>
+        <table class="table table-striped">
+            <tr><th>ID</th><th>Nom</th><th>Actions</th></tr>
+            {% for lang in langs %}
+                <tr>
+                    <td>{{ lang.id }}</td>
+                    <td>{{ lang.name }}</td>
+                    <td>
+                        <div class="d-flex justify-content-evenly">
+                            <a class="btn btn-primary" id="edit" href="{{ url('admin.lang.edit', parameters = {id: lang.id} ) }}">Éditer</a>
+                            <form method="post" action="{{ url('admin.lang.delete', parameters = {id: lang.id} ) }}">
+                                <input type="hidden" name="_method" value="DELETE"/>
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lang.id) }}">
+                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

@@ -26,7 +26,7 @@
 
 
         <table class="table table-striped col-md-6">
-            <tr><th>Date</th><th>Heure début</th><th>Heure de fin</th><th>Film</th><th>Salle</th><th>Places réservées</th><th>Places totales</th></tr>
+            <tr><th>Date</th><th>Heure début</th><th>Heure de fin</th><th>Film</th><th>Salle</th><th>Places réservées</th><th>Places totales</th><th>Actions</th></tr>
             {% for programme in programmes %}
                 <tr>
                     <td>{{ programme.date ? programme.date|date('d/m/Y') : '' }}</td>

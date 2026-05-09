@@ -13,12 +13,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api', name: 'api')]
 final class ApiController extends AbstractController {
-
-    #[Route('/test', name: '.test')]
-    public function test() {
-        return $this->render('test/index.html.twig');
-    }
-
     #[Route('/film/search', name: '.film.search', methods: ['GET'])]
     public function filmsSearch(Request $request, FilmRepository $repository): JsonResponse {
         $query = $request->query->get('q', '');

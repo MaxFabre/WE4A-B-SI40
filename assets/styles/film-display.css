@@ -40,20 +40,6 @@
     }
 }
 
-.tools-menu {
-    background-color: lavender;
-    left: 0;
-
-    ul {
-        list-style: none;
-    }
-
-    a {
-        text-decoration: none;
-        color: inherit;
-    }
-}
-
 .comments-area {
     article {
         padding: 1em;

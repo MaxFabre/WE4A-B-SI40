@@ -8,7 +8,7 @@
 
         {% if comments %}
             <table class="table table-striped">
-                <tr><th>ID</th><th>Auteur</th><th>Titre</th><th>Signalements</th><th></th></tr>
+                <tr><th>ID</th><th>Auteur</th><th>Titre</th><th>Signalements</th><th>Actions</th></tr>
                 {% for comment in comments %}
                     <tr>
                         <td>{{ comment.id }}</td>
