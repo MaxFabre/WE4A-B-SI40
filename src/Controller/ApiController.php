@@ -14,25 +14,25 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/api', name: 'api')]
 final class ApiController extends AbstractController {
 
+    #[Route('/test', name: '.test')]
+    public function test() {
+        return $this->render('test/index.html.twig');
+    }
+
     #[Route('/film/search', name: '.film.search', methods: ['GET'])]
     public function filmSearch(Request $request ,FilmRepository $repository): JsonResponse {
         //Préparation de la requête:
         $query = $request->query->get('q', '');
 
         //Recherche des films correspondant à la chaîne de caractères reçue:
-        $films = $repository->createQueryBuilder('f')
-            ->where('LOWER(f.title) LIKE LOWER(:query)')
-            ->setParameter('query', '%' . $query . '%')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult();
+        $films = $repository->findByTitle($query);
 
         //Récuperation des résultats:
         $results = [];
         foreach ($films as $film) {
             $results[] = [
-                'id' => $film->getId(),
-                'title' => $film->getTitle(),
+                'id' => $film['id'],
+                'title' => $film['title'],
             ];
         }
 
@@ -47,32 +47,53 @@ final class ApiController extends AbstractController {
 
     #[Route('/personalities/search', name: '.personality.search', methods: ['GET'])]
     public function personalitySearch(Request $request, PersonRepository $repository): JsonResponse {
-        //Préparation de la requête:
-        $query = $request->query->get('q', '');
+        // 1. On récupère 'query' pour correspondre au JS (ou on change le JS)
+        $query = $request->query->get('query', '');
 
-        //Recherche des films correspondant à la chaîne de caractères reçue:
-        $qb = $repository->createQueryBuilder('p');
-        $qb->where('LOWER(p.firstname) LIKE LOWER(:query) OR LOWER(p.lastname) LIKE LOWER(:query)')
-            ->andWhere(
-                $qb->expr()->not(
-                    $qb->expr()->exists(
-                        'SELECT u.id FROM App\Entity\User u WHERE u.person = p'
-                    )
-                )
-            )
-            ->setParameter('query', '%' . $query . '%')
-            ->setMaxResults(10);
+        $personalities = $repository->findByName($query);
 
-        //Récuperation des résultats:
-        $personalities = $qb->getQuery()->getResult();
-        $results = array_map(static function ($personality) {
-            return [
-                'id' => $personality->getId(),
-                'fullName' => $personality->getFullName(),
+        $results = [];
+        foreach ($personalities as $personality) {
+            $results[] = [
+                'id'    => $personality['id'],
+                // 'value' est la clé standard pour l'affichage dans Tokenfield
+                'value' => $personality['firstname'].' '.$personality['lastname'],
+                'label' => $personality['firstname'].' '.$personality['lastname']
             ];
-        }, $personalities);
+        }
 
-        //Retour des résultats au format json:
         return new JsonResponse($results);
+    }
+
+    #[Route('/search', name: '.search', methods: ['GET', 'POST'])]
+    public function search(Request $request, PersonRepository $personRepository, FilmRepository $filmRepository): JsonResponse {
+        if (isset($_POST['query'])) {
+            $query = $_POST['query'];
+        } elseif ($request->query->get('q', '') !== null) {
+            $query = $request->query->get('q');
+        } else {
+            $query = '';
+        }
+
+        //Récuperationd des films
+        $films = $filmRepository->findByTitle($query);
+        $results = [];
+        foreach ($films as $film) {
+            $results[] = [
+                'id' => $film['id'],
+                'title' => $film['title'],
+            ];
+        }
+
+        //Recuépartion des personnalités:
+        $prsonalities = $personRepository->findByName($query);
+        foreach ($prsonalities as $personality) {
+            $results[] = [
+                'id' => $personality['id'],
+                'fullName' => $personality['firstname'].' '.$personality['lastname'],
+            ];
+        }
+
+        return $this->json($results);
     }
 }
