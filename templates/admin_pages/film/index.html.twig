@@ -27,13 +27,14 @@
 
 
             <table class="table table-striped col-md-6">
-                <tr><th>ID</th><th>Titre</th><th></th></tr>
+                <tr><th>ID</th><th>Titre</th><th>Actions</th></tr>
                 {% for film in films %}
                     <tr>
                         <td>{{ film.id }}</td>
                         <td>{{ film.title }}</td>
                         <td>
                             <div class="d-flex justify-content-evenly">
+                                <a class="btn btn-primary" id="edit" href="{{ url('film.show', parameters = {slug: film.slug} ) }}">Voire</a>
                                 <a class="btn btn-primary" id="edit" href="{{ url('admin.film.edit', parameters = {id: film.id} ) }}">Éditer</a>
                                 <form method="post" action="{{ url('admin.film.delete', {id: film.id}) }}">
                                     <input type="hidden" name="_method" value="DELETE"/>
@@ -53,7 +54,7 @@
                 <div class="horizontal">
                     <div class="partie-gauche">
                         <form method="get" class="my-3">
-                            <label for="sortGenre" class="form-label">Trier les films</label>
+                            <label for="sortGenre" class="form-label">Trier les genres</label>
                             <select id="sortGenre" name="sortGenre" class="form-select" onchange="this.form.submit()">
                                 <option value="id_asc" {{ sortGenre == 'id_asc' ? 'selected' : '' }}>ID croissant</option>
                                 <option value="id_desc" {{ sortGenre == 'id_desc' ? 'selected' : '' }}>ID décroissant</option>
@@ -69,7 +70,7 @@
 
                 </div>
             <table class="table table-striped col-md-6">
-                <tr><th>ID</th><th>Nom</th><th></th></tr>
+                <tr><th>ID</th><th>Nom</th><th>Actions</th></tr>
                 {% for genre in genres %}
                     <tr>
                         <td>{{ genre.id }}</td>

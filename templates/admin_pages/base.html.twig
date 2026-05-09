@@ -3,9 +3,10 @@
 {% block title %}Outils{% endblock %}
 
 {% block container %}
-    <div class="row">
-        <aside class="tools-menu col-md-2 col-sm-12">
+    <div>
+        <aside id="menu" class="tools-menu">
             <ul>
+                <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
                 <li><strong><a href="{{ url('admin.index') }}">{{ ux_icon('dashboard:settings') }} Dashboard</a></strong></li>
                 {% if is_granted('ROLE_MODERATOR') %}
                     <strong>{{ ux_icon('dashboard:chat') }} Commentaires</strong>
@@ -25,14 +26,25 @@
                     <strong>{{ ux_icon('dashboard:group') }} Gestion des individus</strong>
                     <li><a href="{{ url('admin.user.index') }}">Utilisateurs</a></li>
                     <li><a href="{{ url('admin.personality.index') }}">Personnalité</a></li>
-                    <strong>{{ ux_icon('dashboard:log') }} Journaux</strong>
-                    <li><a href="{{ url('admin.logs') }}">Journaux d'opérations</a></li>
                 {% endif %}
             </ul>
         </aside>
 
-        <div class="vertical col-md-9 col-sm-12">
+        <div>
+            <button class="openbtn" onclick="openNav()">☰ Afficher le menu</button>
             {% block main %}{% endblock %}
         </div>
     </div>
+
+    <script>
+        function openNav() {
+            document.getElementById("menu").style.width = "250px";
+            document.getElementById("container").style.marginLeft = "250px";
+        }
+
+        function closeNav() {
+            document.getElementById("menu").style.width = "0";
+            document.getElementById("container").style.marginLeft= "0";
+        }
+    </script>
 {% endblock %}

@@ -17,9 +17,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/films">Films</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                    </li>
                 </ul>
             </div>
             {% if app.user %}
@@ -34,7 +31,6 @@
                         </div>
                     </div>
                     <a href="{{ url('account.show', parameters = {'id': app.user.id}) }}" style="background-image: url({{ asset(path=app.user.person.photo , packageName = 'profil_pictures') }})" class="round-crop"></a>
-                    <a href="/notifications">{{ ux_icon('header:bell') }}</a>
                     <a href="/basket">{{ ux_icon('header:shopping-cart') }}</a>
                 </div>
             {% else %}

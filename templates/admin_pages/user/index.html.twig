@@ -8,7 +8,7 @@
     </div>
     <div>
         <table class="table table-striped">
-            <tr><th>ID</th><th>Prénom</th><th>Nom</th><th>Surnom</th><th>Email</th><th>Inscris-le</th><th>Dernière Modification</th><th></th></tr>
+            <tr><th>ID</th><th>Prénom</th><th>Nom</th><th>Surnom</th><th>Email</th><th>Inscris-le</th><th>Dernière Modification</th><th>Actions</th></tr>
             {% for user in users %}
                 <tr>
                     <td>{{ user.id }}</td>
@@ -24,6 +24,7 @@
                             <a class="btn btn-primary" id="edit" href="{{ url('admin.user.edit', parameters = {id: user.id} ) }}">Éditer</a>
                             <form method="post" action="{{ url('admin.user.delete', parameters = {id: user.id} ) }}">
                                 <input type="hidden" name="_method" value="DELETE"/>
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
                                 <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
                             </form>
                         </div>

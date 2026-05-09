@@ -9,7 +9,7 @@
     </div>
     <div>
         <table class="table table-striped">
-            <tr><th>ID</th><th>Prénom</th><th>Nom</th><th>Date de naissance</th><th>Créé le</th><th>Dernière Modification</th><th></th></tr>
+            <tr><th>ID</th><th>Prénom</th><th>Nom</th><th>Date de naissance</th><th>Créé le</th><th>Dernière Modification</th><th>Actions</th></tr>
             {% for personality in personalities %}
                 <tr>
                     <td>{{ personality.id }}</td>
@@ -24,6 +24,7 @@
                             <a class="btn btn-primary" id="edit" href="{{ url('admin.personality.edit', parameters = {id: personality.id} ) }}">Éditer</a>
                             <form method="post" action="{{ url('admin.personality.delete', parameters = {id: personality.id} ) }}">
                                 <input type="hidden" name="_method" value="DELETE"/>
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ personality.id) }}">
                                 <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
                             </form>
                         </div>
