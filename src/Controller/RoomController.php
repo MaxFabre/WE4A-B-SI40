@@ -195,10 +195,26 @@ final class RoomController extends AbstractController
     }
 
     #[Route('/{id}', name: '.delete', methods: ['DELETE'])]
-    public function delete(Room $room, EntityManagerInterface $entityManager) {
-        $entityManager->remove($room);
-        $entityManager->flush();
-        $this->addFlash('success', 'La salle à bien été supprimé.');
+    public function delete(Room $room, Request $request, EntityManagerInterface $entityManager) {
+        if ($this->isCsrfTokenValid('delete'.$room->getId(), $request->request->get('_token'))) {
+
+            if (!$room->getProgrammes()->isEmpty()) {
+                $this->addFlash('danger', 'Impossible de supprimer cette salle car elle est utilisée par une ou plusieurs séances.');
+                return $this->redirectToRoute('admin.room.index');
+            }
+
+            foreach ($room->getSeats() as $seat) {
+                if (!$seat->getReservations()->isEmpty()) {
+                    $this->addFlash('danger', 'Impossible de supprimer cette salle car certains sièges sont déjà réservés.');
+                    return $this->redirectToRoute('admin.room.index');
+                }
+                $entityManager->remove($seat);
+            }
+
+            $entityManager->remove($room);
+            $entityManager->flush();
+            $this->addFlash('success', 'La salle à bien été supprimé.');
+        }
         return $this->redirectToRoute('admin.room.index');
     }
 }

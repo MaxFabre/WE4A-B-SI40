@@ -34,9 +34,9 @@
                     <tr>
                         <td>{{ report.id }}</td>
                         <td>{{ report.comment.title }}</td>
-                        <td><a href="{{ url('account.index', parameters = {id: report.comment.author.id}) }}">{{ report.comment.author.username }}</a></td>
+                        <td><a href="{{ url('account.show', parameters = {id: report.comment.author.id}) }}">{{ report.comment.author.username }}</a></td>
                         <td>{{ report.createdAt|date('d/m/Y h:m') }}</td>
-                        <td><a href="{{ url('account.index', parameters = {id: report.complainant.id}) }}">{{ report.complainant.username }}</a></td>
+                        <td><a href="{{ url('account.show', parameters = {id: report.complainant.id}) }}">{{ report.complainant.username }}</a></td>
                         <td>{{ report.statut }}</td>
                     </tr>
                 {% endfor %}

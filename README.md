@@ -20,5 +20,7 @@ Vous pouvez tout installer d'un coup avec `composer install`
 `composer require vich/uploader-bundle`  
 `composer require symfony/serializer-pack`
 
-## Resources
-Les resources (CSS, images et autres) sont à placer dans le dossier public (celui qui est chargé par le client).
+## Point de vigilance
+Après toute modification de fichiers dans /assets, il faut "recompiler" (merci asset-mapper):
+`php bin/console cache:clear`  
+`php bin/console asset-map:compile`

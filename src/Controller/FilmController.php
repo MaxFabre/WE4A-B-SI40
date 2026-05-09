@@ -9,6 +9,7 @@ use App\Form\FilmType;
 use App\Repository\FilmRepository;
 use App\Repository\GenreRepository;
 use App\Repository\CommentRepository;
+use App\Repository\ProgrammeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -48,7 +49,7 @@ final class FilmController extends AbstractController {
     }
 
     #[Route('/film/{slug}', name: 'film.show', methods: ['GET', 'POST'])]
-    public function show(string $slug, FilmRepository $filmRepository, CommentRepository $commentRepository, Request $request, EntityManagerInterface $entityManager): Response {
+    public function show(string $slug, ProgrammeRepository $programmeRepository, FilmRepository $filmRepository, CommentRepository $commentRepository, Request $request, EntityManagerInterface $entityManager): Response {
         //Initialisation:
         $film = $filmRepository->findOneBy(['slug' => $slug]);
         $newComment = new Comment();
@@ -87,11 +88,15 @@ final class FilmController extends AbstractController {
             ['created_at' => 'DESC']
         );
 
+
+        $programmes = $programmeRepository->findByFilmByDate($film->getId());
+
         //Chargement du template:
         return $this->render('film/show.html.twig', [
             'film' => $film,
             'comments' => $comments,
             'form' => $form->createView(),
+            'programmes' => $programmes,
         ]);
     }
 

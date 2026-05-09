@@ -13,37 +13,227 @@
             "{{ reservation.programme.film.title }}"
 
         </h3>
-        <div class="center-content">
-            {% set room = reservation.programme.room %}
-            {% set siegesParRang = room.capacity//5 %}
-            {% set arraySieges = [] %}
+        <h3>Nombre de sièges collectionnés : <span id="nombreSelectionne">{{ nombreSieges }}</span></h3>
+        <div class="center-content sieges" id="sieges">
 
-            {% set rangActuel = 0 %}
+            {% set rangActuel = 0 %}{# Pour garder le compte de la postion actuelle #}
+            {% set rangeeActuelle = 0 %}
             <div class="ligne-sieges">
             {% for seat in room.seats %}
                 {% if(rangActuel == siegesParRang) %}
                     </div>
 
                     <div class="ligne-sieges">
+
+                    {% set rangeeActuelle = rangeeActuelle+1 %}
                     {% set rangActuel = 0 %}
                 {% endif %}
-                {% if (seat in reservation.seats)%}
-                    <div onclick="">{{ux_icon("seats:seat",{fill: 'lightgreen'})}}</div>
+                {% if (seat in reservation.seats)%}{# Si déjà dans la reservation actuelle -> en vert #}
+                    {% if seat.class === 1 %}
+                        <div class="seat selected border-first-class"
+                             data-seat-id="{{ seat.id }}"
+                             data-seat-class="{{ seat.class }}"
+                             data-is-reserved="0">
+                            {{ ux_icon("seats:seat", {class: 'size-3'}) }}
+                        </div>
+                    {% else %}
+                        <div class="seat selected"
+                             data-seat-id="{{ seat.id }}"
+                             data-seat-class="{{ seat.class }}"
+                             data-is-reserved="0">
+                            {{ ux_icon("seats:seat", {class: 'size-3'}) }}
+                        </div>
+                    {% endif %}
+
                 {% else %}
-                    <div onclick="">{{ux_icon("seats:seat", {class: 'size-4'})}}</div>
+                    {% if (seat in seatsProgramme) %} {# Si réservé apr qqn d'autre -> en rouge + class reserved #}
+                        {% if seat.class === 1 %}
+                            <div class="seat reserved border-first-class"
+                                 data-seat-id="{{ seat.id }}"
+                                 data-seat-class="{{ seat.class }}"
+                                 data-is-reserved="1">
+                                {{ ux_icon("seats:seat", {class: 'size-3'}) }}
+                            </div>
+                        {% else %}
+                            <div class="seat reserved"
+                                 data-seat-id="{{ seat.id }}"
+                                 data-seat-class="{{ seat.class }}"
+                                 data-is-reserved="1">
+                                {{ ux_icon("seats:seat", {class: 'size-3'}) }}
+                            </div>
+                        {% endif %}
+                    {% else %} {# Sinon -> en noir #}
+                        {% if seat.class === 1 %}
+                            <div class="seat border-first-class"
+                                 data-seat-id="{{ seat.id }}"
+                                 data-seat-class="{{ seat.class }}"
+                                 data-is-reserved="0">
+                                {{ ux_icon("seats:seat", {class: 'size-3'}) }}
+                            </div>
+                        {% else %}
+                            <div class="seat"
+                                 data-seat-id="{{ seat.id }}"
+                                 data-seat-class="{{ seat.class }}"
+                                 data-is-reserved="0">
+                                {{ ux_icon("seats:seat", {class: 'size-3'}) }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
                 {% endif %}
 
                 {% set rangActuel = rangActuel+1  %}
             {%endfor%}
+
                     </div>
         </div>
+        <br><br><br><br>
+        <div class="center">
+            <div class="ecran">
+            </div>
+
+        </div>
+        <div class="center">
+            <br>
+            <p>écran</p>
+        </div>
+
+{#        formulaire pour bouton submit#}
+        <form method="POST" action="{{ path('reservation_update_seats', {id: reservation.id}) }}">
+            <input
+                type="hidden"
+                name="selectedSeats"
+                id="selectedSeats"
+                value="{{ reservation.seats|map(seat => seat.id)|json_encode|e('html_attr') }}"
+            >
+            <button class="btn btn-lg btn-primary" type="submit">Enregistrer</button>
+        </form>
+
+        {#
+            Affichage des prix
+        #}
+        <br>
+        Prix :
+        <br>
+
+        <span id="lignePremiereClasse">
+                <span id="placesPremiereClasse">0</span> x
+                <span id="prixPremiereClasse">0</span>€
+                première classe
+            </span>
+
+        <br>
+
+        <span id="ligneSecondeClasse">
+                <span id="placesSecondeClasse">0</span> x
+                <span id="prixSecondeClasse">0</span>€
+                seconde classe
+            </span>
+
+        <br><br>
+
+        Total : <span id="prixTotal">0</span>€
+
+        <br><br>
+{#        Légende pour première classe#}
+        <div class="border-first-class">
+            {{ ux_icon("seats:seat", {class: 'size-3'}) }}
+        </div> = Siège première classe
 
 
-{#        {% for seat in reservation.seats %}#}
-{#            {{ seat.number }}#}
-{#            {{ seat.id }}#}
-{#        {% endfor %}#}
+
+
     </div>
-{#    {% set reservation = reservations|filter( r=> r.id == id)|first  %}#}
 
+    <script>
+
+        const placesPremiereClasseElement = document.getElementById('placesPremiereClasse');//nombre de places premiere classe
+        const placesSecondeClasseElement = document.getElementById('placesSecondeClasse'); // nombre de places seconde classe
+        const prixPremiereClasseElement = document.getElementById('prixPremiereClasse'); //prix premiere classe
+        const prixSecondeClasseElement = document.getElementById('prixSecondeClasse'); //prix seconde classe
+        const prixTotalElement = document.getElementById('prixTotal'); //prix total
+        const lignePremiereClasseElement = document.getElementById('lignePremiereClasse'); // ligne prix premiere classe
+        const ligneSecondeClasseElement = document.getElementById('ligneSecondeClasse'); // ligne prix seconde classe
+        const filmPrice = {{ reservation.programme.film.price + 0.0 }};
+
+        //fonction qui affiche les prix en direct suivant la selection de l'utilisateur sur les sièges, et calcul le prix total
+        const updatePrices = () => {
+            let placesPremiereClasse = 0;
+            let placesSecondeClasse = 0;
+
+            document.querySelectorAll('.seat.selected').forEach(seat => {// On compte le nombre de places premiere classe et seconde classe
+                if (seat.dataset.seatClass === '1') {
+                    placesPremiereClasse++;
+                }
+
+                if (seat.dataset.seatClass === '2') {
+                    placesSecondeClasse++;
+                }
+            });
+
+            const prixPremiereClasse = placesPremiereClasse * filmPrice * 1.5;// On calcule les prix
+            const prixSecondeClasse = placesSecondeClasse * filmPrice;
+            const prixTotal = prixPremiereClasse + prixSecondeClasse;
+
+            placesPremiereClasseElement.textContent = placesPremiereClasse.toString();
+            placesSecondeClasseElement.textContent = placesSecondeClasse.toString();
+
+            prixPremiereClasseElement.textContent = prixPremiereClasse.toFixed(2);
+            prixSecondeClasseElement.textContent = prixSecondeClasse.toFixed(2);
+            prixTotalElement.textContent = prixTotal.toFixed(2);
+
+            lignePremiereClasseElement.style.display = placesPremiereClasse === 0 ? 'none' : 'inline'; // on affiche ou non les lignes de prix (suivant si elle sont vide)
+            ligneSecondeClasseElement.style.display = placesSecondeClasse === 0 ? 'none' : 'inline';
+        };
+
+        const selectedSeats = new Set();
+        const selectedSeatsInput = document.getElementById("selectedSeats");
+        const updateSelectedSeatsInput = () => {
+            selectedSeatsInput.value = JSON.stringify([...selectedSeats]);
+        };
+
+        const maxSeats = {{ numberWanted }};// Optionnel, si un changement est demandé, -1 signifie qu'on peux en prendre autant que l'on veut
+        document.getElementById('nombreSelectionne').textContent = {{ nombreSieges }};// on récupére la ligen du nombre de sièges selectionnés
+        document.querySelectorAll('.seat').forEach(seat => {// pour chaque sièges avec la classe seat, si il a la classe selected on l'ajouter au set
+            if (seat.classList.contains('selected')) {
+                selectedSeats.add(seat.dataset.seatId);
+            }
+
+            seat.addEventListener('click', () => {// au click :
+                const id = seat.dataset.seatId;
+
+                if (seat.dataset.isReserved === '1') {// si déjà réservé, on fait rien
+                    return;
+                }
+
+                if (!seat.classList.contains('selected') && maxSeats!==-1 && selectedSeats.size >= maxSeats) { // Si on est au maximum autorisé, on fait rien
+                    alert("Vous ne pouvez sélectionner que " + maxSeats + " sièges.");
+                    return;
+                }
+
+                if (seat.classList.contains('selected')) {// si il est déjà selectionné, on l'enlève de la selection
+                    seat.classList.remove('selected');
+                    selectedSeats.delete(id);
+
+                }else {
+                    seat.classList.add('selected'); // sinon on l'ajoute
+                    selectedSeats.add(id);
+
+                }
+
+                document.getElementById('nombreSelectionne').textContent = selectedSeats.size.toString(); // on update les sièges selectionnés, les prix et le texte du nombre de sièges
+                updateSelectedSeatsInput();
+                updatePrices();
+            });
+        });
+        updateSelectedSeatsInput();
+        updatePrices();
+
+        document.querySelector("form").addEventListener("submit", () => {
+            updateSelectedSeatsInput();
+        });
+
+
+
+
+    </script>
 {% endblock %}

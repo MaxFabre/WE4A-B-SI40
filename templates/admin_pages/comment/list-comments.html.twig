@@ -33,7 +33,7 @@
                     <tr>
                         <td>{{ comment.id }}</td>
                         <td>{{ comment.title }}</td>
-                        <td><a href="{{ url('account.index', parameters = {id: comment.author.id}) }}">{{ comment.author.username }}</a></td>
+                        <td><a href="{{ url('account.show', parameters = {id: comment.author.id}) }}">{{ comment.author.username }}</a></td>
                         <td>{{ comment.createdAt|date('d/m/Y h:m') }}</td>
                         <td>{{ comment.updatedAt|date('d/m/Y h:m') }}</td>
                         <td><a href="{{ url('film.show', parameters = {slug: comment.film.slug}) }}">{{ comment.film.title }}</a></td>

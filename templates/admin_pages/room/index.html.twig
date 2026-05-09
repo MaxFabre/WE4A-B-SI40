@@ -3,9 +3,10 @@
 {% block title %}Outils - Salle{% endblock %}
 
 {% block main %}
-    <div class="col-md-6 col-sm-12 col-xs-12 vertical">
-        <h1>Salles :</h1>
-        <div class="horizontal">
+    <h1>Salles :</h1>
+    <div class="row">
+
+        <div class="horizontal col-md-12 col-sm-12 col-lg-6">
 
             <div class="partie-droite">
                 <form method="get" class="my-3">
@@ -25,8 +26,8 @@
         </div>
 
 
-        <table class="table table-striped col-md-6">
-            <tr><th>ID</th><th>Nom</th><th>Capacité</th></tr>
+        <table class="table table-striped col-md-12 col-sm-12 col-lg-6">
+            <tr><th>ID</th><th>Nom</th><th>Capacité</th><th>Actions</th></tr>
             {% for room in rooms %}
                 <tr>
                     <td>{{ room.id }}</td>
@@ -35,9 +36,10 @@
                     <td>
                         <div class="d-flex justify-content-evenly">
                             <a class="btn btn-primary" id="edit" href="{{ url('admin.room.edit', parameters = {id: room.id} ) }}">Éditer</a>
-                            <form method="post" action="{{ url('admin.room.delete', parameters = {id: room.id} ) }}">
+                            <form method="post" action="{{ url('admin.room.delete', {id: room.id}) }}">
                                 <input type="hidden" name="_method" value="DELETE"/>
-                                <input class="btn btn-danger" type="submit" value="Supprimer" id="delete"/>
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ room.id) }}">
+                                <input class="btn btn-danger" type="submit" value="Supprimer"/>
                             </form>
                         </div>
                     </td>

@@ -3,6 +3,40 @@
 {% block title %}{{ film.title }}{% endblock %}
 
 {% block container %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {% set jours = {
+        'Monday': 'lundi',
+        'Tuesday': 'mardi',
+        'Wednesday': 'mercredi',
+        'Thursday': 'jeudi',
+        'Friday': 'vendredi',
+        'Saturday': 'samedi',
+        'Sunday': 'dimanche'
+    } %}
+
+    {% set mois = {
+        'January': 'janvier',
+        'February': 'février',
+        'March': 'mars',
+        'April': 'avril',
+        'May': 'mai',
+        'June': 'juin',
+        'July': 'juillet',
+        'August': 'août',
+        'September': 'septembre',
+        'October': 'octobre',
+        'November': 'novembre',
+        'December': 'décembre'
+    } %}
+
+
     <div class="vertical">
         <h1>{{ film.title }}</h1>
         <div class="film-show">
@@ -55,6 +89,65 @@
             </div>
         </div>
         <hr/>
+        <h2>Reservations disponibles</h2>
+
+        {% set programmesParDate = {} %}
+
+        {% for programme in programmes %}
+            {% if (programme.is_closed === false) %}
+                {% set date = programme.date|date('Y-m-d') %}
+
+                {% if programmesParDate[date] is not defined %}
+                    {% set programmesParDate = programmesParDate|merge({ (date): [programme] }) %}
+                {% else %}
+                    {% set programmesParDate = programmesParDate|merge({ (date): programmesParDate[date]|merge([programme]) }) %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+
+                <div class="horizontal-left">
+
+
+
+                    {% for date, liste in programmesParDate %}
+                        <div class="column">
+                        <h4>
+                            <u>
+                                {{ jours[date|date('l')] }}
+                                {{ date|date('j') }}
+                                {{ mois[date|date('F')] }}
+                                {{ date|date('Y') }}
+                            </u>
+                        </h4>
+                        {% for programme in liste %}
+
+                            <form method="post" action="{{ path('reservation.create', { id: programme.id }) }}">
+                                <button class="btn btn-lg btn-primary" type="submit" id="programme-{{ programme.id }}">
+                                    {{ programme.date|date('H:i') }}
+                                    {% if (programme.lang_name == "Français") %}
+                                        <img style="height:1.5em;" src="{{ asset(path='vf.png', packageName = 'images') }}" alt=""/>
+                                    {% elseif (programme.lang_name == "Anglais") %}
+                                        <img style="height:1.5em;" src="{{ asset(path='ve.png', packageName = 'images') }}" alt=""/>
+                                    {% endif %}
+                                </button>
+                            </form>
+                            <br>
+
+                        {% endfor %}
+                        </div>
+
+                    {% endfor %}
+
+
+
+
+                </div>
+
+
+        <hr/>
+
+
         {% include 'partials/comments.html.twig' %}
     </div>
 {% endblock %}

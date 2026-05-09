@@ -51,4 +51,17 @@ class ProgrammeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findByFilmByDate(int $filmId): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "SELECT p.id, p.date, l.name AS lang_name, p.is_closed AS is_closed
+        FROM programme AS p
+        INNER JOIN lang AS l ON l.id = p.lang_id
+        WHERE p.film_id = :id
+        ORDER BY p.date ASC";
+
+        return $conn->fetchAllAssociative($sql, ['id' => $filmId]);
+    }
 }

@@ -38,7 +38,7 @@ final class CommentReportController extends AbstractController {
         ]);
     }
 
-    #[Route('/report/{id}', name: '.show')]
+    #[Route('/{id}', name: '.show')]
     public function moderate(CommentRepository $commentRepository, CommentReportRepository $commentReportRepository, $id): Response {
         //Initialisation:
         $comment = $commentRepository->find($id);
@@ -48,7 +48,7 @@ final class CommentReportController extends AbstractController {
             'comment' => $comment,
             'reports' => $reports,
             'dialogObjectId' => $comment->getId(),
-            'dialogRoute' => 'admin.comment-reports.moderate',
+            'dialogRoute' => 'admin.reports.moderate',
         ]);
     }
 
@@ -81,7 +81,7 @@ final class CommentReportController extends AbstractController {
 
 
         //Retour à la page d'index:
-        return $this->redirectToRoute('admin.comment-reports.index');
+        return $this->redirectToRoute('admin.reports.index');
     }
 
     #[Route('/refuse/{id}', name: '.refuse', methods: ['POST'])]
@@ -105,6 +105,6 @@ final class CommentReportController extends AbstractController {
         $entityManager->flush();
 
         //Retour à la page d'index:
-        return $this->redirectToRoute('admin.comment-reports.index');
+        return $this->redirectToRoute('admin.reports.index');
     }
 }
