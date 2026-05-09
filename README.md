@@ -1,8 +1,15 @@
 # WE4A-B-SI40
 
-# Front-End
+# Installation
+Ce projet utilise symfony, alors pour l'utiliser correctement il faut installer l'ensemble des dépencances.  
+De plus afin de profiter de toutre les fonctionalités du site une base de donnée d'exemple est fournie,
+il est nécessaire de l'utiliser avec PostgreSQL. Pour impirter les données il suffit d'executer les commande  
+fournie dans le fichier `WE4X_SI40.sql`.
 
-## Requirements
+Afin de simplifier la navigation tout les comptes fournie ont pour unique mot de passe: `123456`.
+Une fois installé lancer le serveur de test avec `symfony server:start`.
+
+# Dépendances
 Utiliser ces commandes afin d'obtenir les packages:
 Vous pouvez tout installer d'un coup avec `composer install`
 
