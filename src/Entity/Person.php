@@ -81,6 +81,10 @@ class Person {
         return $this->lastname;
     }
 
+    public function getFullName(): string {
+        return $this->firstname . ' ' . $this->lastname;
+    }
+
     public function setLastname(string $lastname): static {
         $this->lastname = $lastname;
 
