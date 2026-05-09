@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Person;
 use App\Form\PersonalityType;
+use App\Repository\FilmRepository;
 use App\Repository\PersonRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -94,5 +95,44 @@ final class PersonalityController extends AbstractController {
         $entityManager->flush();
         $this->addFlash('success', 'La personnalité à bien été supprimé.');
         return $this->redirectToRoute('admin.personality.index');
+    }
+
+    #[Route('tools/personality/film', name: 'admin.personality.film', methods: ['GET', 'POST'])]
+    public function linkFilm(Request $request, EntityManagerInterface $entityManager): Response {
+        // Si la méthode est POST, on traite les données
+        if ($request->isMethod('POST')) {
+            $filmIds = $request->request->all('films'); // Récupère le tableau des IDs de films
+            $personIds = $request->request->all('personalities'); // Récupère le tableau des IDs de personnalités
+            $type = $request->request->get('type');
+
+            // Détermination de la table cible
+            $tableName = ($type === 'actor') ? 'film_actor' : 'film_director';
+
+            if (!empty($filmIds) && !empty($personIds)) {
+                $connection = $entityManager->getConnection();
+
+                foreach ($filmIds as $filmId) {
+                    foreach ($personIds as $personId) {
+                        $connection->executeStatement("
+    INSERT INTO $tableName (film_id, person_id)
+    VALUES (:film, :person)
+    ON CONFLICT (film_id, person_id) DO NOTHING
+", [
+                            'film' => $filmId,
+                            'person' => $personId
+                        ]);
+                    }
+                }
+
+                $this->addFlash('success', 'Les liens ont été enregistrés avec succès.');
+            } else {
+                $this->addFlash('error', 'Veuillez sélectionner au moins un film et une personnalité.');
+            }
+
+            return $this->redirectToRoute('admin.personality.index');
+        }
+
+        // Si c'est un GET, on affiche simplement la vue
+        return $this->render('admin_pages/personality/film.html.twig');
     }
 }

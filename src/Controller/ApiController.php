@@ -20,24 +20,20 @@ final class ApiController extends AbstractController {
     }
 
     #[Route('/film/search', name: '.film.search', methods: ['GET'])]
-    public function filmSearch(Request $request ,FilmRepository $repository): JsonResponse {
-        //Préparation de la requête:
+    public function filmsSearch(Request $request, FilmRepository $repository): JsonResponse {
         $query = $request->query->get('q', '');
 
-        //Recherche des films correspondant à la chaîne de caractères reçue:
         $films = $repository->findByTitle($query);
 
-        //Récuperation des résultats:
         $results = [];
         foreach ($films as $film) {
             $results[] = [
-                'id' => $film['id'],
-                'title' => $film['title'],
+                'id'   => $film['id'],
+                'text' => $film['title'],
             ];
         }
 
-        //Retour des résultats au format json:
-        return $this->json($results);
+        return new JsonResponse(['results' => $results]);
     }
 
     #[Route('/film/{id}', name: '.film.details', methods: ['GET'])]
@@ -47,22 +43,19 @@ final class ApiController extends AbstractController {
 
     #[Route('/personalities/search', name: '.personality.search', methods: ['GET'])]
     public function personalitySearch(Request $request, PersonRepository $repository): JsonResponse {
-        // 1. On récupère 'query' pour correspondre au JS (ou on change le JS)
-        $query = $request->query->get('query', '');
+        $query = $request->query->get('q', '');
 
         $personalities = $repository->findByName($query);
 
         $results = [];
         foreach ($personalities as $personality) {
             $results[] = [
-                'id'    => $personality['id'],
-                // 'value' est la clé standard pour l'affichage dans Tokenfield
-                'value' => $personality['firstname'].' '.$personality['lastname'],
-                'label' => $personality['firstname'].' '.$personality['lastname']
+                'id'   => $personality['id'],
+                'text' => $personality['firstname'].' '.$personality['lastname'],
             ];
         }
 
-        return new JsonResponse($results);
+        return new JsonResponse(['results' => $results]);
     }
 
     #[Route('/search', name: '.search', methods: ['GET', 'POST'])]

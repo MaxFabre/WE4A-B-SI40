@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Films & Personnalités</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+</head>
+<body>
+{% include 'partials/flash.html.twig' %}
+<div class="container">
+    <h1 align="center">Lier des personalité à un film.</h1>
+
+    <div class="row">
+        <div class="col-md-2"></div>
+
+        <div class="col-md-8">
+            <form class="form-group" action="{{ url('admin.personality.film') }}" method="post">
+                <div class="form-group">
+                    <label>Sélectionnez les films</label>
+                    <select id="search_film" name="films[]" class="form-control" multiple="multiple">
+                        <!-- Les films seront affichés en liste par les bibliothèques -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sélectionnez les personnalités</label>
+                    <select id="search_person" name="personalities[]" class="form-control" multiple="multiple">
+                        <!-- Les personnalités seront affichés en liste par les bibliothèques -->
+                    </select>
+                </div>
+                <br/>
+                <div class="form-group">
+                    <label>Type de liens</label>
+                    <select id="type" name="type" class="form-control">
+                        <option value="actor">Acteurs</option>
+                        <option value="director">Réalisateur</option>
+                    </select>
+                </div>
+                <br/>
+                <div>
+                    <a class="btn btn-danger" href="{{ url('admin.personality.index') }}">Retour</a>
+                    <input class="btn btn-primary" type="submit" value="Enregistrer">
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-2">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+<script>
+    $(document).ready(function() {
+        $('#search_person').select2({
+            placeholder: "Rechercher une personnalité...",
+            minimumInputLength: 2, // Commence à chercher après 2 caractères
+            ajax: {
+                url: '/api/personalities/search',
+                dataType: 'json',
+                delay: 250, // Évite de surcharger le serveur à chaque touche
+                data: function (params) {
+                    return {
+                        q: params.term // Envoie la saisie au contrôleur via la variable 'q'
+                    };
+                },
+                processResults: function (data) {
+                    // 'data' est le retour JSON de Symfony (contenant la clé 'results')
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
+
+        $('#search_film').select2({
+            placeholder: "Rechercher un film...",
+            minimumInputLength: 2, // Commence à chercher après 2 caractères
+            ajax: {
+                url: '/api/film/search',
+                dataType: 'json',
+                delay: 250, // Évite de surcharger le serveur à chaque touche
+                data: function (params) {
+                    return {
+                        q: params.term // Envoie la saisie au contrôleur via la variable 'q'
+                    };
+                },
+                processResults: function (data) {
+                    // 'data' est le retour JSON de Symfony (contenant la clé 'results')
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
+    });
+</script>

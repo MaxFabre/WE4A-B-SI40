@@ -126,7 +126,8 @@ final class FilmController extends AbstractController {
             }
         }
 
-        return $this->render('admin_pages/film/create.html.twig', [
+        return $this->render('admin_pages/film/form.html.twig', [
+            'title' => 'Nouveau Film',
             'filmForm' => $filmForm,
         ]);
     }
@@ -149,7 +150,8 @@ final class FilmController extends AbstractController {
             return $this->redirectToRoute('admin.film.index');
         }
 
-        return $this->render('admin_pages/film/edit.html.twig', [
+        return $this->render('admin_pages/film/form.html.twig', [
+            'title' => 'Modifier '.$film->getTitle(),
             'film' => $film,
             'filmForm' => $filmForm,
         ]);
@@ -166,8 +168,7 @@ final class FilmController extends AbstractController {
     }
 
     #[Route('/films', name: 'film.index')]
-    public function index(FilmRepository $filmRepository): Response
-    {
+    public function index(FilmRepository $filmRepository): Response {
         $films = $filmRepository->findBy([], ['title' => 'ASC']);
 
         return $this->render('film/index.html.twig', [
@@ -176,8 +177,7 @@ final class FilmController extends AbstractController {
     }
 
     #[Route('/film', name: 'film.redirect', methods: ['GET'])]
-    public function redirectToIndex(): Response
-    {
+    public function redirectToIndex(): Response {
         return $this->redirectToRoute('film.index', [], 301);
     }
 }
