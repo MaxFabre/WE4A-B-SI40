@@ -3,6 +3,14 @@
 {% block title %}Panier{% endblock %}
 
 {% block container %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
     <div class="row">
         <h1>Contenu du panier</h1>
         <table class="table table-striped col-md-6">
@@ -33,7 +41,7 @@
                     <td class="column-wrap">Première classe :
 
                         <form method="post"
-                              action="{{ path('reservation_update_seats', {id: reservation.id}) }}"
+                              action="{{ path('reservation_choose_seats', {id: reservation.id}) }}"
                               id="form-seats-{{ reservation.id }}">
                             <input type="hidden" name="_method" value="POST">
 
@@ -114,7 +122,7 @@
                         </form>
                         <br>
                         <form method="post"
-                              action="{{ path('reservation_update_seats', {id: reservation.id}) }}"
+                              action="{{ path('reservation_choose_seats', {id: reservation.id}) }}"
                               id="form-seats-{{ reservation.id }}">
                             <input type="hidden" name="_method" value="POST">
                             Seconde classe :
@@ -226,5 +234,16 @@
                 </td>
             </tr>
         </table>
+
+        <button
+        class="btn btn-primary"
+        type="button"
+        popovertarget="dialog-pay"
+        >
+        Payer
+        </button>
+
+        {% include 'basket/verif.html.twig' %}
+
     </div>
 {% endblock %}

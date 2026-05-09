@@ -18,7 +18,7 @@ use App\Entity\User;
 
 final class BasketController extends AbstractController
 {
-    #[Route('/basket', name: 'basket.index', methods: ['GET'])]
+    #[Route('/basket', name: 'basket.index', methods: ['GET','POST'])]
     public function index(EntityManagerInterface $entityManager, BasketRepository $basketRepository): Response
     {
         $user = $this->getUser();
@@ -69,33 +69,25 @@ final class BasketController extends AbstractController
         return $this->redirectToRoute('basket.index');
     }
 
-//    #[Route('/tools/film/edit/{id}', name: 'admin.film.edit', methods: ['GET', 'POST'])]
-//    public function edit(Film $film, Request $request, EntityManagerInterface $entityManager): Response {
-//        $filmForm = $this->createForm(FilmType::class, $film);
-//        $filmForm->handleRequest($request);
-//
-//        if ($filmForm->isSubmitted() && $filmForm->isValid()) {
-//            //Enregistrement en db:
-//            $entityManager->flush();
-//
-//            //Redirection avec message:
-//            $this->addFlash('success','Le film à bien été modifié.');
-//            return $this->redirectToRoute('admin.film.index');
-//        }
-//
-//        return $this->render('admin_pages/film/edit.html.twig', [
-//            'film' => $film,
-//            'filmForm' => $filmForm,
-//        ]);
-//    }
+    #[Route('/basket/pay', name: 'basket.pay', methods: ['GET','POST'])]
+    public function pay(Request $request, EntityManagerInterface $entityManager, BasketRepository $basketRepository): Response {
+        $user = $this->getUser();
+        $basket = $basketRepository->findBasketByUserId($user->getId());
 
-//    #[Route('/admin/basket/{id}', name: 'admin.basket.delete', methods: ['DELETE'])]
-//    public function delete(Basket $basket, EntityManagerInterface $entityManager) {
-//        $entityManager->remove($basket);
-//        $entityManager->flush();
-//        $this->addFlash('success', 'Le panier à bien été supprimé.');
-//        return $this->redirectToRoute('admin.basket.index');
-//    }
+        foreach ($basket->getReservations() as $reservation) {
+            $reservation->setIsValidated(true);
+        }
+
+        $basket->setStatus('paid');
+        $basket->setIsActive(false);
+
+        $entityManager->flush();
+
+
+        $this->addFlash('success', 'Votre panier a bien été payé.');
+
+        return $this->redirectToRoute('basket.index');
+    }
 
     #[Route('/basket/add/{id}', name: 'basket.add', methods: ['POST'])]
     public function add(Reservation $reservation, EntityManagerInterface $entityManager, BasketRepository $basketRepository): Response {

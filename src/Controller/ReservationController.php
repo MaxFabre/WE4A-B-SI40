@@ -38,13 +38,14 @@ final class ReservationController extends AbstractController
         foreach ($reservation->getSeats()->toArray() as $oldSeat) {
             $reservation->removeSeat($oldSeat);
         }
-        // Ajouter les nouveaux sièges
+        // Ajouter les nouveaux siège
         foreach ($seatIds as $id) {
             $seat = $em->getRepository(\App\Entity\Seat::class)->find($id);
             if ($seat) {
                 $reservation->addSeat($seat);
             }
         }
+        $reservation->setIsValidated(false);
         $em->flush();
         return $this->redirectToRoute('basket.index');
     }

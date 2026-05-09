@@ -90,12 +90,14 @@
         {% set programmesParDate = {} %}
 
         {% for programme in programmes %}
-            {% set date = programme.date|date('Y-m-d') %}
+            {% if (programme.is_closed === false) %}
+                {% set date = programme.date|date('Y-m-d') %}
 
-            {% if programmesParDate[date] is not defined %}
-                {% set programmesParDate = programmesParDate|merge({ (date): [programme] }) %}
-            {% else %}
-                {% set programmesParDate = programmesParDate|merge({ (date): programmesParDate[date]|merge([programme]) }) %}
+                {% if programmesParDate[date] is not defined %}
+                    {% set programmesParDate = programmesParDate|merge({ (date): [programme] }) %}
+                {% else %}
+                    {% set programmesParDate = programmesParDate|merge({ (date): programmesParDate[date]|merge([programme]) }) %}
+                {% endif %}
             {% endif %}
         {% endfor %}
 

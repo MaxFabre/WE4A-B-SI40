@@ -56,7 +56,7 @@ class ProgrammeRepository extends ServiceEntityRepository
     {
         $conn = $this->getEntityManager()->getConnection();
 
-        $sql = "SELECT p.id, p.date, l.name AS lang_name
+        $sql = "SELECT p.id, p.date, l.name AS lang_name, p.is_closed AS is_closed
         FROM programme AS p
         INNER JOIN lang AS l ON l.id = p.lang_id
         WHERE p.film_id = :id

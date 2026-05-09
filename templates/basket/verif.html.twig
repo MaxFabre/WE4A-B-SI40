@@ -1,0 +1,37 @@
+<dialog id="dialog-pay" popover>
+    <div class="overlay">
+        <div class="warning">
+            <h1>{{ ux_icon('dashboard:alert') }} CONFIRMATION</h1>
+
+            <p>
+                Êtes-vous sûr de vouloir <strong>payer</strong> ce panier ?
+                <br/>
+                <small>Vous allez être redirigé vers la page de paiement.</small>
+            </p>
+
+            <div>
+                <button
+                    id="cancel-btn"
+                    class="btn btn-primary"
+                    type="button"
+                    popovertarget="dialog-pay"
+                    popovertargetaction="hide"
+                >
+                    Non
+                </button>
+
+                <form action="{{ path('basket.pay') }}" method="post">
+
+                    <input type="hidden" name="totalPanier" value="{{ totalPanier }}"/>
+
+                    <input
+                        id="confirm-btn"
+                        class="btn btn-success"
+                        type="submit"
+                        value="Oui, payer"
+                    />
+                </form>
+            </div>
+        </div>
+    </div>
+</dialog>
