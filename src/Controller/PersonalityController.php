@@ -89,7 +89,7 @@ final class PersonalityController extends AbstractController {
         ]);
     }
 
-    #[Route('/delete/{id}', name: '.delete', methods: ['DELETE'])]
+    #[Route('tools/personality/delete/{id}', name: 'admin.personality.delete', methods: ['DELETE'])]
     public function delete(Person $person, Request $request, EntityManagerInterface $entityManager): Response {
         if ($this->isCsrfTokenValid('delete'.$person->getId(), $request->request->get('_token'))) {
             $entityManager->remove($person);
