@@ -26,6 +26,9 @@ class RegistrationController extends AbstractController {
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
+            //Création du token d'api:
+            $user->setPassword(hash('sha256', $form->get('email')->getData().$plainPassword));
+
             //Champs cachés:
             $user->getPerson()->setCreatedAt(new \DateTimeImmutable());
             $user->getPerson()->setUpdatedAt(new \DateTimeImmutable());

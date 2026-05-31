@@ -1,25 +1,21 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\API;
 
 use App\Entity\Film;
 use App\Entity\Person;
-use App\Entity\Programme;
 use App\Entity\Room;
 use App\Entity\User;
-
 use App\Repository\FilmRepository;
 use App\Repository\PersonRepository;
-use App\Repository\ProgrammeRepository;
-use App\Repository\RoomRepository;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/api', name: 'api')]
 final class ApiController extends AbstractController {
@@ -43,49 +39,6 @@ final class ApiController extends AbstractController {
     #[Route('/film/{id}', name: '.film.details', methods: ['GET'])]
     public function film(Film $film, SerializerInterface $serializer): JsonResponse {
         return $this->json($film, 200, [], ['groups' => ['film.details']]);
-    }
-
-    #[Route('/login', name: '.login', methods: ['POST'])]
-    public function login(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher): JsonResponse {
-        $data = json_decode($request->getContent(), true);
-
-        if (!is_array($data)) {
-            return $this->json([
-                'message' => 'JSON invalide.',
-            ], 400);
-        }
-
-        $email = trim($data['email'] ?? '');
-        $password = $data['password'] ?? '';
-
-        if ($email === '' || $password === '') {
-            return $this->json([
-                'message' => 'Email et mot de passe obligatoires.',
-            ], 400);
-        }
-
-        $user = $userRepository->findOneBy(['email' => $email]);
-
-        if (!$user || !$passwordHasher->isPasswordValid($user, $password)) {
-            return $this->json([
-                'message' => 'Identifiants invalides.',
-            ], 401);
-        }
-
-        return $this->json([
-            'message' => 'Connexion réussie.',
-            'user' => [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'username' => $user->getUsername(),
-                'roles' => $user->getRoles(),
-                'person' => [
-                    'id' => $user->getPerson()->getId(),
-                    'firstname' => $user->getPerson()->getFirstname(),
-                    'lastname' => $user->getPerson()->getLastname(),
-                ],
-            ],
-        ]);
     }
 
     #[Route('/room/{id}', name: '.room.details', methods: ['GET'])]

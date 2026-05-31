@@ -10,6 +10,10 @@ security:
             entity:
                 class: App\Entity\User
                 property: email
+        api_user_provider:
+            entity:
+                class: App\Entity\User
+                property: apiToken
 
     role_hierarchy:
         ROLE_MODERATOR: ROLE_USER
@@ -23,13 +27,11 @@ security:
             security: false
 
         api:
-            pattern: ^/api
-            provider: app_user_provider
+            pattern: ^/api/session/
+            provider: api_user_provider
+            custom_authenticator: App\Security\APIAuthenticator
             stateless: true
-            json_login:
-                check_path: /api/authenticate
-                username_path: email
-                password_path: password
+            lazy: true
 
         main:
             lazy: true
@@ -54,7 +56,7 @@ security:
     # Note: Only the *first* matching rule is applied
     access_control:
 
-        - { path: ^/api/register$, roles: PUBLIC_ACCESS }
+        #- { path: ^/api/register$, roles: PUBLIC_ACCESS }
 
         - { path: ^/tools, roles: [ROLE_MODERATOR, ROLE_FUND_MANAGER, ROLE_ADMIN] }
 

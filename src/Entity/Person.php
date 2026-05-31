@@ -19,18 +19,19 @@ class Person {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'user.details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'user.details'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'user.details'])]
     private ?string $lastname = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['user.details'])]
     private ?\DateTime $birthdate = null;
 
     #[ORM\Column(length: 255, nullable: true)]

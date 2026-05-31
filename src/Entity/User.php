@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -18,9 +19,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user.details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['user.details'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
@@ -30,6 +33,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
      * @var list<string> The user roles
      */
     #[ORM\Column]
+    #[Groups(['user.details'])]
     private array $roles = [];
 
     /**
@@ -40,6 +44,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['user.details'])]
     private ?Person $person = null;
 
     /**
@@ -53,6 +58,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
      */
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'author', orphanRemoval: true)]
     private Collection $comments;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $apiToken = null;
 
     public function __construct() {
         $this->baskets = new ArrayCollection();
@@ -203,6 +211,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
                 $comment->setAuthor(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(?string $apiToken): static
+    {
+        $this->apiToken = $apiToken;
 
         return $this;
     }
