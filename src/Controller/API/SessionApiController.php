@@ -41,7 +41,7 @@ final class SessionApiController extends AbstractController {
         }
 
         return $this->json([
-            'Auth_Token' => $user->getApiToken(),
+            'AUTH_TOKEN' => $user->getApiToken(),
         ]);
     }
 

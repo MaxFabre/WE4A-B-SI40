@@ -35,6 +35,7 @@ class Person {
     private ?\DateTime $birthdate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user.details'])]
     private ?string $photo = null;
 
     #[UploadableField(mapping: 'profil_pictures', fileNameProperty: 'photo')]
