@@ -21,7 +21,7 @@ class Film {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'programme.details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
