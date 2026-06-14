@@ -20,10 +20,15 @@ final class CommentApiController extends AbstractController{
     //#[IsGranted('ROLE_USER')]
     public function publish(Request $request, FilmRepository $filmRepository) {
         //Initialisation:
-        $title = trim($request->request->get('title', ''));
-        $content = trim($request->request->get('content', ''));
-        $note = trim($request->request->get('note', ''));
-        $filmId = trim($request->request->get('film_id', ''));
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data)) {
+            return $this->json(['message' => 'JSON invalide.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $title = trim($data['title']);
+        $content = trim($data['content']);
+        $note = $data['note'] ?? null;
+        $filmId = $data['filmId'] ?? null;
 
         //Vérification des champs vides:
         /*if ($apiToken == null || $title == null || $content == null || $note == null || $filmId == null) {

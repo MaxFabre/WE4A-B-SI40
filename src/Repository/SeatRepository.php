@@ -40,4 +40,18 @@ class SeatRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    // src/Repository/SeatRepository.php
+    public function findByRoomIdWithRelations(int $roomId): array
+    {
+        return $this->createQueryBuilder('s')
+            ->leftJoin('s.room', 'r')->addSelect('r')
+            ->leftJoin('s.reservations', 'res')->addSelect('res') // si besoin
+            ->andWhere('r.id = :roomId')
+            ->setParameter('roomId', $roomId)
+            ->orderBy('s.number', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
 }
