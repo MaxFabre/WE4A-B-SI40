@@ -6,29 +6,35 @@ use App\Repository\CommentReportRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CommentReportRepository::class)]
 class CommentReport {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['report.list', 'report.details'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'commentReports')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['report.list', 'report.details'])]
     private ?Comment $comment = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['report.details', 'report.list'])]
     private ?User $complainant = null;
 
     #[ORM\Column]
+    #[Groups(['report.details', 'report.list'])]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column]
     private ?bool $is_active = null;
 
     #[ORM\Column(length: 64)]
+    #[Groups(['report.details', 'report.list'])]
     private ?string $statut = null;
 
     /**
