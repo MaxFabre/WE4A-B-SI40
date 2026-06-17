@@ -19,7 +19,7 @@ class Comment {
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['film.details', 'comment.details'])]
+    #[Groups(['film.details', 'comment.details', 'report.list'])]
     private ?User $author = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
@@ -27,7 +27,7 @@ class Comment {
     private ?Film $film = null;
 
     #[ORM\Column(length: 64)]
-    #[Groups(['film.details', 'comment.details'])]
+    #[Groups(['film.details', 'comment.details', 'report.list'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -47,6 +47,7 @@ class Comment {
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\Column]
+    #[Groups(['comment.details'])]
     private ?bool $is_visible = null;
 
     /**
