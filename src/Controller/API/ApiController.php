@@ -32,47 +32,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/api', name: 'api')]
 final class ApiController extends AbstractController {
 
-
-    //--------------------------------SECTION FILMS----------------------------------------------------------------------------------
-    #[Route('/film/search', name: '.film.search', methods: ['GET'])]
-    public function filmsSearch(Request $request, FilmRepository $repository): JsonResponse {
-        $query = $request->query->get('q', '');
-
-        $films = $repository->findByTitle($query);
-
-        $results = [];
-        foreach ($films as $film) {
-            $results[] = [
-                'id'   => $film['id'],
-                'text' => $film['title'],
-            ];
-        }
-
-        return new JsonResponse(['results' => $results]);
-    }
-
-    #[Route('/film/{id}', name: '.film.details', methods: ['GET'])]
-    public function film(Film $film, SerializerInterface $serializer): JsonResponse {
-        return $this->json($film, 200, [], ['groups' => ['film.details']]);
-    }
-
-    #[Route('/film', name: '.film.all', methods: ['GET'])]
-    public function filmAll(FilmRepository $filmRepository, SerializerInterface $serializer): JsonResponse
-    {
-        $films = $filmRepository->findAll();
-        $results = [];
-
-        foreach ($films as $film) {
-            $results[] = [
-                'id' => $film->getId(),
-                'title' => $film->getTitle(),
-                'duration' => $film->getDuration(),
-            ];
-        }
-
-        return $this->json($results);
-    }
-
     //--------------------------------SECTION RESERVATION----------------------------------------------------------------------------------
 
     #[Route('/reservation/{id}', name: '.reservation.details', methods: ['GET'])]
@@ -404,79 +363,7 @@ final class ApiController extends AbstractController {
 
 
 
-    //--------------------------------SECTION CONNEXION/INSCRIPTION-------------------------------------------------------------------
-
-    #[Route('/register', name: '.register', methods: ['POST'])]
-    public function register(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): JsonResponse {
-        $data = json_decode($request->getContent(), true);
-
-        if (!is_array($data)) {
-            return $this->json([
-                'message' => 'JSON invalide.',
-            ], 400);
-        }
-
-        $email = trim($data['email'] ?? '');
-        $username = trim($data['username'] ?? '');
-        $password = $data['password'] ?? '';
-        $firstname = trim($data['firstname'] ?? '');
-        $lastname = trim($data['lastname'] ?? '');
-
-        if ($email === '' || $username === '' || $password === '' || $firstname === '' || $lastname === '') {
-            return $this->json([
-                'message' => 'Email, username, mot de passe, prénom et nom sont obligatoires.',
-            ], 400);
-        }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $this->json([
-                'message' => 'Email invalide.',
-            ], 400);
-        }
-
-        if ($userRepository->findOneBy(['email' => $email])) {
-            return $this->json([
-                'message' => 'Un compte existe déjà avec cet email.',
-            ], 409);
-        }
-
-        $now = new \DateTimeImmutable();
-
-        $person = new Person();
-        $person
-            ->setFirstname($firstname)
-            ->setLastname($lastname)
-            ->setCreatedAt($now)
-            ->setUpdatedAt($now);
-
-        $user = new User();
-        $user
-            ->setEmail($email)
-            ->setUsername($username)
-            ->setRoles(['ROLE_USER'])
-            ->setPerson($person);
-
-        $user->setPassword($passwordHasher->hashPassword($user, $password));
-
-        $entityManager->persist($person);
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        return $this->json([
-            'message' => 'Inscription réussie.',
-            'user' => [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'username' => $user->getUsername(),
-                'roles' => $user->getRoles(),
-                'person' => [
-                    'id' => $person->getId(),
-                    'firstname' => $person->getFirstname(),
-                    'lastname' => $person->getLastname(),
-                ],
-            ],
-        ], 201);
-    }
+    // ------------------------------------ SECTION RECHERCHE ------------------------------------------------------------------------------
 
     #[Route('/personalities/search', name: '.personality.search', methods: ['GET'])]
     public function personalitySearch(Request $request, PersonRepository $repository): JsonResponse {
@@ -649,6 +536,4 @@ final class ApiController extends AbstractController {
             ]
         ], Response::HTTP_CREATED);
     }
-
-
 }
