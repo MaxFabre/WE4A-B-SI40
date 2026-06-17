@@ -14,7 +14,7 @@ class Programme
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['programme.details'])]
+    #[Groups(['programme.details','reservation.details'])]
     private ?int $id = null;
 
     #[ORM\Column]

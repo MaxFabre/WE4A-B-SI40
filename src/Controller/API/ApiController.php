@@ -17,6 +17,7 @@ use App\Repository\GenreRepository;
 use App\Repository\LangRepository;
 use App\Repository\PersonRepository;
 use App\Repository\ProgrammeRepository;
+use App\Repository\ReservationRepository;
 use App\Repository\RoomRepository;
 use App\Repository\SeatRepository;
 use App\Repository\UserRepository;
@@ -84,6 +85,52 @@ final class ApiController extends AbstractController {
         return $this->json($reservation, 200, [], ['groups' => ['reservation.details']]);
     }
 
+    #[Route('/reservation/update/{id?}', name: '.reservation.update', methods: ['POST'])]
+    public function updateReservation(Request $request, EntityManagerInterface $em, ReservationRepository $reservationRepo, SeatRepository $seatRepo, ?int $id = null): JsonResponse {
+
+        // Récupérer seatIds depuis le body JSON
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data) || !isset($data['seatIds']) || !is_array($data['seatIds']) || count($data['seatIds']) === 0) {
+            return $this->json(['message' => 'seatIds (liste non vide) requis.'], Response::HTTP_BAD_REQUEST);
+        }
+        $seatIds = array_map('intval', $data['seatIds']);
+
+        // Si pas d'id ou réservation introuvable : ne rien faire (204 No Content)
+        if ($id === null) {
+            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        }
+        $reservation = $reservationRepo->find($id);
+        if (!$reservation) {
+            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        }
+
+        // Récupérer les sièges demandés
+        $newSeats = $seatRepo->findBy(['id' => $seatIds]);
+        if (count($newSeats) !== count($seatIds)) {
+            return $this->json(['message' => 'Un ou plusieurs sièges introuvables.'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Remplacer les anciens sièges par les nouveaux (aucune autre vérification métier)
+        foreach ($reservation->getSeats()->toArray() as $oldSeat) {
+            $reservation->removeSeat($oldSeat);
+        }
+        foreach ($newSeats as $seat) {
+            $reservation->addSeat($seat);
+        }
+
+        $em->persist($reservation);
+        $em->flush();
+
+        return $this->json([
+            'message' => 'Sièges mis à jour',
+            'reservation' => [
+                'id' => $reservation->getId(),
+                'seatIds' => array_map(fn($s) => $s->getId(), $reservation->getSeats()->toArray()),
+            ]
+        ], Response::HTTP_OK);
+    }
+
+
     #[Route('/reservation/create', name: '.reservation.create', methods: ['POST'])]
     public function createReservation(Request $request, EntityManagerInterface $em, ProgrammeRepository $programmeRepo, SeatRepository $seatRepo, BasketRepository $basketRepo, UserRepository $userRepo): JsonResponse {
 //        $user = $this->getUser();
@@ -101,8 +148,8 @@ final class ApiController extends AbstractController {
         $programmeId = $data['programmeId'] ?? null;
         $seatIds = $data['seatIds'] ?? null; // attend un tableau d'IDs
         $basketId = $data['basketId'] ?? null;
-        $userIds = $data['userId'] ?? null; //Je sais pas trop ce que je fais mais dans l'idée quand le user sera connecté on récupèrera direct son ID avec this->user ?
-        $user = $userRepo->find($userIds);
+        $userId = $data['userId'] ?? null; //Je sais pas trop ce que je fais mais dans l'idée quand le user sera connecté on récupèrera direct son ID avec this->user ?
+        $user = $userRepo->find($userId);
 
         if (!$programmeId || !is_array($seatIds) || count($seatIds) === 0) {
             return $this->json(['message' => 'programmeId et seatIds (liste non vide) sont obligatoires.'], Response::HTTP_BAD_REQUEST);
@@ -150,7 +197,7 @@ final class ApiController extends AbstractController {
             }
             // Vérifier si le siège est déjà réservé pour ce programme
             foreach ($seat->getReservations() as $existingReservation) {
-                if ($existingReservation->getProgramme() && $existingReservation->getProgramme()->getId() === $programme->getId()) {
+                if ($existingReservation->getProgramme() && $existingReservation->getProgramme()->getId() === $programme->getId() && $existingReservation->getBasket()->getUser()->getId() !== $userId) {
                     return $this->json(['message' => sprintf('Le siège %d est déjà réservé pour ce programme.', $seat->getId())], Response::HTTP_CONFLICT);
                 }
             }
@@ -160,7 +207,7 @@ final class ApiController extends AbstractController {
         $reservation = new Reservation();
         $reservation->setProgramme($programme);
         $reservation->setBasket($basket);
-        $reservation->setIsValidated(false); // ou true selon votre logique
+        $reservation->setIsValidated(false);
 
         foreach ($seats as $seat) {
             $reservation->addSeat($seat);
