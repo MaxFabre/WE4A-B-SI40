@@ -22,11 +22,11 @@ class Film {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details', 'programme.details'])]
+    #[Groups(['film.details', 'programme.details', 'film.search'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.search'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -38,7 +38,7 @@ class Film {
     private ?int $duration = null;
 
     #[ORM\Column(length: 60)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.search'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 2, nullable: true)]
@@ -46,7 +46,7 @@ class Film {
     private ?string $price = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.search'])]
     private ?string $coverPath = null;
 
     #[UploadableField(mapping: 'films_cover', fileNameProperty: 'coverpath')]

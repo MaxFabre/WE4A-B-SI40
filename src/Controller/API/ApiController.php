@@ -365,23 +365,6 @@ final class ApiController extends AbstractController {
 
     // ------------------------------------ SECTION RECHERCHE ------------------------------------------------------------------------------
 
-    #[Route('/personalities/search', name: '.personality.search', methods: ['GET'])]
-    public function personalitySearch(Request $request, PersonRepository $repository): JsonResponse {
-        $query = $request->query->get('q', '');
-
-        $personalities = $repository->findByName($query);
-
-        $results = [];
-        foreach ($personalities as $personality) {
-            $results[] = [
-                'id'   => $personality['id'],
-                'text' => $personality['firstname'].' '.$personality['lastname'],
-            ];
-        }
-
-        return new JsonResponse(['results' => $results]);
-    }
-
     #[Route('/search', name: '.search', methods: ['GET', 'POST'])]
     public function search(Request $request, PersonRepository $personRepository, FilmRepository $filmRepository): JsonResponse {
         if (isset($_POST['query'])) {

@@ -19,15 +19,15 @@ class Person {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details', 'user.details'])]
+    #[Groups(['film.details', 'user.details', 'personality.search'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details', 'user.details'])]
+    #[Groups(['film.details', 'user.details', 'personality.search'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details', 'user.details'])]
+    #[Groups(['film.details', 'user.details', 'personality.search'])]
     private ?string $lastname = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
@@ -35,7 +35,7 @@ class Person {
     private ?\DateTime $birthdate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user.details'])]
+    #[Groups(['user.details', 'personality.search'])]
     private ?string $photo = null;
 
     #[UploadableField(mapping: 'profil_pictures', fileNameProperty: 'photo')]
