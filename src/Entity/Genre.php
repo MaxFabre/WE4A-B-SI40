@@ -13,11 +13,11 @@ class Genre{
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details','genre.details', 'film.pined'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details','genre.details', 'film.pined'])]
     private ?string $name = null;
 
     /**

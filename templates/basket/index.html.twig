@@ -197,15 +197,17 @@
                         </td>
                         <td>
                             {% if (placesPremiereClasse !== 0) %}
-                                {{ placesPremiereClasse }} x {{ placesPremiereClasse*reservation.programme.film.price*1.5+0.0 }}€
+                                {% set prixpremierClasse = placesPremiereClasse*reservation.programme.film.price*1.5+0.0 %}
+                                {{ placesPremiereClasse }} x {{ reservation.programme.film.price*1.5+0.0 }}€
                             {% endif %}
                             <br>
                             {% if (placesSecondeClasse !== 0) %}
-                                {{ placesSecondeClasse }} x {{ placesSecondeClasse*reservation.programme.film.price*1+0.0 }}€
+                                {% set prixsecondeClasse = placesSecondeClasse*reservation.programme.film.price*1+0.0 %}
+                                {{ placesSecondeClasse }} x {{ reservation.programme.film.price*1+0.0 }}€
                             {% endif %}
                             <br><br><br>
-                            Total : {{ (placesPremiereClasse+placesSecondeClasse)*reservation.programme.film.price*2.5+0.0 }}€
-                            {% set totalPanier = totalPanier +  (placesPremiereClasse+placesSecondeClasse)*reservation.programme.film.price*2.5%}
+                            Total : {{ prixpremierClasse + prixsecondeClasse }}€
+                            {% set totalPanier = totalPanier +  prixpremierClasse + prixsecondeClasse %}
                         </td>
 
 

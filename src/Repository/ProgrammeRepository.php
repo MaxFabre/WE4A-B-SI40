@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Programme;
+use App\Entity\Room;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -50,6 +51,27 @@ class ProgrammeRepository extends ServiceEntityRepository
             ->orderBy('f.title', $direction)
             ->getQuery()
             ->getResult();
+    }
+
+// src/Repository/ProgrammeRepository.php
+
+    public function findConflicting(Room $room, \DateTimeImmutable $start, int $durationMinutes): ?Programme
+    {
+        // fin du nouveau programme
+        $end = $start->add(new \DateInterval('PT' . $durationMinutes . 'M'));
+
+        $qb = $this->createQueryBuilder('p')
+            ->join('p.film', 'f') // on a besoin de la durée du film existant
+            ->andWhere('p.room = :room')
+            // On vérifie si le nouveau programme n'entre pas en conflit avec un autre programme dans la même salle
+            ->andWhere('p.date < :endNew')
+            ->andWhere("DATE_ADD(p.date, f.duration, 'minute') > :startNew")
+            ->setParameter('room', $room)
+            ->setParameter('startNew', $start)
+            ->setParameter('endNew', $end)
+            ->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     public function findByFilmByDate(int $filmId): array

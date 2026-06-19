@@ -25,7 +25,7 @@
         <h1>Personnalités:</h1>
         {% if personalities is not empty %}
             <table class="table table-striped">
-                <tr><th>Titre</th></tr>
+                <tr><th>Nom</th></tr>
                 {% for personality in personalities %}
                     <tr>
                         <td class="imagePreview"><a href="{{ url('personality.show', parameters = {id: personality.id}) }}"><img src="{{ asset(path=personality.photo, packageName='profil_pictures') }}" alt="Photot de la personnalités" class="imagePreview"/> {{ personality.firstname }} {{ personality.lastname }}</a></td>
@@ -33,7 +33,7 @@
                 {% endfor %}
             </table>
         {% else %}
-            <em>Aucun films ne correspond à votre recherche.</em>
+            <em>Aucune personnalités ne correspond à votre recherche.</em>
         {% endif %}
     </div>
 </div>
