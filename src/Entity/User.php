@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -19,14 +20,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user.details', 'film.details', 'comment.details', 'report.list'])]
+    #[Groups(['user.details', 'film.details', 'comment.details', 'report.list', 'user.profile', 'user.list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['user.details', 'film.details', 'report.list', 'comment.details', 'report.details'])]
+    #[Groups(['user.details', 'film.details', 'report.list', 'comment.details', 'report.details', 'user.profile', 'user.list'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['user.list', 'user.details'])]
     private ?string $email = null;
 
     /**
@@ -44,7 +46,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['user.details'])]
+    #[Groups(['user.details', 'user.profile', 'user.list'])]
     private ?Person $person = null;
 
     /**
@@ -193,8 +195,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
         return $this->comments;
     }
 
-    public function addComment(Comment $comment): static
-    {
+    public function addComment(Comment $comment): static {
         if (!$this->comments->contains($comment)) {
             $this->comments->add($comment);
             $comment->setAuthor($this);
@@ -203,8 +204,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
         return $this;
     }
 
-    public function removeComment(Comment $comment): static
-    {
+    public function removeComment(Comment $comment): static {
         if ($this->comments->removeElement($comment)) {
             // set the owning side to null (unless already changed)
             if ($comment->getAuthor() === $this) {
@@ -215,13 +215,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
         return $this;
     }
 
-    public function getApiToken(): ?string
-    {
+
+    #[Groups(['user.profile'])]
+    public function getVisibleComments(): Collection {
+        $criteria = Criteria::create()->andWhere(Criteria::expr()->eq('is_visible', true));
+        return $this->comments->matching($criteria);
+    }
+
+    public function getApiToken(): ?string {
         return $this->apiToken;
     }
 
-    public function setApiToken(?string $apiToken): static
-    {
+    public function setApiToken(?string $apiToken): static {
         $this->apiToken = $apiToken;
 
         return $this;

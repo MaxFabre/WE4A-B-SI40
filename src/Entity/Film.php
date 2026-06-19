@@ -26,7 +26,7 @@ class Film {
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -38,7 +38,7 @@ class Film {
     private ?int $duration = null;
 
     #[ORM\Column(length: 60)]
-    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 2, nullable: true)]
@@ -348,8 +348,7 @@ class Film {
         return $this;
     }
 
-    public function removeComment(Comment $comment): static
-    {
+    public function removeComment(Comment $comment): static {
         if ($this->comments->removeElement($comment)) {
             // set the owning side to null (unless already changed)
             if ($comment->getFilm() === $this) {

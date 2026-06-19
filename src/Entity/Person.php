@@ -19,15 +19,15 @@ class Person {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details', 'user.details', 'personality.search', 'personality.details'])]
+    #[Groups(['film.details', 'user.details', 'personality.search', 'personality.details', 'user.profile', 'user.list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details', 'user.details', 'personality.search', 'personality.details'])]
+    #[Groups(['film.details', 'user.details', 'personality.search', 'personality.details', 'user.profile', 'user.list'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details', 'user.details', 'personality.search', 'personality.details'])]
+    #[Groups(['film.details', 'user.details', 'personality.search', 'personality.details', 'user.profile', 'user.list'])]
     private ?string $lastname = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
@@ -35,7 +35,7 @@ class Person {
     private ?\DateTime $birthdate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user.details', 'personality.search', 'personality.details'])]
+    #[Groups(['user.details', 'personality.search', 'personality.details', 'user.profile'])]
     private ?string $photo = null;
 
     #[UploadableField(mapping: 'profil_pictures', fileNameProperty: 'photo')]
@@ -57,9 +57,11 @@ class Person {
     private Collection $playedFilms;
 
     #[ORM\Column]
+    #[Groups(['user.profile', 'user.list', 'personality.details'])]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column]
+    #[Groups(['user.list', 'personality.details'])]
     private ?\DateTimeImmutable $updated_at = null;
 
     public function __construct() {
