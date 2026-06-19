@@ -108,4 +108,10 @@ class FilmApiController extends AbstractController {
         $film = $filmRepository->findBy(['slug' => $slug]);
         return $this->json($film, 200, [], ['groups' => ['film.details']]);
     }
+
+    #[Route('/{id}/programmes', name: '.programmes', methods: ['GET'])]
+    public function programmes(Film $film, FilmRepository $filmRepository): JsonResponse {
+        $programmes = $film->getProgrammes();
+        return $this->json($programmes, 200, [], ['groups' => ['programme.details']]);
+    }
 }

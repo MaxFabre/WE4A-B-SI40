@@ -11,18 +11,22 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: BasketRepository::class)]
 class Basket {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['basket.details'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['basket.details'])]
     private ?\DateTime $date = null;
 
     #[ORM\OneToMany(mappedBy: 'basket', targetEntity: Reservation::class)]
+    #[Groups(['basket.details'])]
     private Collection $reservations;
 
     public function getId(): ?int {
@@ -41,12 +45,15 @@ class Basket {
 
     #[ORM\ManyToOne(inversedBy: 'baskets')]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['basket.details'])]
     private ?User $user = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['basket.details'])]
     private ?bool $isActive = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['basket.details'])]
     private ?string $status = null;
 
 
