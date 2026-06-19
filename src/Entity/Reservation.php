@@ -14,7 +14,7 @@ class Reservation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['programme.details','reservation.details'])]
+    #[Groups(['programme.details','reservation.details','basket.details'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]

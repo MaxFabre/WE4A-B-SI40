@@ -38,7 +38,7 @@ class Film {
     private ?int $duration = null;
 
     #[ORM\Column(length: 60)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details','programme.details'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 2, nullable: true)]

@@ -35,44 +35,44 @@ final class ApiController extends AbstractController {
 
 
     //--------------------------------SECTION FILMS----------------------------------------------------------------------------------
-    #[Route('/film/search', name: '.film.search', methods: ['GET'])]
-    public function filmsSearch(Request $request, FilmRepository $repository): JsonResponse {
-        $query = $request->query->get('q', '');
+//    #[Route('/film/search', name: '.film.search', methods: ['GET'])]
+//    public function filmsSearch(Request $request, FilmRepository $repository): JsonResponse {
+//        $query = $request->query->get('q', '');
+//
+//        $films = $repository->findByTitle($query);
+//
+//        $results = [];
+//        foreach ($films as $film) {
+//            $results[] = [
+//                'id'   => $film['id'],
+//                'text' => $film['title'],
+//            ];
+//        }
+//
+//        return new JsonResponse(['results' => $results]);
+//    }
 
-        $films = $repository->findByTitle($query);
+//    #[Route('/film/{id}', name: '.film.details', methods: ['GET'])]
+//    public function film(Film $film, SerializerInterface $serializer): JsonResponse {
+//        return $this->json($film, 200, [], ['groups' => ['film.details']]);
+//    }
 
-        $results = [];
-        foreach ($films as $film) {
-            $results[] = [
-                'id'   => $film['id'],
-                'text' => $film['title'],
-            ];
-        }
-
-        return new JsonResponse(['results' => $results]);
-    }
-
-    #[Route('/film/{id}', name: '.film.details', methods: ['GET'])]
-    public function film(Film $film, SerializerInterface $serializer): JsonResponse {
-        return $this->json($film, 200, [], ['groups' => ['film.details']]);
-    }
-
-    #[Route('/film', name: '.film.all', methods: ['GET'])]
-    public function filmAll(FilmRepository $filmRepository, SerializerInterface $serializer): JsonResponse
-    {
-        $films = $filmRepository->findAll();
-        $results = [];
-
-        foreach ($films as $film) {
-            $results[] = [
-                'id' => $film->getId(),
-                'title' => $film->getTitle(),
-                'duration' => $film->getDuration(),
-            ];
-        }
-
-        return $this->json($results);
-    }
+//    #[Route('/film', name: '.film.all', methods: ['GET'])]
+//    public function filmAll(FilmRepository $filmRepository, SerializerInterface $serializer): JsonResponse
+//    {
+//        $films = $filmRepository->findAll();
+//        $results = [];
+//
+//        foreach ($films as $film) {
+//            $results[] = [
+//                'id' => $film->getId(),
+//                'title' => $film->getTitle(),
+//                'duration' => $film->getDuration(),
+//            ];
+//        }
+//
+//        return $this->json($results);
+//    }
 
     //--------------------------------SECTION RESERVATION----------------------------------------------------------------------------------
 
@@ -88,14 +88,12 @@ final class ApiController extends AbstractController {
     #[Route('/reservation/update/{id?}', name: '.reservation.update', methods: ['POST'])]
     public function updateReservation(Request $request, EntityManagerInterface $em, ReservationRepository $reservationRepo, SeatRepository $seatRepo, ?int $id = null): JsonResponse {
 
-        // Récupérer seatIds depuis le body JSON
         $data = json_decode($request->getContent(), true);
         if (!is_array($data) || !isset($data['seatIds']) || !is_array($data['seatIds']) || count($data['seatIds']) === 0) {
             return $this->json(['message' => 'seatIds (liste non vide) requis.'], Response::HTTP_BAD_REQUEST);
         }
         $seatIds = array_map('intval', $data['seatIds']);
 
-        // Si pas d'id ou réservation introuvable : ne rien faire (204 No Content)
         if ($id === null) {
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         }
@@ -104,13 +102,25 @@ final class ApiController extends AbstractController {
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         }
 
-        // Récupérer les sièges demandés
         $newSeats = $seatRepo->findBy(['id' => $seatIds]);
         if (count($newSeats) !== count($seatIds)) {
             return $this->json(['message' => 'Un ou plusieurs sièges introuvables.'], Response::HTTP_NOT_FOUND);
         }
 
-        // Remplacer les anciens sièges par les nouveaux (aucune autre vérification métier)
+        $programme = $reservation->getProgramme();
+        $reservedSeats = [];
+        foreach ($programme->getReservations() as $existingReservation) {
+            if ($existingReservation->getId() !== $reservation->getId()) {
+                $reservedSeats = array_merge($reservedSeats, $existingReservation->getSeats()->toArray());
+            }
+        }
+        foreach ($newSeats as $seat) {
+            if (in_array($seat, $reservedSeats) ) {
+                return $this->json(['message' => 'Un ou plusieurs sièges déjà réservés'], Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+
         foreach ($reservation->getSeats()->toArray() as $oldSeat) {
             $reservation->removeSeat($oldSeat);
         }
@@ -160,42 +170,35 @@ final class ApiController extends AbstractController {
             return $this->json(['message' => 'Programme introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
-        // Récupération ou création du basket
         $basket = null;
         if ($basketId) {
             $basket = $basketRepo->find($basketId);
             if (!$basket) {
                 return $this->json(['message' => 'Basket introuvable.'], Response::HTTP_NOT_FOUND);
             }
-            // Optionnel : vérifier que le basket appartient bien à l'utilisateur
             if ($basket->getUser() !== $user) {
                 return $this->json(['message' => 'Basket non autorisé pour cet utilisateur.'], Response::HTTP_FORBIDDEN);
             }
         } else {
             $basket = $basketRepo->findOneBy(['user' => $user, 'isActive' => true]);
             if (!$basket) {
-                // Si vous préférez renvoyer une erreur au lieu de créer, remplacez par un 404/400
                 $basket = new Basket();
                 $basket->setUser($user);
                 $basket->setIsActive(true);
                 $em->persist($basket);
-                // flush plus bas après création de la reservation
             }
         }
 
-        // Récupérer les sièges et vérifier
         $seats = $seatRepo->findBy(['id' => $seatIds]);
         if (count($seats) !== count($seatIds)) {
             return $this->json(['message' => 'Un ou plusieurs sièges introuvables.'], Response::HTTP_NOT_FOUND);
         }
 
-        // Vérifications sièges dans la même salle que le programme et tous non réservés
         $roomOfProgramme = $programme->getRoom();
         foreach ($seats as $seat) {
             if ($seat->getRoom() !== $roomOfProgramme) {
                 return $this->json(['message' => sprintf('Le siège %d n\'appartient pas à la salle du programme.', $seat->getId())], Response::HTTP_BAD_REQUEST);
             }
-            // Vérifier si le siège est déjà réservé pour ce programme
             foreach ($seat->getReservations() as $existingReservation) {
                 if ($existingReservation->getProgramme() && $existingReservation->getProgramme()->getId() === $programme->getId() && $existingReservation->getBasket()->getUser()->getId() !== $userId) {
                     return $this->json(['message' => sprintf('Le siège %d est déjà réservé pour ce programme.', $seat->getId())], Response::HTTP_CONFLICT);
@@ -203,7 +206,6 @@ final class ApiController extends AbstractController {
             }
         }
 
-        // Création de la reservation
         $reservation = new Reservation();
         $reservation->setProgramme($programme);
         $reservation->setBasket($basket);
@@ -213,11 +215,9 @@ final class ApiController extends AbstractController {
             $reservation->addSeat($seat);
         }
 
-        // Persister
         $em->persist($reservation);
         $em->flush();
 
-        // Réponse
         return $this->json([
             'message' => 'Réservation créée.',
             'reservation' => [
@@ -228,6 +228,21 @@ final class ApiController extends AbstractController {
                 'isValidated' => $reservation->isValidated(),
             ]
         ], Response::HTTP_CREATED);
+    }
+
+    #[Route('/reservation/delete/{id}', name: 'api.reservation.delete', methods: ['DELETE'])]
+    public function deleteReservation(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $reservation = $em->getRepository(Reservation::class)->find($id);
+
+        if (!$reservation) {
+            return new JsonResponse(['message' => 'Réservation non trouvée.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $em->remove($reservation);
+        $em->flush();
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
 
@@ -448,8 +463,18 @@ final class ApiController extends AbstractController {
         return $this->json($results);
     }
 
+    //--------------------------------SECTION BASKET-------------------------------------------------------------------
 
+    #[Route('/basket', name: 'fetchAll', methods: ['GET'])]
+    public function basketfetchAll(BasketRepository $basketRepository): JsonResponse {
+        $baskets = $basketRepository->findAll();
+        return $this->json($baskets, 200, [], ['groups' => ['basket.details']]);
+    }
 
+    #[Route('/basket/{id}', name: '.basket.details', methods: ['GET'])]
+    public function basket(Basket $basket, SerializerInterface $serializer): JsonResponse {
+        return $this->json($basket, 200, [], ['groups' => ['basket.details']]);
+    }
 
     //--------------------------------SECTION CONNEXION/INSCRIPTION-------------------------------------------------------------------
 
