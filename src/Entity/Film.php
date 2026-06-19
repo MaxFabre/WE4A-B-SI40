@@ -22,7 +22,7 @@ class Film {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details', 'programme.details', 'film.search', 'film.pined'])]
+    #[Groups(['film.details', 'programme.details', 'film.search', 'film.pined', 'programme.details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
@@ -38,7 +38,7 @@ class Film {
     private ?int $duration = null;
 
     #[ORM\Column(length: 60)]
-    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile', 'programme.details'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 2, nullable: true)]

@@ -28,13 +28,55 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api', name: 'api')]
 final class ApiController extends AbstractController {
 
     //--------------------------------SECTION RESERVATION----------------------------------------------------------------------------------
+    #[Route('/reservation/{id}', name: '.reservation.details', methods: ['GET'])]
+    public function reservation(?Reservation $reservation, SerializerInterface $serializer): JsonResponse {
+        if (!$reservation) {
+            return $this->json(['message' => 'Reservation introuvable.'], 404);
+        }
+        return $this->json($reservation, 200, [], ['groups' => ['reservation.details']]);
+    }
 
+    #[Route('/reservation/update/{id?}', name: '.reservation.update', methods: ['POST'])]
+    public function updateReservation(Request $request, EntityManagerInterface $em, ReservationRepository $reservationRepo, SeatRepository $seatRepo, ?int $id = null): JsonResponse {
+
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data) || !isset($data['seatIds']) || !is_array($data['seatIds']) || count($data['seatIds']) === 0) {
+            return $this->json(['message' => 'seatIds (liste non vide) requis.'], Response::HTTP_BAD_REQUEST);
+        }
+        $seatIds = array_map('intval', $data['seatIds']);
+
+        if ($id === null) {
+            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        }
+        $reservation = $reservationRepo->find($id);
+        if (!$reservation) {
+            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        }
+
+        $newSeats = $seatRepo->findBy(['id' => $seatIds]);
+        if (count($newSeats) !== count($seatIds)) {
+            return $this->json(['message' => 'Un ou plusieurs sièges introuvables.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $programme = $reservation->getProgramme();
+        $reservedSeats = [];
+        foreach ($programme->getReservations() as $existingReservation) {
+            if ($existingReservation->getId() !== $reservation->getId()) {
+                $reservedSeats = array_merge($reservedSeats, $existingReservation->getSeats()->toArray());
+            }
+        }
+        foreach ($newSeats as $seat) {
+            if (in_array($seat, $reservedSeats) ) {
+                return $this->json(['message' => 'Un ou plusieurs sièges déjà réservés'], Response::HTTP_BAD_REQUEST);
+            }
+        }
 
         foreach ($reservation->getSeats()->toArray() as $oldSeat) {
             $reservation->removeSeat($oldSeat);
@@ -57,14 +99,8 @@ final class ApiController extends AbstractController {
 
 
     #[Route('/reservation/create', name: '.reservation.create', methods: ['POST'])]
+    #[IsGranted("ROLE_USER")]
     public function createReservation(Request $request, EntityManagerInterface $em, ProgrammeRepository $programmeRepo, SeatRepository $seatRepo, BasketRepository $basketRepo, UserRepository $userRepo): JsonResponse {
-//        $user = $this->getUser();
-//        if (!$user) {
-//            return $this->json(['message' => 'Utilisateur non authentifié.'], Response::HTTP_UNAUTHORIZED);
-//        }
-
-
-
         $data = json_decode($request->getContent(), true);
         if (!is_array($data)) {
             return $this->json(['message' => 'JSON invalide.'], Response::HTTP_BAD_REQUEST);
@@ -146,10 +182,8 @@ final class ApiController extends AbstractController {
     }
 
     #[Route('/reservation/delete/{id}', name: 'api.reservation.delete', methods: ['DELETE'])]
-    public function deleteReservation(int $id, EntityManagerInterface $em): JsonResponse
-    {
+    public function deleteReservation(int $id, EntityManagerInterface $em): JsonResponse {
         $reservation = $em->getRepository(Reservation::class)->find($id);
-
         if (!$reservation) {
             return new JsonResponse(['message' => 'Réservation non trouvée.'], Response::HTTP_NOT_FOUND);
         }
@@ -170,21 +204,8 @@ final class ApiController extends AbstractController {
 
 
     #[Route('/room', name: '.room.all', methods: ['GET'])]
-    public function roomAll(RoomRepository $roomRepository, SerializerInterface $serializer): JsonResponse
-    {
-//        $user = $this->getUser();
-//
-//        if (!$user) {
-//            return $this->json([
-//                'message' => 'Vous n\'êtes pas connecté',
-//            ], Response::HTTP_UNAUTHORIZED);
-//        }
-//
-//        if (!$this->isGranted('ROLE_ADMIN')) {
-//            return $this->json([
-//                'message' => 'Vous n\'êtes pas admin',
-//            ], Response::HTTP_FORBIDDEN);
-//        }
+    #[IsGranted('ROLE_FUND_MANAGER')]
+    public function roomAll(RoomRepository $roomRepository, SerializerInterface $serializer): JsonResponse {
         $rooms = $roomRepository->findAll();
         $results = [];
 
@@ -213,22 +234,12 @@ final class ApiController extends AbstractController {
     }
 
     #[Route('/room/create', name: '.room.create', methods: ['POST'])]
+    #[IsGranted('ROLE_FUND_MANAGER')]
     public function createRoom(Request $request, EntityManagerInterface $em, RoomRepository $roomRepository): JsonResponse {
-//        $user = $this->getUser();
-//
-//        if (!$user) {
-//            return $this->json(['message' => 'Vous n\'êtes pas connecté.'], Response::HTTP_UNAUTHORIZED);
-//        }
-//
-//        if (!$this->isGranted('ROLE_ADMIN')) {
-//            return $this->json(['message' => 'Vous n\'êtes pas admin.'], Response::HTTP_FORBIDDEN);
-//        }
-
         $data = json_decode($request->getContent(), true);
         if (!is_array($data)) {
             return $this->json(['message' => 'JSON invalide.'], Response::HTTP_BAD_REQUEST);
         }
-
 
         $name = trim($data['name'] ?? '');
         $firstClassSeats = $data['firstClassSeats'] ?? null;
@@ -239,7 +250,6 @@ final class ApiController extends AbstractController {
         if ($existing) {
             return $this->json(['message' => 'Une salle existe déjà avec ce nom.'], Response::HTTP_CONFLICT);
         }
-
 
         if ($name === '' || $firstClassSeats === null || $secondClassSeats === null) {
             return $this->json(['message' => 'Les champs name, firstClassSeats et secondClassSeats sont obligatoires.'], Response::HTTP_BAD_REQUEST);
@@ -299,17 +309,8 @@ final class ApiController extends AbstractController {
     //--------------------------------SECTION GENRE-------------------------------------------------------------------
 
     #[Route('/genre/create', name: '.genre.create', methods: ['POST'])]
+    #[IsGranted('ROLE_FUND_MANAGER')]
     public function createGenre(Request $request, EntityManagerInterface $em, GenreRepository $genreRepository): JsonResponse {
-//        $user = $this->getUser();
-//
-//        if (!$user) {
-//            return $this->json(['message' => 'Vous n\'êtes pas connecté.'], Response::HTTP_UNAUTHORIZED);
-//        }
-//
-//        if (!$this->isGranted('ROLE_ADMIN')) {
-//            return $this->json(['message' => 'Vous n\'êtes pas admin.'], Response::HTTP_FORBIDDEN);
-//        }
-
         $data = json_decode($request->getContent(), true);
         if (!is_array($data)) {
             return $this->json(['message' => 'JSON invalide.'], Response::HTTP_BAD_REQUEST);
@@ -350,21 +351,8 @@ final class ApiController extends AbstractController {
 
 
     #[Route('/genre', name: '.genre.all', methods: ['GET'])]
-    public function genreAll(GenreRepository $genreRepository, SerializerInterface $serializer): JsonResponse
-    {
-//        $user = $this->getUser();
-//
-//        if (!$user) {
-//            return $this->json([
-//                'message' => 'Vous n\'êtes pas connecté',
-//            ], Response::HTTP_UNAUTHORIZED);
-//        }
-//
-//        if (!$this->isGranted('ROLE_ADMIN')) {
-//            return $this->json([
-//                'message' => 'Vous n\'êtes pas admin',
-//            ], Response::HTTP_FORBIDDEN);
-//        }
+    #[IsGranted('ROLE_FUND_MANAGER')]
+    public function genreAll(GenreRepository $genreRepository, SerializerInterface $serializer): JsonResponse {
         $genres = $genreRepository->findAll();
         $results = [];
 
@@ -473,23 +461,9 @@ final class ApiController extends AbstractController {
 
 
     #[Route('/programme/create', name: '.programme.create', methods: ['POST'])]
+    #[IsGranted('ROLE_FUND_MANAGER')]
     public function createProgramme(Request $request, EntityManagerInterface $em, FilmRepository $filmRepo, LangRepository $langRepo, RoomRepository $roomRepo, ProgrammeRepository $programmeRepo
     ): JsonResponse {
-
-        $user = $this->getUser(); //On récupère l'utilisateur connecté
-
-//        if (!$user) {
-//            return $this->json([
-//                'message' => 'Vous n\'êtes pas connecté',
-//            ], Response::HTTP_UNAUTHORIZED);
-//        }
-//
-//        if (!$this->isGranted('ROLE_ADMIN')) {
-//            return $this->json([
-//                'message' => 'Vous n\'êtes pas admin',
-//            ], Response::HTTP_FORBIDDEN);
-//        }
-
         $data = json_decode($request->getContent(), true);
         if (!is_array($data)) {
             return $this->json(['message' => 'JSON invalide.'], Response::HTTP_BAD_REQUEST);
