@@ -4,19 +4,23 @@ namespace App\Entity;
 
 use App\Repository\CarouselItemRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CarouselItemRepository::class)]
 class CarouselItem {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['film.pined'])]
     private ?int $id = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['film.pined'])]
     private ?Film $film = null;
 
     #[ORM\Column]
+    #[Groups(['film.pined'])]
     private ?int $position = null;
 
     public function getId(): ?int {

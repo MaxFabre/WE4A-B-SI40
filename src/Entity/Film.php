@@ -22,23 +22,23 @@ class Film {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details', 'programme.details'])]
+    #[Groups(['film.details', 'programme.details', 'film.search', 'film.pined'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.pined'])]
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.pined'])]
     private ?int $duration = null;
 
     #[ORM\Column(length: 60)]
-    #[Groups(['film.details','programme.details'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 2, nullable: true)]
@@ -46,7 +46,7 @@ class Film {
     private ?string $price = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined'])]
     private ?string $coverPath = null;
 
     #[UploadableField(mapping: 'films_cover', fileNameProperty: 'coverpath')]
@@ -58,7 +58,7 @@ class Film {
      * @var Collection<int, Genre>
      */
     #[ORM\ManyToMany(targetEntity: Genre::class, mappedBy: 'films')]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.pined'])]
     private Collection $genres;
 
     /**
@@ -348,8 +348,7 @@ class Film {
         return $this;
     }
 
-    public function removeComment(Comment $comment): static
-    {
+    public function removeComment(Comment $comment): static {
         if ($this->comments->removeElement($comment)) {
             // set the owning side to null (unless already changed)
             if ($comment->getFilm() === $this) {

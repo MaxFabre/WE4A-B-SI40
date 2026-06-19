@@ -14,7 +14,7 @@ class Comment {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details', 'comment.details'])]
+    #[Groups(['film.details', 'comment.details', 'user.profile'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
@@ -24,10 +24,11 @@ class Comment {
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['user.profile'])]
     private ?Film $film = null;
 
     #[ORM\Column(length: 64)]
-    #[Groups(['film.details', 'comment.details', 'report.list'])]
+    #[Groups(['film.details', 'comment.details', 'report.list', 'user.profile'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -35,7 +36,7 @@ class Comment {
     private ?string $content = null;
 
     #[ORM\Column]
-    #[Groups(['film.details', 'comment.details'])]
+    #[Groups(['film.details', 'comment.details', 'user.profile'])]
     private ?float $note = null;
 
     #[ORM\Column]
