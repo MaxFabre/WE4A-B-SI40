@@ -22,11 +22,11 @@ class Film {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details', 'programme.details', 'film.search', 'film.pined', 'programme.details'])]
+    #[Groups(['film.details', 'programme.details', 'film.search', 'film.pined', 'programme.details', 'comment.details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile', 'programme.details'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile', 'programme.details', 'comment.details'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
