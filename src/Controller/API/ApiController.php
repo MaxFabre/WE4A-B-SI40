@@ -528,15 +528,101 @@ final class ApiController extends AbstractController {
 
     //--------------------------------SECTION BASKET-------------------------------------------------------------------
 
-    #[Route('/basket', name: 'fetchAll', methods: ['GET'])]
+    #[Route('/basket{slash}', name: 'api.basket.create', methods: ['GET'], requirements: ['slash' => '/?'], defaults: ['slash' => ''])]
     public function basketfetchAll(BasketRepository $basketRepository): JsonResponse {
         $baskets = $basketRepository->findAll();
         return $this->json($baskets, 200, [], ['groups' => ['basket.details']]);
     }
 
+    #[Route('/basket/create', name: 'fetchAll', methods: ['POST'])]
+    public function basketCreate(Request $request, EntityManagerInterface $em, UserRepository $userRepository): JsonResponse {
+
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data)) {
+            $data = $request->request->all();
+        }
+
+        $basket = new Basket();
+
+        if (!empty($data['date'])) {
+            try {
+                $date = new \DateTime($data['date']);
+            } catch (\Exception $e) {
+                return new JsonResponse(['message' => 'Date invalide'], Response::HTTP_BAD_REQUEST);
+            }
+        } else {
+            $date = new \DateTime('now');
+        }
+        $basket->setDate($date);
+
+        if (isset($data['isActive'])) {
+            $basket->setIsActive((bool)$data['isActive']);
+        } else {
+            $basket->setIsActive(true);
+        }
+
+        $basket->setStatus($data['status'] ?? 'pending');
+
+        // user : si userId fourni on le récupère, sinon on utilise l'utilisateur connecté si présent
+        $user = null;
+        if (!empty($data['userId'])) {
+            $user = $userRepository->find((int)$data['userId']);
+            if (!$user) {
+                return new JsonResponse(['message' => 'Utilisateur introuvable'], Response::HTTP_BAD_REQUEST);
+            }
+        } else {
+            $current = $this->getUser();
+            if ($current instanceof \App\Entity\User) {
+                $user = $current;
+            }
+        }
+        $basket->setUser($user);
+
+        try {
+            $em->persist($basket);
+            $em->flush();
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => 'Erreur lors de la création du panier'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $location = $this->generateUrl('basket.get', ['id' => $basket->getId()], 0); // optionnel si vous avez une route get
+        return $this->json(
+            $basket,
+            Response::HTTP_CREATED,
+            $location ? ['Location' => $location] : [],
+            ['groups' => ['basket.details']]
+        );
+    }
+
     #[Route('/basket/{id}', name: '.basket.details', methods: ['GET'])]
     public function basket(Basket $basket, SerializerInterface $serializer): JsonResponse {
         return $this->json($basket, 200, [], ['groups' => ['basket.details']]);
+    }
+
+    #[Route('/basket/pay/{id}', name: 'basket.pay', methods: ['POST'])]
+    public function basketPay(Basket $basket, EntityManagerInterface $em, SerializerInterface $serializer): JsonResponse
+    {
+        // Mettre à jour le panier
+        $basket->setIsActive(false);
+        $basket->setStatus('paid');
+
+        try {
+            $em->persist($basket);
+            $em->flush();
+        } catch (\Throwable $e) {
+            return new JsonResponse(
+                ['message' => 'Erreur lors de la mise à jour du panier'],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+
+        // Retourner le panier mis à jour (sérialisé avec le groupe basket.details)
+        return $this->json(
+            $basket,
+            Response::HTTP_OK,
+            [],
+            ['groups' => ['basket.details']]
+        );
     }
 
     #[Route('/basket/user/{id}', name: '.basket.user', methods: ['GET'])]
