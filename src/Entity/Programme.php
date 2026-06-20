@@ -34,7 +34,7 @@ class Programme {
 
     #[ORM\ManyToOne(inversedBy: 'programmes')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['programme.details'])]
+    #[Groups(['programme.details', 'basket.details'])]
     private ?Film $film = null;
 
     #[ORM\ManyToOne(inversedBy: 'programmes')]

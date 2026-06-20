@@ -18,14 +18,14 @@ class Reservation {
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['reservation.details'])]
+    #[Groups(['reservation.details', 'basket.details'])]
     private ?Programme $programme = null;
 
     /**
      * @var Collection<int, Seat>
      */
     #[ORM\ManyToMany(targetEntity: Seat::class, inversedBy: 'reservations')]
-    #[Groups(['reservation.details', 'programme.details'])]
+    #[Groups(['reservation.details', 'programme.details', 'basket.details'])]
     private Collection $seats;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
