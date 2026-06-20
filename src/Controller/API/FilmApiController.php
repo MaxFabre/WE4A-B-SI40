@@ -22,6 +22,7 @@ use function PHPUnit\Framework\isEmpty;
 class FilmApiController extends AbstractController {
 
     #[Route('/create', name: '.create', methods: ['POST'])]
+    #[IsGranted("ROLE_FUND_MANAGER")]
     public function create(?Film $film, Request $request, EntityManagerInterface $em, GenreRepository $genreRepository, PersonRepository $personRepository): JsonResponse {
         //Initialisation:
         $title = $request->request->get('title');
@@ -192,6 +193,7 @@ class FilmApiController extends AbstractController {
     }
 
     #[Route('/{id}', name: '.update', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[isGranted("ROLE_FUND_MANAGER")]
     public function update(Film $film, Request $request, EntityManagerInterface $em, GenreRepository $genreRepository, PersonRepository $personRepository): JsonResponse {
         //Initialisation:
         $title = $request->request->get('title');

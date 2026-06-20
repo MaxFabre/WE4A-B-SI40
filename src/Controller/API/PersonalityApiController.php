@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\Person;
+use App\Repository\FilmRepository;
 use App\Repository\PersonRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,7 +35,7 @@ class PersonalityApiController extends AbstractController{
 
     #[Route('/create', name: '.create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse {
+    public function create(Request $request, EntityManagerInterface $entityManager, FilmRepository $filmRepository): JsonResponse {
         //Initialisation:
         $firstname = $request->request->get('firstname');
         $lastname = $request->request->get('lastname');
@@ -64,6 +65,29 @@ class PersonalityApiController extends AbstractController{
             $personality->setPhotoFile($photoFile);
         }
 
+        //Gestion des films:
+        if ($request->request->has('directedFilms')) {
+            $directedFilmIds = json_decode($request->request->get('directedFilms'), true) ?? [];
+            foreach ($directedFilmIds as $filmId) {
+                $film = $filmRepository->find($filmId);
+                if ($film) {
+                    $personality->addDirectedFilm($film);
+                    $entityManager->persist($film);
+                }
+            }
+        }
+
+        if ($request->request->has('actedFilms')) {
+            $actedFilmIds = json_decode($request->request->get('actedFilms'), true) ?? [];
+            foreach ($actedFilmIds as $filmId) {
+                $film = $filmRepository->find($filmId);
+                if ($film) {
+                    $personality->addPlayedFilm($film);
+                    $entityManager->persist($film);
+                }
+            }
+        }
+
         try {
             $entityManager->persist($personality);
             $entityManager->flush();
@@ -84,7 +108,7 @@ class PersonalityApiController extends AbstractController{
 
     #[Route('/{id}', name: '.update', methods: ['POST'])]
     #[IsGranted("ROLE_ADMIN")]
-    public function update(Person $personality, Request $request, EntityManagerInterface $entityManager, PersonRepository $personalityRepository) {
+    public function update(Person $personality, Request $request, EntityManagerInterface $entityManager, FilmRepository $filmRepository): JsonResponse {
         //Initialisation:
         $parisTimeZone = new \DateTimeZone("Europe/Paris");
         $now = new \DateTimeImmutable("now", $parisTimeZone);
@@ -115,8 +139,44 @@ class PersonalityApiController extends AbstractController{
         if ($photoFile) {
             $personality->setPhotoFile($photoFile);
         }
-
         $personality->setUpdatedAt($now);
+
+        //Mise à jour des films:
+        if ($request->request->has('directedFilms')) {
+            $directedFilmIds = json_decode($request->request->get('directedFilms'), true) ?? [];
+            $currentDirectedFilms = $personality->getDirectedFilms()->toArray();
+            foreach ($currentDirectedFilms as $currentFilm) {
+                if (!in_array($currentFilm->getId(), $directedFilmIds)) {
+                    $personality->removeDirectedFilm($currentFilm);
+                    $entityManager->persist($currentFilm);
+                }
+            }
+            foreach ($directedFilmIds as $filmId) {
+                $film = $filmRepository->find($filmId);
+                if ($film) {
+                    $personality->addDirectedFilm($film);
+                    $entityManager->persist($film);
+                }
+            }
+        }
+
+        if ($request->request->has('actedFilms')) {
+            $actedFilmIds = json_decode($request->request->get('actedFilms'), true) ?? [];
+            $currentPlayedFilms = $personality->getPlayedFilms()->toArray();
+            foreach ($currentPlayedFilms as $currentFilm) {
+                if (!in_array($currentFilm->getId(), $actedFilmIds)) {
+                    $personality->removePlayedFilm($currentFilm);
+                    $entityManager->persist($currentFilm);
+                }
+            }
+            foreach ($actedFilmIds as $filmId) {
+                $film = $filmRepository->find($filmId);
+                if ($film) {
+                    $personality->addPlayedFilm($film);
+                    $entityManager->persist($film);
+                }
+            }
+        }
 
         //Enregistrement en DB:
         try {
