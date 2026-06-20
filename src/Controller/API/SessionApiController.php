@@ -340,44 +340,79 @@ final class SessionApiController extends AbstractController {
     /**
      * Met à jour la photo de profile d'un utilisateur.
      */
-    public function updatePhoto(Request $request, EntityManagerInterface $entityManager): JsonResponse {
-        //Initialisation:
-        $user = $this->getUser();
 
-        //Suppresion de la photo de profile:
+    public function updatePhoto(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $person = $user->getPerson();
+        if (!$person) {
+            return new JsonResponse(['error' => 'Profil introuvable'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // suppression
         $deletePhoto = $request->request->get('deletePhoto');
         if ($deletePhoto === 'true' || $deletePhoto === '1' || $deletePhoto === true) {
-            //Modification de l'entité:
-            $user->getPerson()->setPhotoFile(null);
-            $user->getPErson()->setPhoto(null);
-            $user->getPerson()->setUpdatedAt(new \DateTimeImmutable("now", new \DateTimeZone("Europe/Paris")));
+            if (method_exists($person, 'setPhotoFile')) {
+                $person->setPhotoFile(null);
+            }
+            if (method_exists($person, 'setPhoto')) {
+                $person->setPhoto(null);
+            }
 
-            //Enregistrement en DB:
+            $person->setUpdatedAt(new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris')));
+
+            // marquer l'uploader (même pour suppression)
+            if (method_exists($person, 'setUploadedBy')) {
+                $person->setUploadedBy($user);
+            }
+            // s'assurer de la relation inverse
+            if (method_exists($user, 'setPerson')) {
+                $user->setPerson($person);
+            }
+
+            $entityManager->persist($person);
+            $entityManager->persist($user);
             $entityManager->flush();
 
-            return new JsonResponse([
-                'message' => 'Photo de profil supprimée avec succès',
-                'photoUrl' => null
-            ], Response::HTTP_OK);
+            return new JsonResponse(['message' => 'Photo supprimée'], Response::HTTP_OK);
         }
 
-        //Remplacement de la photo:
+        // upload / remplacement
         $file = $request->files->get('photo');
         if ($file) {
-            //Modification de l'entité:
-            $user->getPerson()->setPhotoFile($file);
-            $user->getPerson()->setUpdatedAt(new \DateTimeImmutable("now", new \DateTimeZone("Europe/Paris")));
+            if (method_exists($person, 'setPhotoFile')) {
+                $person->setPhotoFile($file);
+            }
 
-            //Enregitrement en DB:
-            $entityManager->flush();
+            // mise à jour de la date — date actuelle en Europe/Paris
+            $person->setUpdatedAt(new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris')));
 
-            return new JsonResponse([
-                'message' => 'Photo de profil mise à jour avec succès',
-            ], Response::HTTP_OK);
+            // IMPORTANT : marquer l'uploader AVANT le flush
+            if (method_exists($person, 'setUploadedBy')) {
+                $person->setUploadedBy($user);
+            }
+            // forcer la relation inverse pour éviter toute ambiguïté
+            if (method_exists($user, 'setPerson')) {
+                $user->setPerson($person);
+            }
+
+            $entityManager->persist($person);
+            $entityManager->persist($user);
+            $entityManager->flush(); // déclenche Vich + listener
+
+            return new JsonResponse(['message' => 'Photo mise à jour'], Response::HTTP_OK);
         }
 
-        return new JsonResponse(['error' => 'Veuillez uploader une image ou cocher la checkbox.'], Response::HTTP_BAD_REQUEST);
+        return new JsonResponse(['error' => 'Aucun fichier envoyé'], Response::HTTP_BAD_REQUEST);
     }
+
+
+
+
 
     #[Route('/update-personal-datas', name: '.updatePersonalDatas', methods: ['PUT'])]
     #[IsGranted('ROLE_USER')]
