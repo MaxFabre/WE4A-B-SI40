@@ -176,7 +176,7 @@ final class FilmController extends AbstractController {
         ]);
     }
 
-    #[Route('/film', name: 'film.redirect', methods: ['GET'])]
+    #[Route('/film{trailingSlash}', name: 'film.redirect', methods: ['GET'], requirements: ['trailingSlash' => '/?'], defaults: ['trailingSlash' => ''])]
     public function redirectToIndex(): Response {
         return $this->redirectToRoute('film.index', [], 301);
     }

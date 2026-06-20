@@ -99,7 +99,7 @@ class FilmApiController extends AbstractController {
         }
     }
 
-    #[Route('/', name: 'fetchAll', methods: ['GET'])]
+    #[Route('/{slash}', name: 'fetchAll', methods: ['GET'], requirements: ['slash' => '/?'], defaults: ['slash' => ''])]
     public function fetchAll(FilmRepository $filmRepository): JsonResponse {
         $films = $filmRepository->findAll();
         return $this->json($films, 200, [], ['groups' => ['film.details']]);

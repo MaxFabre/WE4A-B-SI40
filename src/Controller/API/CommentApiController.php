@@ -17,7 +17,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/api/comment', name: 'api.comment')]
 final class CommentApiController extends AbstractController{
 
-    #[Route('/', name: '.fetchAll', methods: ['GET'])]
+    #[Route('', name: '.fetchAll', methods: ['GET'])]
     #[IsGranted('ROLE_MODERATOR')]
     public function fetchAll(CommentRepository $commentRepository) {
         $comments = $commentRepository->findAll();
