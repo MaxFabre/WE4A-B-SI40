@@ -33,6 +33,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Constraints\Timezone;
+use function Sodium\add;
 
 #[Route('/api', name: 'api')]
 final class ApiController extends AbstractController {
@@ -536,6 +537,13 @@ final class ApiController extends AbstractController {
     #[Route('/basket/{id}', name: '.basket.details', methods: ['GET'])]
     public function basket(Basket $basket, SerializerInterface $serializer): JsonResponse {
         return $this->json($basket, 200, [], ['groups' => ['basket.details']]);
+    }
+
+    #[Route('/basket/user/{id}', name: '.basket.user', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function getBasketByUserId($id, BasketRepository $basketRepository): JsonResponse {
+        $baskets = $basketRepository->findPaidBasketsWithReservationsByUser($id);
+        return $this->json($baskets, RESPONSE::HTTP_OK, [], ['groups' => ['basket.details', 'film.search', 'seat.details']]);
     }
 
     // ------------------------------------ SECTION RECHERCHE ------------------------------------------------------------------------------
