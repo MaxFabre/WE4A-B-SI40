@@ -107,7 +107,10 @@ class PersonalityApiController extends AbstractController{
         }
 
         //Gestion de l'image automatique par VichUploader:
-        if ($request->request->get('deletePhoto') === '1') {}
+        if ($request->request->get('deletePhoto') === '1' || $request->request->get('deletePhoto') === 'true') {
+            $personality->setPhotoFile(null);
+            $personality->setPhoto(null);
+        }
         $photoFile = $request->files->get('photo');
         if ($photoFile) {
             $personality->setPhotoFile($photoFile);

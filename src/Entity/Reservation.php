@@ -9,8 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
-class Reservation
-{
+class Reservation {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -26,7 +25,7 @@ class Reservation
      * @var Collection<int, Seat>
      */
     #[ORM\ManyToMany(targetEntity: Seat::class, inversedBy: 'reservations')]
-    #[Groups(['reservation.details'])]
+    #[Groups(['reservation.details', 'programme.details'])]
     private Collection $seats;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]

@@ -14,15 +14,15 @@ class Seat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['room.details','seat.details','reservation.details'])]
+    #[Groups(['room.details','seat.details','reservation.details', 'programme.details'])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['seat.details'])]
+    #[Groups(['seat.details', 'programme.details'])]
     private ?int $number = null;
 
     #[ORM\Column]
-    #[Groups(['room.details','seat.details','reservation.details'])]
+    #[Groups(['room.details','seat.details','reservation.details', 'programme.details'])]
     private ?int $class = null;
 
     #[ORM\ManyToOne(inversedBy: 'seats')]

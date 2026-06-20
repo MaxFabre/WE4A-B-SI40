@@ -18,6 +18,7 @@ class Lang
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['programme.details'])]
     private ?string $name = null;
 
     /**

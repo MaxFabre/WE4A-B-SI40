@@ -9,8 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ProgrammeRepository::class)]
-class Programme
-{
+class Programme {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

@@ -26,7 +26,7 @@ class Film {
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile', 'programme.details'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -34,7 +34,7 @@ class Film {
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['film.details', 'film.pined'])]
+    #[Groups(['film.details', 'film.pined', 'programme.details'])]
     private ?int $duration = null;
 
     #[ORM\Column(length: 60)]
@@ -49,7 +49,7 @@ class Film {
     #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined'])]
     private ?string $coverPath = null;
 
-    #[UploadableField(mapping: 'films_cover', fileNameProperty: 'coverpath')]
+    #[UploadableField(mapping: 'films_cover', fileNameProperty: 'coverPath')]
     #[Image]
     private ?File $coverFile = null;
 
@@ -235,6 +235,10 @@ class Film {
 
     public function setCoverFile(?File $photoFile): static {
         $this->coverFile = $photoFile;
+
+        if (null !== $photoFile) {
+            $this->updated_at = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
+        }
 
         return $this;
     }

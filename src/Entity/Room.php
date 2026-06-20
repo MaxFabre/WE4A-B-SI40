@@ -18,11 +18,11 @@ class Room
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['room.details'])]
+    #[Groups(['room.details', 'programme.details'])]
     private ?string $name = null;
 
     #[ORM\Column]
-    #[Groups(['room.details'])]
+    #[Groups(['room.details', 'programme.details'])]
     private ?int $capacity = null;
 
     /**

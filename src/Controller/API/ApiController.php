@@ -2,9 +2,11 @@
 
 namespace App\Controller\API;
 
+use App\Controller\RoomController;
 use App\Entity\Basket;
 use App\Entity\Film;
 use App\Entity\Genre;
+use App\Entity\Lang;
 use App\Entity\Person;
 use App\Entity\Programme;
 use App\Entity\Reservation;
@@ -30,13 +32,15 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Constraints\Timezone;
 
 #[Route('/api', name: 'api')]
 final class ApiController extends AbstractController {
 
     //--------------------------------SECTION RESERVATION----------------------------------------------------------------------------------
+
     #[Route('/reservation/{id}', name: '.reservation.details', methods: ['GET'])]
-    public function reservation(?Reservation $reservation, SerializerInterface $serializer): JsonResponse {
+    public function fetchOneRservation(?Reservation $reservation, SerializerInterface $serializer): JsonResponse {
         if (!$reservation) {
             return $this->json(['message' => 'Reservation introuvable.'], 404);
         }
@@ -96,7 +100,6 @@ final class ApiController extends AbstractController {
             ]
         ], Response::HTTP_OK);
     }
-
 
     #[Route('/reservation/create', name: '.reservation.create', methods: ['POST'])]
     #[IsGranted("ROLE_USER")]
@@ -199,9 +202,65 @@ final class ApiController extends AbstractController {
 
     #[Route('/room/{id}', name: '.room.details', methods: ['GET'])]
     public function room(Room $room, SerializerInterface $serializer): JsonResponse {
-        return $this->json($room, 200, [], ['groups' => ['room.details']]);
+        $firstClassSeats = 0;
+        $secondClassSeats = 0;
+
+        foreach ($room->getSeats() as $seat) {
+            if ($seat->getClass() === 1) {
+                $firstClassSeats++;
+            }
+
+            if ($seat->getClass() === 2) {
+                $secondClassSeats++;
+            }
+        }
+        return $this->json([
+            'id' => $room->getId(),
+            'name' => $room->getName(),
+            'capacity' => $room->getCapacity(),
+            'firstClassSeats' => $firstClassSeats,
+            'secondClassSeats' => $secondClassSeats,
+        ], RESPONSE::HTTP_OK);
     }
 
+    #[Route('/room/{id}', name: '.room.update', methods: ['PUT'])]
+    public function updateRoom(Room $room, Request $request, EntityManagerInterface $entityManager): JsonResponse {
+        //Initialisation:
+        $name = $request->request->get('name');
+        $firstClassSeatsStr = $request->request->get('firstClassSeats');
+        $secondClassSeatsStr = $request->request->get('secondClassSeats');
+
+        if (!isset($name) || !isset($firstClassSeatsStr) || !isset($secondClassSeatsStr)) {
+            return $this->json(['message' => 'Veuillez remplir tout les champs.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $firstClassSeats = (int) $firstClassSeatsStr;
+        $secondClassSeats = (int) $secondClassSeatsStr;
+        if ($firstClassSeats <= 0 || $secondClassSeats <= 0) {
+            return $this->json(['message' => 'Le nombre de sièges doit être supérieur à 0.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $roomController = new RoomController();
+
+        $newFirstClassSeats = (int) $firstClassSeatsStr;
+        $newSecondClassSeats = (int) $secondClassSeatsStr;
+        $roomController->updateRoomSeats($room, 1, $firstClassSeats, $newFirstClassSeats, $entityManager);
+        $roomController->updateRoomSeats($room, 2, $secondClassSeats, $newSecondClassSeats, $entityManager);
+        $room->setCapacity($firstClassSeats + $secondClassSeats);
+
+        try {
+            //Enregistrement en DB:
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'La salle à été modifiée avec succès.'
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->json([
+                'message' => 'Erreur lors de l\'enregistrement'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
 
     #[Route('/room', name: '.room.all', methods: ['GET'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
@@ -220,7 +279,6 @@ final class ApiController extends AbstractController {
         return $this->json($results);
     }
 
-
     #[Route('/room/{id}/seats', name: 'api.room.seats', methods: ['GET'])]
     public function roomSeat(int $id, RoomRepository $roomRepo, SeatRepository $seatRepo, SerializerInterface $serializer): JsonResponse {
         $room = $roomRepo->find($id);
@@ -236,33 +294,29 @@ final class ApiController extends AbstractController {
     #[Route('/room/create', name: '.room.create', methods: ['POST'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
     public function createRoom(Request $request, EntityManagerInterface $em, RoomRepository $roomRepository): JsonResponse {
-        $data = json_decode($request->getContent(), true);
-        if (!is_array($data)) {
-            return $this->json(['message' => 'JSON invalide.'], Response::HTTP_BAD_REQUEST);
+        //Initialisation:
+        $name = $request->request->get('name');
+        $firstClassSeatsStr = $request->request->get('firstClassSeats');
+        $secondClassSeatsStr = $request->request->get('secondClassSeats');
+
+        if (!isset($name) || !isset($firstClassSeatsStr) || !isset($secondClassSeatsStr)) {
+            return $this->json(['message' => 'Veuillez remplir tout les champs.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $name = trim($data['name'] ?? '');
-        $firstClassSeats = $data['firstClassSeats'] ?? null;
-        $secondClassSeats = $data['secondClassSeats'] ?? null;
+        //Création de l'objet:
+        $lang = new Lang();
+        $lang->setName($name);
 
-        // On check si une salle à déjà ce nom
+        //On check si une salle à déjà ce nom:
         $existing = $roomRepository->findOneBy(['name' => $name]);
         if ($existing) {
             return $this->json(['message' => 'Une salle existe déjà avec ce nom.'], Response::HTTP_CONFLICT);
         }
 
-        if ($name === '' || $firstClassSeats === null || $secondClassSeats === null) {
-            return $this->json(['message' => 'Les champs name, firstClassSeats et secondClassSeats sont obligatoires.'], Response::HTTP_BAD_REQUEST);
-        }
-
-        if (!is_int($firstClassSeats) && !ctype_digit((string)$firstClassSeats) && !is_int($secondClassSeats) && !ctype_digit((string)$secondClassSeats)) {
-            return $this->json(['message' => 'capacity doit être un entier.'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $firstClassSeats = (int) $firstClassSeats;
-        $secondClassSeats = (int) $secondClassSeats;
+        $firstClassSeats = (int) $firstClassSeatsStr;
+        $secondClassSeats = (int) $secondClassSeatsStr;
         if ($firstClassSeats <= 0 || $secondClassSeats <= 0) {
-            return $this->json(['message' => 'le nombre de sièges doit être supérieur à 0.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['message' => 'Le nombre de sièges doit être supérieur à 0.'], Response::HTTP_BAD_REQUEST);
         }
 
         $room = new Room();
@@ -298,7 +352,7 @@ final class ApiController extends AbstractController {
 
 
         return $this->json([
-            'message' => 'Salle créée.',
+            'message' => 'Salle créée avec succès.',
             'room' => [
                 'id' => $room->getId(),
                 'name' => $room->getName(),
@@ -306,53 +360,84 @@ final class ApiController extends AbstractController {
             ],
         ], Response::HTTP_CREATED);
     }
+
     //--------------------------------SECTION GENRE-------------------------------------------------------------------
 
     #[Route('/genre/create', name: '.genre.create', methods: ['POST'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
-    public function createGenre(Request $request, EntityManagerInterface $em, GenreRepository $genreRepository): JsonResponse {
-        $data = json_decode($request->getContent(), true);
-        if (!is_array($data)) {
-            return $this->json(['message' => 'JSON invalide.'], Response::HTTP_BAD_REQUEST);
+    public function createGenre(Request $request, EntityManagerInterface $entityManager): JsonResponse {
+        //Initialisation:
+        $name = $request->request->get('name');
+
+        if (!isset($name)) {
+            return $this->json(['message' => 'Veuillez donner un nom au genre.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $name = trim($data['name'] ?? '');
-
-
-        if ($name === '') {
-            return $this->json(['message' => 'Le champ name est obligatoire'], Response::HTTP_BAD_REQUEST);
-        }
-
-        // On check si un genre à déjà ce nom
-        $existing = $genreRepository->findOneBy(['name' => $name]);
-        if ($existing) {
-            return $this->json(['message' => 'Un genre existe déjà avec ce nom.'], Response::HTTP_CONFLICT);
-        }
-
+        //Création de l'objet:
         $genre = new Genre();
         $genre->setName($name);
 
-        $em->persist($genre);
-        $em->flush();
+        try {
+            //Enregistrement en DB:
+            $entityManager->persist($genre);
+            $entityManager->flush();
 
-        return $this->json([
-            'message' => 'Genre créée.',
-            'genre' => [
-                'id' => $genre->getId(),
-                'name' => $genre->getName(),
-            ],
-        ], Response::HTTP_CREATED);
+            return new JsonResponse([
+                'message' => 'Genre créé avec succès !'
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return $this->json([
+                'message' => 'Erreur lors de la création du genre.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    #[Route('/genre/{id}', name: '.genre.details', methods: ['GET'])]
-    public function genre(Genre $genre, SerializerInterface $serializer): JsonResponse {
-        return $this->json($genre, 200, [], ['groups' => ['genre.details']]);
+    #[Route('/genre/{id}', name: '.genre.fetchOne', methods: ['GET'])]
+    public function genre(Genre $genre): JsonResponse {
+        return $this->json($genre, RESPONSE::HTTP_OK, [], ['groups' => ['genre.details']]);
+    }
+
+    #[Route('/genre/{id}', name: '.genre.update', methods: ['PUT'])]
+    #[IsGranted('ROLE_FUND_MANAGER')]
+    public function updateGenre(Genre $genre, Request $request, EntityManagerInterface $entityManager): JsonResponse {
+        //Initialisation:
+        $name = $request->request->get('name');
+
+        if (!isset($name)) {
+            return $this->json(['message' => 'Veuillez donner un nom au genre.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        //Modification de l'objet:
+        $genre->setName($name);
+
+        try {
+            //Enregistrement en DB:
+            $entityManager->persist($genre);
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'Genre modifié avec succès !'
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return $this->json([
+                'message' => 'Erreur lors de la modification du genre.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/genre/{id}', name: '.genre.details', methods: ['DELETE'])]
+    public function deleteGenre(Genre $genre, EntityManagerInterface $entityManager): JsonResponse {
+        $entityManager->remove($genre);
+        $entityManager->flush();
+        return $this->json([
+            'message' => 'Genre supprimé avec succès.'
+        ], RESPONSE::HTTP_OK);
     }
 
 
     #[Route('/genre', name: '.genre.all', methods: ['GET'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
-    public function genreAll(GenreRepository $genreRepository, SerializerInterface $serializer): JsonResponse {
+    public function genreAll(GenreRepository $genreRepository): JsonResponse {
         $genres = $genreRepository->findAll();
         $results = [];
 
@@ -364,6 +449,80 @@ final class ApiController extends AbstractController {
         }
 
         return $this->json($results);
+    }
+
+    //--------------------------------SECTION LANGUE-------------------------------------------------------------------
+
+    #[Route('/lang', name: '.langs.fetchAll', methods: ['GET'])]
+    public function langFetchAll(LangRepository $langRepository): JsonResponse {
+        $langs = $langRepository->findAll();
+        return $this->json($langs, RESPONSE::HTTP_OK, [], ['groups' => ['programme.details']]);
+    }
+
+    #[Route('/lang/create', name: '.langs.create', methods: ['POST'])]
+    public function langCreate(Request $request, EntityManagerInterface $entityManager): JsonResponse {
+        //Initialisation:
+        $name = $request->request->get('name');
+
+        if (!isset($name)) {
+            return $this->json(['message' => 'Veuillez donner un nom à la langue.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        //Création de l'objet:
+        $lang = new Lang();
+        $lang->setName($name);
+
+        try {
+            //Enregistrement en DB:
+            $entityManager->persist($lang);
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'Langue créée avec succès !'
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return $this->json([
+                'message' => 'Erreur lors de la création de la langue.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/lang/{id}', name: '.langs.fetchOne', methods: ['GET'])]
+    public function langFetchOne(Lang $lang): JsonResponse {
+        return $this->json($lang, 200, [], ['groups' => ['programme.details']]);
+    }
+
+    #[Route('/lang/{id}', name: '.langs.update', methods: ['PUT'])]
+    public function updateLang(Lang $lang, Request $request, EntityManagerInterface $entityManager): JsonResponse {
+        //Initialisation:
+        $name = $request->request->get('name');
+
+        if (!isset($name)) {
+            return $this->json(['message' => 'Veuillez donner un nom à la langue.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $lang->setName($name);
+
+        try {
+            //Enregistrement en DB:
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'Langue modifiée avec succès !'
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return $this->json([
+                'message' => 'Erreur lors de la modification de la langue.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/lang/{id}', name: '.langs.delete', methods: ['DELETE'])]
+    public function delete(Lang $lang, EntityManagerInterface $entityManager): JsonResponse {
+        $entityManager->remove($lang);
+        return $this->json([
+            'message' => 'La langue à bien été supprimée.'
+        ], RESPONSE::HTTP_OK, [], ['groups' => ['programme.details']]);
     }
 
     //--------------------------------SECTION BASKET-------------------------------------------------------------------
@@ -415,6 +574,13 @@ final class ApiController extends AbstractController {
 
     // ------------------------------------ SECTION PROGRAMME ------------------------------------------------------------------------------
 
+    #[Route('/programme/', name: '.programme.fetchAll', methods: ['GET'])]
+    public function fetchAllProgramme(ProgrammeRepository $programmeRepository): JsonResponse {
+        //Initialisation:
+        $programmes = $programmeRepository->findAll();
+        return $this->json($programmes, RESPONSE::HTTP_OK, [], ['groups' => ['programme.details']]);
+    }
+
     #[Route('/programme/{id}', name: '.programme.details', methods: ['GET'])]
     public function programme(?Programme $programme, SerializerInterface $serializer): JsonResponse {
 
@@ -422,6 +588,68 @@ final class ApiController extends AbstractController {
             return $this->json(['message' => 'Programme introuvable.'], 404);
         }
         return $this->json($programme, 200, [], ['groups' => ['programme.details']]);
+    }
+
+    #[Route('/programme/{id}', name: '.programme.update', methods: ['PUT'])]
+    #[IsGranted('ROLE_FUND_MANAGER')]
+    public function updateProgramme(Programme $programme, Request $request, EntityManagerInterface $entityManager, FilmRepository $filmRepo, LangRepository $langRepo, RoomRepository $roomRepo, ProgrammeRepository $programmeRepo
+    ): JsonResponse {
+        //Initialisation:
+        $dateStr = $request->request->get('date');
+        $film = $request->request->get('film');
+        $langId = $request->request->get('langId');
+        $roomId = $request->request->get('roomId');
+
+        if (!isset($dateStr) || !isset($film) || !isset($langId) || !isset($roomId)) {
+            return $this->json(['message' => 'Veuillez remplir tout les champs.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $date = new \DateTime($dateStr, new \DateTimeZone('Europe/Paris'));
+        } catch (\Exception $e) {
+            return $this->json(['message' => 'Erreur dans le choix de la date.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        //Création des objets:
+        $film = $filmRepo->find($film);
+        $lang = $langRepo->findOneBy(['id' => $langId]);
+        $room = $roomRepo->findOneBy(['id' => $roomId]);
+
+        //Vérification des entrées utilisateurs:
+        if (!$film || !$lang || !$room) {
+            return $this->json(['message' => 'Film, langue ou salle introuvable.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $programme
+            ->setDate($date)
+            ->setFilm($film)
+            ->setLang($lang)
+            ->setRoom($room)
+            ->setIsClosed(false);
+
+        try {
+            //Enregistrement en DB:
+            $entityManager->persist($programme);
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'Le programme à été modifié avec succès !'
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return $this->json([
+                'message' => 'Erreur de lors de l\'enregistrement du programme.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/programme/{id}', name: '.programme.delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_FUND_MANAGER')]
+    public function deleteProgramme(Programme $programme, EntityManagerInterface $entityManager): JsonResponse {
+        $entityManager->remove($programme);
+        $entityManager->flush();
+        return new JsonResponse([
+            'message' => 'Le programme à bien été supprimé.'
+        ], RESPONSE::HTTP_NO_CONTENT);
     }
 
     #[Route('/programme/{id}/reservations', name: '.programme.reservations.details', methods: ['GET'])]
@@ -459,66 +687,56 @@ final class ApiController extends AbstractController {
         return $this->json(['programmeId' => $programme->getId(), 'reservations' => $result], Response::HTTP_OK);
     }
 
-
     #[Route('/programme/create', name: '.programme.create', methods: ['POST'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
-    public function createProgramme(Request $request, EntityManagerInterface $em, FilmRepository $filmRepo, LangRepository $langRepo, RoomRepository $roomRepo, ProgrammeRepository $programmeRepo
+    public function createProgramme(Request $request, EntityManagerInterface $entityManager, FilmRepository $filmRepo, LangRepository $langRepo, RoomRepository $roomRepo, ProgrammeRepository $programmeRepo
     ): JsonResponse {
-        $data = json_decode($request->getContent(), true);
-        if (!is_array($data)) {
-            return $this->json(['message' => 'JSON invalide.'], Response::HTTP_BAD_REQUEST);
+        //Initialisation:
+        $dateStr = $request->request->get('date');
+        $film = $request->request->get('film');
+        $langId = $request->request->get('langId');
+        $roomId = $request->request->get('roomId');
+
+        if (!isset($dateStr) || !isset($film) || !isset($langId) || !isset($roomId)) {
+            return $this->json(['message' => 'Veuillez remplir tout les champs.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $filmId = $data['filmId'] ?? null;
-        $langId = $data['langId'] ?? null;
-        $roomId = $data['roomId'] ?? null;
-        $dateStr = $data['date'] ?? null;
-        $isClosed = $data['isClosed'] ?? false;
-
-        if (!$filmId || !$langId || !$roomId || !$dateStr) {
-            return $this->json(['message' => 'filmId, langId, roomId et date sont obligatoires.'], Response::HTTP_BAD_REQUEST);
+        try {
+            $date = new \DateTime($dateStr, new \DateTimeZone('Europe/Paris'));
+        } catch (\Exception $e) {
+            return $this->json(['message' => 'Erreur dans le choix de la date.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $film = $filmRepo->find($filmId);
-        $lang = $langRepo->find($langId);
-        $room = $roomRepo->find($roomId);
+        //Création des objets:
+        $programme = new Programme();
+        $film = $filmRepo->find($film);
+        $lang = $langRepo->findOneBy(['id' => $langId]);
+        $room = $roomRepo->findOneBy(['id' => $roomId]);
 
+        //Vérification des entrées utilisateurs:
         if (!$film || !$lang || !$room) {
             return $this->json(['message' => 'Film, langue ou salle introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
+        $programme
+            ->setDate($date)
+            ->setFilm($film)
+            ->setLang($lang)
+            ->setRoom($room)
+            ->setIsClosed(false);
+
         try {
-            $date = new \DateTimeImmutable($dateStr);
+            //Enregistrement en DB:
+            $entityManager->persist($programme);
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'Programme créé avec succès !'
+            ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
-            return $this->json(['message' => 'Format de date invalide. Utiliser ISO 8601. AAAA-MM-JJTHH:MM:SS'], Response::HTTP_BAD_REQUEST);
+            return $this->json([
+                'message' => 'Erreur de lors de l\'enregistrement du programme.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        // On vérifie qu'une programmation n'éxiste pas déjà dans la même salle au même moment
-        $conflict = $programmeRepo->findConflicting($room, $date, $film->getDuration());
-        if ($conflict) {
-            return $this->json(['message' => 'Conflit d\'horaire : un programme existe déjà dans cette salle à cette date.'], Response::HTTP_CONFLICT);
-        }
-
-        $programme = new Programme();
-        $programme->setFilm($film);
-        $programme->setLang($lang);
-        $programme->setRoom($room);
-        $programme->setDate(\DateTime::createFromImmutable($date));
-        $programme->setIsClosed((bool)$isClosed);
-
-        $em->persist($programme);
-        $em->flush();
-
-        return $this->json([
-            'message' => 'Programme créé.',
-            'programme' => [
-                'id' => $programme->getId(),
-                'filmId' => $film->getId(),
-                'langId' => $lang->getId(),
-                'roomId' => $room->getId(),
-                'date' => $programme->getDate()->format(\DateTime::ATOM),
-                'isClosed' => $programme->isClosed(),
-            ]
-        ], Response::HTTP_CREATED);
     }
 }
