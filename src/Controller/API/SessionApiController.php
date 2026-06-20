@@ -335,7 +335,7 @@ final class SessionApiController extends AbstractController {
         return $this->json($user, 200, [], ['groups' => ['user.profile']]);
     }
 
-    #[Route('/upadte-photo', name: '.upadatePhoto', methods: ['POST'])]
+    #[Route('/update-photo', name: '.updatePhoto', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     /**
      * Met à jour la photo de profile d'un utilisateur.
