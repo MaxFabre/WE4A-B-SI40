@@ -24,7 +24,7 @@ class Comment {
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['user.profile'])]
+    #[Groups(['user.profile', 'comment.details'])]
     private ?Film $film = null;
 
     #[ORM\Column(length: 64)]
