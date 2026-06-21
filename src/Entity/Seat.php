@@ -6,6 +6,7 @@ use App\Repository\SeatRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SeatRepository::class)]
 class Seat
@@ -13,12 +14,15 @@ class Seat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['room.details','seat.details','reservation.details', 'programme.details'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['seat.details', 'programme.details'])]
     private ?int $number = null;
 
     #[ORM\Column]
+    #[Groups(['room.details','seat.details','reservation.details', 'programme.details'])]
     private ?int $class = null;
 
     #[ORM\ManyToOne(inversedBy: 'seats')]

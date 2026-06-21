@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\FilmRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
@@ -21,23 +22,23 @@ class Film {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'programme.details', 'film.search', 'film.pined', 'programme.details', 'comment.details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile', 'programme.details', 'comment.details'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.pined'])]
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.pined', 'programme.details'])]
     private ?int $duration = null;
 
     #[ORM\Column(length: 60)]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined', 'user.profile', 'programme.details'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 2, nullable: true)]
@@ -45,9 +46,10 @@ class Film {
     private ?string $price = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['film.details', 'film.search', 'personality.details', 'film.pined'])]
     private ?string $coverPath = null;
 
-    #[UploadableField(mapping: 'films_cover', fileNameProperty: 'coverpath')]
+    #[UploadableField(mapping: 'films_cover', fileNameProperty: 'coverPath')]
     #[Image]
     private ?File $coverFile = null;
 
@@ -56,7 +58,7 @@ class Film {
      * @var Collection<int, Genre>
      */
     #[ORM\ManyToMany(targetEntity: Genre::class, mappedBy: 'films')]
-    #[Groups(['film.details'])]
+    #[Groups(['film.details', 'film.pined'])]
     private Collection $genres;
 
     /**
@@ -156,7 +158,11 @@ class Film {
         return $this;
     }
     #[Assert\Callback]
-    public function validatePrice(ExecutionContextInterface $context): void {//Fonction appelée automatiquement en cas de validation d'un formulaire qui va set un price. ça affichera le message d'erreur jsute en dessous du champ.
+    /**
+     * Fonction appelée automatiquement en cas de validation d'un formulaire qui va set un price.
+     * ça affichera le message d'erreur jsute en dessous du champ.
+     */
+    public function validatePrice(ExecutionContextInterface $context): void {
         if ($this->price === null || $this->price === '') {
             return;
         }
@@ -230,17 +236,21 @@ class Film {
     public function setCoverFile(?File $photoFile): static {
         $this->coverFile = $photoFile;
 
+        if (null !== $photoFile) {
+            $this->updated_at = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
+        }
+
         return $this;
     }
 
     /**
      * @return Collection<int, Genre>
      */
-    public function getgenre(): Collection {
+    public function getGenres(): Collection {
         return $this->genres;
     }
 
-    public function addgenre(Genre $genre): static {
+    public function addGenres(Genre $genre): static {
         if (!$this->genres->contains($genre)) {
             $this->genres->add($genre);
             $genre->addFilm($this);
@@ -249,7 +259,7 @@ class Film {
         return $this;
     }
 
-    public function removegenre(Genre $genre): static {
+    public function removeGenres(Genre $genre): static {
         if ($this->genres->removeElement($genre)) {
             $genre->removeTest($this);
         }
@@ -329,13 +339,11 @@ class Film {
     /**
      * @return Collection<int, Comment>
      */
-    public function getComments(): Collection
-    {
+    public function getComments(): Collection {
         return $this->comments;
     }
 
-    public function addComment(Comment $comment): static
-    {
+    public function addComment(Comment $comment): static {
         if (!$this->comments->contains($comment)) {
             $this->comments->add($comment);
             $comment->setFilm($this);
@@ -344,8 +352,7 @@ class Film {
         return $this;
     }
 
-    public function removeComment(Comment $comment): static
-    {
+    public function removeComment(Comment $comment): static {
         if ($this->comments->removeElement($comment)) {
             // set the owning side to null (unless already changed)
             if ($comment->getFilm() === $this) {
@@ -354,6 +361,12 @@ class Film {
         }
 
         return $this;
+    }
+
+    #[Groups(['film.details'])]
+    public function getVisibleComments(): Collection {
+        $criteria = Criteria::create()->andWhere(Criteria::expr()->eq('is_visible', true));
+        return $this->comments->matching($criteria);
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable {

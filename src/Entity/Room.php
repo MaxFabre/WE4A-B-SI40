@@ -6,6 +6,7 @@ use App\Repository\RoomRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: RoomRepository::class)]
 class Room
@@ -13,18 +14,22 @@ class Room
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['room.details', 'programme.details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['room.details', 'programme.details'])]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(['room.details', 'programme.details'])]
     private ?int $capacity = null;
 
     /**
      * @var Collection<int, Seat>
      */
     #[ORM\OneToMany(targetEntity: Seat::class, mappedBy: 'room')]
+    #[Groups(['room.details'])]
     private Collection $seats;
 
     /**

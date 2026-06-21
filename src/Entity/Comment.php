@@ -7,38 +7,48 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
 class Comment {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['film.details', 'comment.details', 'user.profile'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['film.details', 'comment.details', 'report.list'])]
     private ?User $author = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['user.profile', 'comment.details'])]
     private ?Film $film = null;
 
     #[ORM\Column(length: 64)]
+    #[Groups(['film.details', 'comment.details', 'report.list', 'user.profile'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['film.details', 'comment.details'])]
     private ?string $content = null;
 
     #[ORM\Column]
+    #[Groups(['film.details', 'comment.details', 'user.profile'])]
     private ?float $note = null;
 
     #[ORM\Column]
+    #[Groups(['film.details', 'comment.details'])]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column]
+    #[Groups(['film.details', 'comment.details'])]
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\Column]
+    #[Groups(['comment.details'])]
     private ?bool $is_visible = null;
 
     /**
@@ -47,8 +57,7 @@ class Comment {
     #[ORM\OneToMany(targetEntity: CommentReport::class, mappedBy: 'comment', orphanRemoval: true)]
     private Collection $commentReports;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->commentReports = new ArrayCollection();
     }
 

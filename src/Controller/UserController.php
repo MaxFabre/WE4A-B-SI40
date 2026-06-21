@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\AdminUserType;
 use App\Repository\UserRepository;
+use App\Service\AdminEntityChangeLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +23,7 @@ final class UserController extends AbstractController {
         ]);
     }
     #[Route('/create', name: '.create')]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response {
+    public function create(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $user = new User();
         $form = $this->createForm(AdminUserType::class, $user);
 
@@ -31,6 +32,19 @@ final class UserController extends AbstractController {
             //Enregistrement en db:
             $entityManager->persist($user);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'user',
+                [
+                    'id' => $user->getId(),
+                    'username' => $user->getUsername(),
+                    'email' => $user->getEmail(),
+                    'roles' => $user->getRoles(),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'L\'utilisateur à bien été créé.');
@@ -43,7 +57,7 @@ final class UserController extends AbstractController {
     }
 
     #[Route('/edit/{id}', name: '.edit', methods: ['GET', 'POST'])]
-    public function edit(User $user, Request $request, EntityManagerInterface $entityManager): Response {
+    public function edit(User $user, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $form = $this->createForm(AdminUserType::class, $user);
         $form->handleRequest($request);
 
@@ -53,6 +67,19 @@ final class UserController extends AbstractController {
 
             //Enregistrement en db:
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'user',
+                [
+                    'id' => $user->getId(),
+                    'username' => $user->getUsername(),
+                    'email' => $user->getEmail(),
+                    'roles' => $user->getRoles(),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success','L\'utilisateur à bien été modifié.');

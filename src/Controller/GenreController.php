@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Genre;
+use App\Entity\User;
 use App\Form\GenreType;
+use App\Service\AdminEntityChangeLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +22,7 @@ final class GenreController extends AbstractController {
     }
 
     #[Route('/create', name: '.create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response {
+    public function create(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $genre = new Genre();
         $genreForm = $this->createForm(GenreType::class, $genre);
 
@@ -29,6 +31,17 @@ final class GenreController extends AbstractController {
             //Enregistrement en db:
             $entityManager->persist($genre);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'genre',
+                [
+                    'id' => $genre->getId(),
+                    'name' => $genre->getName(),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'Le genre de film à bien été créé.');
@@ -40,12 +53,23 @@ final class GenreController extends AbstractController {
     }
 
     #[Route('/edit/{id}', name: '.edit', methods: ['GET', 'POST'])]
-    public function edit(Genre $genre, Request $request, EntityManagerInterface $entityManager): Response {
+    public function edit(Genre $genre, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $genreForm = $this->createForm(GenreType::class, $genre);
         $genreForm->handleRequest($request);
         if ($genreForm->isSubmitted() && $genreForm->isValid()) {
             //Enregistrement en db:
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'genre',
+                [
+                    'id' => $genre->getId(),
+                    'name' => $genre->getName(),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'Le genre de film à bien été modifié.');

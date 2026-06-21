@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Programme;
+use App\Entity\User;
 use App\Form\ProgrammeType;
 use App\Repository\ProgrammeRepository;
+use App\Service\AdminEntityChangeLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,7 +38,7 @@ final class ProgrammeController extends AbstractController {
 
     }
     #[Route('/create', name: '.create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response {
+    public function create(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $programme = new Programme();
         $programmeForm = $this->createForm(ProgrammeType::class, $programme);
 
@@ -46,6 +48,24 @@ final class ProgrammeController extends AbstractController {
             //Enregistrement en db:
             $entityManager->persist($programme);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'programme',
+                [
+                    'id' => $programme->getId(),
+                    'date' => $programme->getDate()?->format(DATE_ATOM),
+                    'filmId' => $programme->getFilm()?->getId(),
+                    'filmTitle' => $programme->getFilm()?->getTitle(),
+                    'roomId' => $programme->getRoom()?->getId(),
+                    'roomName' => $programme->getRoom()?->getName(),
+                    'langId' => $programme->getLang()?->getId(),
+                    'langName' => $programme->getLang()?->getName(),
+                    'isClosed' => $programme->isClosed(),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'La programmation.');
@@ -57,12 +77,30 @@ final class ProgrammeController extends AbstractController {
     }
 
     #[Route('/edit/{id}', name: '.edit', methods: ['GET', 'POST'])]
-    public function edit(Programme $programme, Request $request, EntityManagerInterface $entityManager): Response {
+    public function edit(Programme $programme, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $programmeForm = $this->createForm(ProgrammeType::class, $programme);
         $programmeForm->handleRequest($request);
         if ($programmeForm->isSubmitted() && $programmeForm->isValid()) {
             //Enregistrement en db:
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'programme',
+                [
+                    'id' => $programme->getId(),
+                    'date' => $programme->getDate()?->format(DATE_ATOM),
+                    'filmId' => $programme->getFilm()?->getId(),
+                    'filmTitle' => $programme->getFilm()?->getTitle(),
+                    'roomId' => $programme->getRoom()?->getId(),
+                    'roomName' => $programme->getRoom()?->getName(),
+                    'langId' => $programme->getLang()?->getId(),
+                    'langName' => $programme->getLang()?->getName(),
+                    'isClosed' => $programme->isClosed(),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'La programmation à bien été modifié.');

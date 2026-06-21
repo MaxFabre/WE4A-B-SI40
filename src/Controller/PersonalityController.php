@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Person;
+use App\Entity\User;
 use App\Form\PersonalityType;
 use App\Repository\FilmRepository;
 use App\Repository\PersonRepository;
+use App\Service\AdminEntityChangeLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,7 +41,7 @@ final class PersonalityController extends AbstractController {
     }
 
     #[Route('tools/personality/create', name: 'admin.personality.create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response {
+    public function create(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $personality = new Person();
         $form = $this->createForm(PersonalityType::class, $personality);
 
@@ -53,6 +55,19 @@ final class PersonalityController extends AbstractController {
             $entityManager->persist($personality);
             $entityManager->flush();
 
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'personality',
+                [
+                    'id' => $personality->getId(),
+                    'firstname' => $personality->getFirstname(),
+                    'lastname' => $personality->getLastname(),
+                    'birthdate' => $personality->getBirthdate()?->format('Y-m-d'),
+                ]
+            );
+
             //Redirection avec message:
             $this->addFlash('success', 'Le film à bien été créé.');
             return $this->redirectToRoute('admin.personality.index');
@@ -65,7 +80,7 @@ final class PersonalityController extends AbstractController {
     }
 
     #[Route('tools/personality/edit/{id}/', name: 'admin.personality.edit')]
-    public function edit(Person $person, Request $request, EntityManagerInterface $entityManager): Response {
+    public function edit(Person $person, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $form = $this->createForm(PersonalityType::class, $person);
 
         $form->handleRequest($request);
@@ -77,6 +92,19 @@ final class PersonalityController extends AbstractController {
             //Enregistrement en db:
             $entityManager->persist($person);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'personality',
+                [
+                    'id' => $person->getId(),
+                    'firstname' => $person->getFirstname(),
+                    'lastname' => $person->getLastname(),
+                    'birthdate' => $person->getBirthdate()?->format('Y-m-d'),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'Le film à bien été modifié.');

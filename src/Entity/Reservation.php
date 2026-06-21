@@ -6,23 +6,26 @@ use App\Repository\ReservationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
-class Reservation
-{
+class Reservation {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['programme.details','reservation.details','basket.details'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['reservation.details', 'basket.details'])]
     private ?Programme $programme = null;
 
     /**
      * @var Collection<int, Seat>
      */
     #[ORM\ManyToMany(targetEntity: Seat::class, inversedBy: 'reservations')]
+    #[Groups(['reservation.details', 'programme.details', 'basket.details'])]
     private Collection $seats;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]

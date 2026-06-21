@@ -61,4 +61,14 @@ class BasketRepository extends ServiceEntityRepository
 
         return $this->find($result['id']);
     }
+
+    public function findPaidBasketsWithReservationsByUser(int $userId): array
+    {
+        return $this->createQueryBuilder('b')
+            ->innerJoin('b.reservations', 'r')
+            ->andWhere('b.user = :user')
+            ->setParameter('user', $userId)
+            ->getQuery()
+            ->getResult();
+    }
 }

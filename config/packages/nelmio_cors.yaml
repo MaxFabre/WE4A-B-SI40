@@ -1,0 +1,13 @@
+nelmio_cors:
+    defaults:
+        origin_regex: true
+        allow_origin: ['^http://localhost:[0-9]+$']
+        allow_headers: ['X-Requested-With', 'Content-Type', 'Accept', 'Origin', 'Authorization']
+        allow_methods: ['POST', 'PUT', 'GET', 'DELETE', 'OPTIONS']
+        max_age: 3600
+    paths:
+        '^/api/':
+            allow_origin: ['^http://localhost:[0-9]+$']
+            allow_headers: ['*']
+            allow_methods: ['POST', 'PUT', 'GET', 'DELETE']
+            max_age: 3600

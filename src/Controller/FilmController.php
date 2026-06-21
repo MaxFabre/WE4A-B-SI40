@@ -4,12 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Comment;
 use App\Entity\Film;
+use App\Entity\User;
 use App\Form\CommentType;
 use App\Form\FilmType;
 use App\Repository\FilmRepository;
 use App\Repository\GenreRepository;
 use App\Repository\CommentRepository;
 use App\Repository\ProgrammeRepository;
+use App\Service\AdminEntityChangeLogger;
+use App\Service\LogEntryLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -49,7 +52,7 @@ final class FilmController extends AbstractController {
     }
 
     #[Route('/film/{slug}', name: 'film.show', methods: ['GET', 'POST'])]
-    public function show(string $slug, ProgrammeRepository $programmeRepository, FilmRepository $filmRepository, CommentRepository $commentRepository, Request $request, EntityManagerInterface $entityManager): Response {
+    public function show(string $slug, ProgrammeRepository $programmeRepository, FilmRepository $filmRepository, CommentRepository $commentRepository, Request $request, EntityManagerInterface $entityManager, LogEntryLogger $logEntryLogger): Response {
         //Initialisation:
         $film = $filmRepository->findOneBy(['slug' => $slug]);
         $newComment = new Comment();
@@ -60,8 +63,9 @@ final class FilmController extends AbstractController {
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 //Remplissage des champs cachés:
+                $currentUser = $this->getUser();
                 $newComment->setFilm($film);
-                $newComment->setAuthor($this->getUser());
+                $newComment->setAuthor($currentUser instanceof User ? $currentUser : null);
                 $newComment->setCreatedAt(new \DateTimeImmutable());
                 $newComment->setUpdatedAt(new \DateTimeImmutable());
                 $newComment->setIsVisible(true);
@@ -70,6 +74,25 @@ final class FilmController extends AbstractController {
                 $entityManager->persist($newComment);
                 $entityManager->flush();
 
+                try {
+                    $logEntryLogger->log(
+                        $currentUser instanceof User ? $currentUser->getId() : null,
+                        'Comment published',
+                        'success',
+                        [
+                            'commentId' => $newComment->getId(),
+                            'filmId' => $film?->getId(),
+                            'filmSlug' => $film?->getSlug(),
+                            'authorId' => $currentUser instanceof User ? $currentUser->getId() : null,
+                            'authorUsername' => $currentUser instanceof User ? $currentUser->getUsername() : null,
+                            'title' => $newComment->getTitle(),
+                            'note' => $newComment->getNote(),
+                            'source' => 'web',
+                        ]
+                    );
+                } catch (\Throwable) {
+                }
+
                 $this->addFlash('success', 'Le commentaire a bien été créé.');
 
                 //Rechargement de la page:
@@ -77,7 +100,25 @@ final class FilmController extends AbstractController {
                     'slug' => $slug
                 ]);
 
-            } catch (\Doctrine\DBAL\Exception\DriverException $e) {
+            } catch (\Throwable $e) {
+                try {
+                    $currentUser = $this->getUser();
+                    $logEntryLogger->log(
+                        $currentUser instanceof User ? $currentUser->getId() : null,
+                        'Comment published',
+                        'failed',
+                        [
+                            'filmId' => $film?->getId(),
+                            'filmSlug' => $film?->getSlug(),
+                            'title' => $newComment->getTitle(),
+                            'note' => $newComment->getNote(),
+                            'source' => 'web',
+                            'error' => $e::class,
+                        ]
+                    );
+                } catch (\Throwable) {
+                }
+
                 $form->addError(new FormError('Y a un problème quelque part dans les données...'));
             }
         }
@@ -101,7 +142,7 @@ final class FilmController extends AbstractController {
     }
 
     #[Route('/tools/film/create', name: 'admin.film.create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response {
+    public function create(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $film = new Film();
         $filmForm = $this->createForm(FilmType::class, $film);
 
@@ -115,6 +156,20 @@ final class FilmController extends AbstractController {
                 //Enregistrement en db:
                 $entityManager->persist($film);
                 $entityManager->flush();
+
+                $currentUser = $this->getUser();
+                $adminEntityChangeLogger->log(
+                    $currentUser instanceof User ? $currentUser : null,
+                    'creation',
+                    'film',
+                    [
+                        'id' => $film->getId(),
+                        'title' => $film->getTitle(),
+                        'slug' => $film->getSlug(),
+                        'duration' => $film->getDuration(),
+                        'price' => $film->getPrice(),
+                    ]
+                );
 
                 //Redirection avec message:
                 $this->addFlash('success', 'Le film à bien été créé.');
@@ -133,7 +188,7 @@ final class FilmController extends AbstractController {
     }
 
     #[Route('/tools/film/edit/{id}', name: 'admin.film.edit', methods: ['GET', 'POST'])]
-    public function edit(Film $film, Request $request, EntityManagerInterface $entityManager): Response {
+    public function edit(Film $film, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $filmForm = $this->createForm(FilmType::class, $film);
         $filmForm->handleRequest($request);
 
@@ -144,6 +199,20 @@ final class FilmController extends AbstractController {
 
             //Enregistrement en db:
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'film',
+                [
+                    'id' => $film->getId(),
+                    'title' => $film->getTitle(),
+                    'slug' => $film->getSlug(),
+                    'duration' => $film->getDuration(),
+                    'price' => $film->getPrice(),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success','Le film à bien été modifié.');
@@ -176,7 +245,7 @@ final class FilmController extends AbstractController {
         ]);
     }
 
-    #[Route('/film', name: 'film.redirect', methods: ['GET'])]
+    #[Route('/film{trailingSlash}', name: 'film.redirect', methods: ['GET'], requirements: ['trailingSlash' => '/?'], defaults: ['trailingSlash' => ''])]
     public function redirectToIndex(): Response {
         return $this->redirectToRoute('film.index', [], 301);
     }

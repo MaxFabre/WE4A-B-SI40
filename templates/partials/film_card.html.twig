@@ -25,7 +25,7 @@
         <p class="film-card-description">{{ film.description ? (film.description|slice(0,300) ~ (film.description|length > 300 ? '...' : '')) : '' }}</p>
 
         <div class="film-pined-genre">
-            {% for genre in film.genre %}
+            {% for genre in film.genres %}
                 <span>{{ genre.name }}</span>
             {% endfor %}
         </div>

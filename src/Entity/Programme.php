@@ -6,37 +6,44 @@ use App\Repository\ProgrammeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ProgrammeRepository::class)]
-class Programme
-{
+class Programme {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['programme.details','reservation.details'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['programme.details'])]
     private ?\DateTime $date = null;
 
     #[ORM\ManyToOne(inversedBy: 'programmes')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['programme.details'])]
     private ?Room $room = null;
 
     /**
      * @var Collection<int, Reservation>
      */
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'programme')]
+    #[Groups(['programme.details'])]
     private Collection $reservations;
 
     #[ORM\ManyToOne(inversedBy: 'programmes')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['programme.details', 'basket.details'])]
     private ?Film $film = null;
 
     #[ORM\ManyToOne(inversedBy: 'programmes')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['programme.details'])]
     private ?Lang $lang = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['programme.details'])]
     private ?bool $isClosed = null;
 
     public function __construct() {

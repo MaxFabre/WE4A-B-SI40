@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Service\AdminEntityChangeLogger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -14,18 +16,7 @@ use App\Entity\Seat;
 use Doctrine\ORM\EntityManager;
 use App\Repository\RoomRepository;
 #[Route('/tools/room', name: 'admin.room')]
-final class RoomController extends AbstractController
-{
-//    #[Route('/tools/room', name: 'admin.room')]
-//    public function index(): Response
-//    {
-//        return $this->render('room/index.html.twig', [
-//            'controller_name' => 'RoomController',
-//        ]);
-//    }
-
-
-
+final class RoomController extends AbstractController {
     #[Route('/', name: '.index')]
     public function roomList(RoomRepository $roomRepository): Response {
 
@@ -47,7 +38,7 @@ final class RoomController extends AbstractController
 
     }
     #[Route('/edit/{id}', name: '.edit', methods: ['GET', 'POST'])]
-    public function edit(Room $room, Request $request, EntityManagerInterface $entityManager): Response {
+    public function edit(Room $room, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $firstClassSeats = 0;
         $secondClassSeats = 0;
 
@@ -84,6 +75,20 @@ final class RoomController extends AbstractController
             //Enregistrement en db:
             $entityManager->flush();
 
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'room',
+                [
+                    'id' => $room->getId(),
+                    'name' => $room->getName(),
+                    'capacity' => $room->getCapacity(),
+                    'firstClassSeats' => $newFirstClassSeats,
+                    'secondClassSeats' => $newSecondClassSeats,
+                ]
+            );
+
             //Redirection avec message:
             $this->addFlash('success', 'La salle à bien été modifié.');
             return $this->redirectToRoute('admin.room.index');
@@ -95,7 +100,7 @@ final class RoomController extends AbstractController
     }
 
     // Prend en paramètres une salle, une classe de sièges, le nombre d'anciens sièges et le nombre de nouveaux sièges
-    private function updateRoomSeats(Room $room, int $seatClass, int $oldCount, int $newCount, EntityManagerInterface $entityManager): void
+    public function updateRoomSeats(Room $room, int $seatClass, int $oldCount, int $newCount, EntityManagerInterface $entityManager): void
     {
         if ($newCount > $oldCount) { //Si on doit ajouter des sièges
             $seatNumber = $this->getNextSeatNumber($room);//On récupère le prochain numéro de siège qui n'est pas pris
@@ -147,7 +152,7 @@ final class RoomController extends AbstractController
 
 
     #[Route('/create', name: '.create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response {
+    public function create(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $room = new Room();
         $roomForm = $this->createForm(RoomType::class, $room);
 
@@ -184,6 +189,20 @@ final class RoomController extends AbstractController
             //Enregistrement en db:
             $entityManager->persist($room);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'room',
+                [
+                    'id' => $room->getId(),
+                    'name' => $room->getName(),
+                    'capacity' => $room->getCapacity(),
+                    'firstClassSeats' => $firstClassSeats,
+                    'secondClassSeats' => $secondClassSeats,
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'La salle.');
