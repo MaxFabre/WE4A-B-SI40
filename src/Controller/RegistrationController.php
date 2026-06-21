@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\Person;
 use App\Form\RegistrationFormType;
+use App\Service\LogEntryLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -15,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class RegistrationController extends AbstractController {
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response {
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager, LogEntryLogger $logEntryLogger): Response {
         $user = new User();
         $user->setPerson(new Person());
 
@@ -38,6 +39,22 @@ class RegistrationController extends AbstractController {
 
             $entityManager->persist($user);
             $entityManager->flush();
+
+            try {
+                $logEntryLogger->log(
+                    $user->getId(),
+                    'Account created',
+                    'success',
+                    [
+                        'userId' => $user->getId(),
+                        'email' => $user->getEmail(),
+                        'username' => $user->getUsername(),
+                        'personId' => $user->getPerson()?->getId(),
+                        'source' => 'web',
+                    ]
+                );
+            } catch (\Throwable) {
+            }
 
             // do anything else you need here, like send an email
 

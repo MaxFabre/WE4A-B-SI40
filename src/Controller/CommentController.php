@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\Comment;
 use App\Entity\CommentReport;
 use App\Entity\Film;
+use App\Entity\User;
 use App\Repository\CommentRepository;
+use App\Service\LogEntryLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Flow\FormFlowInterface;
@@ -42,22 +44,47 @@ final class CommentController extends AbstractController {
     }
 
     #[Route('/comment/report/{id}', name: 'comment.report', methods: ['POST'])]
-    public function report(Comment $comment, Request $request, EntityManagerInterface $entityManager): Response {
+    public function report(Comment $comment, Request $request, EntityManagerInterface $entityManager, LogEntryLogger $logEntryLogger): Response {
         //Verification de connexion:
         if ($this->isCsrfTokenValid('report'.$comment->getId(), $request->request->get('_token'))) {
             //Initialisation:
             $report = new CommentReport();
+            $currentUser = $this->getUser();
+            $complainant = $currentUser instanceof User ? $currentUser : null;
+            $commentAuthor = $comment->getAuthor();
+            $reportedAt = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
 
             //Remplissage des champs du signalement:
             $report->setComment($comment);
-            $report->setComplainant($this->getUser());
-            $report->setCreatedAt(new \DateTimeImmutable());
+            $report->setComplainant($complainant);
+            $report->setCreatedAt($reportedAt);
             $report->setIsActive(true);
             $report->setStatut("En attente");
 
             //Enregistrement en DB:
             $entityManager->persist($report);
             $entityManager->flush();
+
+            try {
+                $logEntryLogger->log(
+                    $complainant?->getId(),
+                    'Comment report created',
+                    'success',
+                    [
+                        'reportId' => $report->getId(),
+                        'commentId' => $comment->getId(),
+                        'commentTitle' => $comment->getTitle(),
+                        'commentContent' => $comment->getContent(),
+                        'reportedAt' => $reportedAt->format(DATE_ATOM),
+                        'commentAuthorId' => $commentAuthor?->getId(),
+                        'commentAuthorUsername' => $commentAuthor?->getUsername(),
+                        'complainantId' => $complainant?->getId(),
+                        'complainantUsername' => $complainant?->getUsername(),
+                        'source' => 'web',
+                    ]
+                );
+            } catch (\Throwable) {
+            }
         }
 
         //Retour vers la page du film:

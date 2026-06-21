@@ -22,14 +22,18 @@ class LogEntry
     #[ODM\Field(type: 'string')]
     private string $status = '';
 
+    #[ODM\Field(type: 'string')]
+    private ?string $details = null;
+
     #[ODM\Field(type: 'date')]
     private DateTime $createdAt;
 
-    public function __construct(?int $userId, string $type, string $status = '')
+    public function __construct(?int $userId, string $type, string $status = '', ?string $details = null)
     {
         $this->userId = $userId;
         $this->type = $type;
         $this->status = $status;
+        $this->details = $details;
         $this->createdAt = new DateTime('now', new \DateTimeZone('+02:00'));
     }
 
@@ -70,6 +74,18 @@ class LogEntry
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getDetails(): ?string
+    {
+        return $this->details;
+    }
+
+    public function setDetails(?string $details): static
+    {
+        $this->details = $details;
 
         return $this;
     }

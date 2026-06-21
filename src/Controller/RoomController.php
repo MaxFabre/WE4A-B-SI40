@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Service\AdminEntityChangeLogger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -36,7 +38,7 @@ final class RoomController extends AbstractController {
 
     }
     #[Route('/edit/{id}', name: '.edit', methods: ['GET', 'POST'])]
-    public function edit(Room $room, Request $request, EntityManagerInterface $entityManager): Response {
+    public function edit(Room $room, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $firstClassSeats = 0;
         $secondClassSeats = 0;
 
@@ -72,6 +74,20 @@ final class RoomController extends AbstractController {
 
             //Enregistrement en db:
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'room',
+                [
+                    'id' => $room->getId(),
+                    'name' => $room->getName(),
+                    'capacity' => $room->getCapacity(),
+                    'firstClassSeats' => $newFirstClassSeats,
+                    'secondClassSeats' => $newSecondClassSeats,
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'La salle à bien été modifié.');
@@ -136,7 +152,7 @@ final class RoomController extends AbstractController {
 
 
     #[Route('/create', name: '.create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response {
+    public function create(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $room = new Room();
         $roomForm = $this->createForm(RoomType::class, $room);
 
@@ -173,6 +189,20 @@ final class RoomController extends AbstractController {
             //Enregistrement en db:
             $entityManager->persist($room);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'room',
+                [
+                    'id' => $room->getId(),
+                    'name' => $room->getName(),
+                    'capacity' => $room->getCapacity(),
+                    'firstClassSeats' => $firstClassSeats,
+                    'secondClassSeats' => $secondClassSeats,
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'La salle.');

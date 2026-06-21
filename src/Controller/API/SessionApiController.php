@@ -2,9 +2,12 @@
 
 namespace App\Controller\API;
 
+use App\Document\LogEntry;
 use App\Entity\Person;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\LogEntryLogger;
+use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -24,7 +27,7 @@ final class SessionApiController extends AbstractController {
     /**
      * Inscription d'un utilisateur depuis l'API.
      */
-    public function register(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): JsonResponse {
+    public function register(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, LogEntryLogger $logEntryLogger): JsonResponse {
         //Initialisation:
         $email = trim($request->request->get('email', ''));
         $username = trim($request->request->get('username', ''));
@@ -85,6 +88,22 @@ final class SessionApiController extends AbstractController {
         $entityManager->persist($user);
         $entityManager->flush();
 
+        try {
+            $logEntryLogger->log(
+                $user->getId(),
+                'Account created',
+                'success',
+                [
+                    'userId' => $user->getId(),
+                    'email' => $user->getEmail(),
+                    'username' => $user->getUsername(),
+                    'personId' => $person->getId(),
+                    'source' => 'api',
+                ]
+            );
+        } catch (\Throwable) {
+        }
+
         //Une fois le compte créer on connecte automatiquement l'utilisateur:
         return $this->json([
             'AUTH_TOKEN' => $user->getApiToken(),
@@ -95,7 +114,7 @@ final class SessionApiController extends AbstractController {
     /**
      * Connexion d'un utilisateur depuis l'API.
      */
-    public function login(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher): JsonResponse {
+    public function login(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, DocumentManager $documentManager): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
         if (!is_array($data)) {
@@ -116,10 +135,18 @@ final class SessionApiController extends AbstractController {
         $user = $userRepository->findOneBy(['email' => $email]);
 
         if (!$user || !$passwordHasher->isPasswordValid($user, $password)) {
+            $log = new LogEntry($user?->getId(), 'login', 'failure');
+            $documentManager->persist($log);
+            $documentManager->flush();
+
             return $this->json([
                 'message' => 'Identifiants invalides.',
             ], RESPONSE::HTTP_UNAUTHORIZED);
         }
+
+        $log = new LogEntry($user->getId(), 'login', 'success');
+        $documentManager->persist($log);
+        $documentManager->flush();
 
         return $this->json([
             'AUTH_TOKEN' => $user->getApiToken(),
@@ -133,6 +160,36 @@ final class SessionApiController extends AbstractController {
      */
     public function me(): JsonResponse {
         return $this->json($this->getUser(), 200, [], ['groups' => ['user.details']]);
+    }
+
+    #[Route('/logout/log', name: '.logout.log', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function logLogout(Request $request, LogEntryLogger $logEntryLogger): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $payload = json_decode($request->getContent(), true);
+        $status = 'success';
+
+        if (is_array($payload) && isset($payload['status']) && in_array($payload['status'], ['success', 'failed'], true)) {
+            $status = $payload['status'];
+        }
+
+        $logEntryLogger->log(
+            $user->getId(),
+            'logout',
+            $status,
+            [
+                'userId' => $user->getId(),
+                'username' => $user->getUsername(),
+                'source' => 'frontend',
+                'client' => is_array($payload) ? ($payload['client'] ?? null) : null,
+            ]
+        );
+
+        return $this->json([
+            'message' => 'Log de déconnexion enregistré.'
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/user/create', name: '.create', methods: ['POST'])]

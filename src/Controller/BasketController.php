@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\BasketPaymentLogger;
 use App\Entity\Basket;
 use App\Repository\BasketRepository;
 use App\Repository\ReservationRepository;
@@ -76,9 +77,19 @@ final class BasketController extends AbstractController {
     }
 
     #[Route('/basket/pay', name: 'basket.pay', methods: ['GET','POST'])]
-    public function pay(Request $request, EntityManagerInterface $entityManager, BasketRepository $basketRepository): Response {
+    public function pay(Request $request, EntityManagerInterface $entityManager, BasketRepository $basketRepository, BasketPaymentLogger $basketPaymentLogger): Response {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
         $basket = $basketRepository->findBasketByUserId($user->getId());
+
+        if (!$basket instanceof Basket) {
+            $this->addFlash('danger', 'Panier introuvable.');
+
+            return $this->redirectToRoute('basket.index');
+        }
 
         foreach ($basket->getReservations() as $reservation) {
             $reservation->setIsValidated(true);
@@ -87,7 +98,19 @@ final class BasketController extends AbstractController {
         $basket->setStatus('paid');
         $basket->setIsActive(false);
 
-        $entityManager->flush();
+        try {
+            $entityManager->flush();
+            $basketPaymentLogger->log($basket, true);
+        } catch (\Throwable $exception) {
+            try {
+                $basketPaymentLogger->log($basket, false, $exception);
+            } catch (\Throwable) {
+            }
+
+            $this->addFlash('danger', 'Une erreur est survenue lors du paiement du panier.');
+
+            return $this->redirectToRoute('basket.index');
+        }
 
 
         $this->addFlash('success', 'Votre panier a bien été payé.');

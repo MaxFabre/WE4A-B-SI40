@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\CarouselItem;
+use App\Entity\User;
 use App\Form\CarouselType;
 use App\Repository\CarouselItemRepository;
+use App\Service\AdminEntityChangeLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use phpDocumentor\Reflection\Element;
 use phpDocumentor\Reflection\Types\Integer;
@@ -19,7 +21,7 @@ use function Adminer\first;
 final class CarouselController extends AbstractController {
 
     #[Route('/', name: '.index')]
-    public function carousel(CarouselItemRepository $repository, Request $request, EntityManagerInterface $entityManager): Response {
+    public function carousel(CarouselItemRepository $repository, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $films = $repository->findBy([], ['position' => 'ASC']);
         $item = new CarouselItem();
         $form = $this->createForm(CarouselType::class, $item);
@@ -31,6 +33,19 @@ final class CarouselController extends AbstractController {
                 //Enregistrement en db:
                 $entityManager->persist($item);
                 $entityManager->flush();
+
+                $currentUser = $this->getUser();
+                $adminEntityChangeLogger->log(
+                    $currentUser instanceof User ? $currentUser : null,
+                    'creation',
+                    'carousel_item',
+                    [
+                        'id' => $item->getId(),
+                        'filmId' => $item->getFilm()?->getId(),
+                        'filmTitle' => $item->getFilm()?->getTitle(),
+                        'position' => $item->getPosition(),
+                    ]
+                );
 
                 //Redirection avec message:
                 $this->addFlash('success', 'Le film à bien été créé.');

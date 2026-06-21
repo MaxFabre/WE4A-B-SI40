@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\Controller\RoomController;
 use App\Entity\Basket;
+use App\Entity\Comment;
 use App\Entity\Film;
 use App\Entity\Genre;
 use App\Entity\Lang;
@@ -23,6 +24,8 @@ use App\Repository\ReservationRepository;
 use App\Repository\RoomRepository;
 use App\Repository\SeatRepository;
 use App\Repository\UserRepository;
+use App\Service\AdminEntityChangeLogger;
+use App\Service\BasketPaymentLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,8 +35,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Constraints\Timezone;
-use function Sodium\add;
 
 #[Route('/api', name: 'api')]
 final class ApiController extends AbstractController {
@@ -198,6 +199,62 @@ final class ApiController extends AbstractController {
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
+    #[Route('/film/{id}', name: '.film.delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function deleteFilm(Film $film, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
+        $currentUser = $this->getUser();
+        $programmes = $film->getProgrammes()->toArray();
+        $comments = $film->getComments()->toArray();
+        $reservations = [];
+
+        foreach ($programmes as $programme) {
+            foreach ($programme->getReservations() as $reservation) {
+                $reservations[$reservation->getId()] = $reservation;
+            }
+        }
+
+        try {
+            foreach ($reservations as $reservation) {
+                $entityManager->remove($reservation);
+            }
+
+            foreach ($programmes as $programme) {
+                $entityManager->remove($programme);
+            }
+
+            foreach ($comments as $comment) {
+                $entityManager->remove($comment);
+            }
+
+            $entityManager->remove($film);
+            $entityManager->flush();
+
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'suppression',
+                'film',
+                [
+                    'id' => $film->getId(),
+                    'title' => $film->getTitle(),
+                    'slug' => $film->getSlug(),
+                    'duration' => $film->getDuration(),
+                    'price' => $film->getPrice(),
+                    'programmesRemoved' => count($programmes),
+                    'reservationsRemoved' => count($reservations),
+                    'commentsRemoved' => count($comments),
+                ]
+            );
+
+            return new JsonResponse([
+                'message' => 'Film supprimé avec succès.'
+            ], Response::HTTP_OK);
+        } catch (\Throwable) {
+            return $this->json([
+                'message' => 'Erreur lors de la suppression du film.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     //--------------------------------SECTION SALLE----------------------------------------------------------------------------------
 
@@ -225,8 +282,8 @@ final class ApiController extends AbstractController {
     }
 
     #[Route('/room/{id}', name: '.room.update', methods: ['PUT'])]
-    public function updateRoom(Room $room, Request $request, EntityManagerInterface $entityManager): JsonResponse {
-        //Initialisation:
+    public function updateRoom(Room $room, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
+
         $name = $request->request->get('name');
         $firstClassSeatsStr = $request->request->get('firstClassSeats');
         $secondClassSeatsStr = $request->request->get('secondClassSeats');
@@ -250,8 +307,22 @@ final class ApiController extends AbstractController {
         $room->setCapacity($firstClassSeats + $secondClassSeats);
 
         try {
-            //Enregistrement en DB:
             $entityManager->flush();
+
+            //logs modification admin
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'room',
+                [
+                    'id' => $room->getId(),
+                    'name' => $room->getName(),
+                    'capacity' => $room->getCapacity(),
+                    'firstClassSeats' => $newFirstClassSeats,
+                    'secondClassSeats' => $newSecondClassSeats,
+                ]
+            );
 
             return new JsonResponse([
                 'message' => 'La salle à été modifiée avec succès.'
@@ -260,6 +331,60 @@ final class ApiController extends AbstractController {
             return $this->json([
                 'message' => 'Erreur lors de l\'enregistrement'
             ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/room/{id}', name: '.room.delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_FUND_MANAGER')]
+    public function deleteRoom(Room $room, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
+        $currentUser = $this->getUser();
+        $programmes = $room->getProgrammes()->toArray();
+        $seats = $room->getSeats()->toArray();
+        $reservations = [];
+
+        foreach ($programmes as $programme) {
+            foreach ($programme->getReservations() as $reservation) {
+                $reservations[$reservation->getId()] = $reservation;
+            }
+        }
+
+        try {
+            foreach ($reservations as $reservation) {
+                $entityManager->remove($reservation);
+            }
+
+            foreach ($programmes as $programme) {
+                $entityManager->remove($programme);
+            }
+
+            foreach ($seats as $seat) {
+                $entityManager->remove($seat);
+            }
+
+            $entityManager->remove($room);
+            $entityManager->flush();
+
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'suppression',
+                'room',
+                [
+                    'id' => $room->getId(),
+                    'name' => $room->getName(),
+                    'capacity' => $room->getCapacity(),
+                    'programmesRemoved' => count($programmes),
+                    'reservationsRemoved' => count($reservations),
+                    'seatsRemoved' => count($seats),
+                ]
+            );
+
+            return new JsonResponse([
+                'message' => 'Salle supprimée avec succès.'
+            ], Response::HTTP_OK);
+        } catch (\Throwable) {
+            return $this->json([
+                'message' => 'Erreur lors de la suppression de la salle.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -294,8 +419,8 @@ final class ApiController extends AbstractController {
 
     #[Route('/room/create', name: '.room.create', methods: ['POST'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
-    public function createRoom(Request $request, EntityManagerInterface $em, RoomRepository $roomRepository): JsonResponse {
-        //Initialisation:
+    public function createRoom(Request $request, EntityManagerInterface $em, RoomRepository $roomRepository, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
+
         $name = $request->request->get('name');
         $firstClassSeatsStr = $request->request->get('firstClassSeats');
         $secondClassSeatsStr = $request->request->get('secondClassSeats');
@@ -305,9 +430,6 @@ final class ApiController extends AbstractController {
         }
 
         //Création de l'objet:
-        $lang = new Lang();
-        $lang->setName($name);
-
         //On check si une salle à déjà ce nom:
         $existing = $roomRepository->findOneBy(['name' => $name]);
         if ($existing) {
@@ -347,9 +469,23 @@ final class ApiController extends AbstractController {
         }
 
         $room->setName($name);
-        //Enregistrement en db:
         $em->persist($room);
         $em->flush();
+
+        //logs modification admin
+        $currentUser = $this->getUser();
+        $adminEntityChangeLogger->log(
+            $currentUser instanceof User ? $currentUser : null,
+            'creation',
+            'room',
+            [
+                'id' => $room->getId(),
+                'name' => $room->getName(),
+                'capacity' => $room->getCapacity(),
+                'firstClassSeats' => $firstClassSeats,
+                'secondClassSeats' => $secondClassSeats,
+            ]
+        );
 
 
         return $this->json([
@@ -366,22 +502,33 @@ final class ApiController extends AbstractController {
 
     #[Route('/genre/create', name: '.genre.create', methods: ['POST'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
-    public function createGenre(Request $request, EntityManagerInterface $entityManager): JsonResponse {
-        //Initialisation:
+    public function createGenre(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
+
         $name = $request->request->get('name');
 
         if (!isset($name)) {
             return $this->json(['message' => 'Veuillez donner un nom au genre.'], Response::HTTP_BAD_REQUEST);
         }
 
-        //Création de l'objet:
         $genre = new Genre();
         $genre->setName($name);
 
         try {
-            //Enregistrement en DB:
             $entityManager->persist($genre);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+
+            //logs modification en admin
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'genre',
+                [
+                    'id' => $genre->getId(),
+                    'name' => $genre->getName(),
+                ]
+            );
 
             return new JsonResponse([
                 'message' => 'Genre créé avec succès !'
@@ -400,7 +547,7 @@ final class ApiController extends AbstractController {
 
     #[Route('/genre/{id}', name: '.genre.update', methods: ['PUT'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
-    public function updateGenre(Genre $genre, Request $request, EntityManagerInterface $entityManager): JsonResponse {
+    public function updateGenre(Genre $genre, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
         //Initialisation:
         $name = $request->request->get('name');
 
@@ -416,6 +563,18 @@ final class ApiController extends AbstractController {
             $entityManager->persist($genre);
             $entityManager->flush();
 
+            //logs modification en admin
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'genre',
+                [
+                    'id' => $genre->getId(),
+                    'name' => $genre->getName(),
+                ]
+            );
+
             return new JsonResponse([
                 'message' => 'Genre modifié avec succès !'
             ], Response::HTTP_CREATED);
@@ -427,9 +586,21 @@ final class ApiController extends AbstractController {
     }
 
     #[Route('/genre/{id}', name: '.genre.details', methods: ['DELETE'])]
-    public function deleteGenre(Genre $genre, EntityManagerInterface $entityManager): JsonResponse {
+    public function deleteGenre(Genre $genre, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
         $entityManager->remove($genre);
         $entityManager->flush();
+
+        $currentUser = $this->getUser();
+        $adminEntityChangeLogger->log(
+            $currentUser instanceof User ? $currentUser : null,
+            'suppression',
+            'genre',
+            [
+                'id' => $genre->getId(),
+                'name' => $genre->getName(),
+            ]
+        );
+
         return $this->json([
             'message' => 'Genre supprimé avec succès.'
         ], RESPONSE::HTTP_OK);
@@ -461,7 +632,7 @@ final class ApiController extends AbstractController {
     }
 
     #[Route('/lang/create', name: '.langs.create', methods: ['POST'])]
-    public function langCreate(Request $request, EntityManagerInterface $entityManager): JsonResponse {
+    public function langCreate(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
         //Initialisation:
         $name = $request->request->get('name');
 
@@ -477,6 +648,17 @@ final class ApiController extends AbstractController {
             //Enregistrement en DB:
             $entityManager->persist($lang);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'lang',
+                [
+                    'id' => $lang->getId(),
+                    'name' => $lang->getName(),
+                ]
+            );
 
             return new JsonResponse([
                 'message' => 'Langue créée avec succès !'
@@ -494,7 +676,7 @@ final class ApiController extends AbstractController {
     }
 
     #[Route('/lang/{id}', name: '.langs.update', methods: ['PUT'])]
-    public function updateLang(Lang $lang, Request $request, EntityManagerInterface $entityManager): JsonResponse {
+    public function updateLang(Lang $lang, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
         //Initialisation:
         $name = $request->request->get('name');
 
@@ -508,6 +690,17 @@ final class ApiController extends AbstractController {
             //Enregistrement en DB:
             $entityManager->flush();
 
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'lang',
+                [
+                    'id' => $lang->getId(),
+                    'name' => $lang->getName(),
+                ]
+            );
+
             return new JsonResponse([
                 'message' => 'Langue modifiée avec succès !'
             ], Response::HTTP_CREATED);
@@ -519,8 +712,21 @@ final class ApiController extends AbstractController {
     }
 
     #[Route('/lang/{id}', name: '.langs.delete', methods: ['DELETE'])]
-    public function delete(Lang $lang, EntityManagerInterface $entityManager): JsonResponse {
+    public function delete(Lang $lang, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
         $entityManager->remove($lang);
+        $entityManager->flush();
+
+        $currentUser = $this->getUser();
+        $adminEntityChangeLogger->log(
+            $currentUser instanceof User ? $currentUser : null,
+            'suppression',
+            'lang',
+            [
+                'id' => $lang->getId(),
+                'name' => $lang->getName(),
+            ]
+        );
+
         return $this->json([
             'message' => 'La langue à bien été supprimée.'
         ], RESPONSE::HTTP_OK, [], ['groups' => ['programme.details']]);
@@ -600,7 +806,7 @@ final class ApiController extends AbstractController {
     }
 
     #[Route('/basket/pay/{id}', name: 'basket.pay', methods: ['POST'])]
-    public function basketPay(Basket $basket, EntityManagerInterface $em, SerializerInterface $serializer): JsonResponse
+    public function basketPay(Basket $basket, EntityManagerInterface $em, SerializerInterface $serializer, BasketPaymentLogger $basketPaymentLogger): JsonResponse
     {
         // Mettre à jour le panier
         $basket->setIsActive(false);
@@ -609,14 +815,19 @@ final class ApiController extends AbstractController {
         try {
             $em->persist($basket);
             $em->flush();
+            $basketPaymentLogger->log($basket, true);
         } catch (\Throwable $e) {
+            try {
+                $basketPaymentLogger->log($basket, false, $e);
+            } catch (\Throwable) {
+            }
+
             return new JsonResponse(
                 ['message' => 'Erreur lors de la mise à jour du panier'],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
 
-        // Retourner le panier mis à jour (sérialisé avec le groupe basket.details)
         return $this->json(
             $basket,
             Response::HTTP_OK,
@@ -687,7 +898,7 @@ final class ApiController extends AbstractController {
     #[Route('/programme/{id}', name: '.programme.update', methods: ['PUT'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
     public function updateProgramme(Programme $programme, Request $request, EntityManagerInterface $entityManager, FilmRepository $filmRepo, LangRepository $langRepo, RoomRepository $roomRepo, ProgrammeRepository $programmeRepo
-    ): JsonResponse {
+        , AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
         //Initialisation:
         $dateStr = $request->request->get('date');
         $film = $request->request->get('film');
@@ -726,6 +937,24 @@ final class ApiController extends AbstractController {
             $entityManager->persist($programme);
             $entityManager->flush();
 
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'programme',
+                [
+                    'id' => $programme->getId(),
+                    'date' => $programme->getDate()?->format(DATE_ATOM),
+                    'filmId' => $programme->getFilm()?->getId(),
+                    'filmTitle' => $programme->getFilm()?->getTitle(),
+                    'roomId' => $programme->getRoom()?->getId(),
+                    'roomName' => $programme->getRoom()?->getName(),
+                    'langId' => $programme->getLang()?->getId(),
+                    'langName' => $programme->getLang()?->getName(),
+                    'isClosed' => $programme->isClosed(),
+                ]
+            );
+
             return new JsonResponse([
                 'message' => 'Le programme à été modifié avec succès !'
             ], Response::HTTP_CREATED);
@@ -738,9 +967,28 @@ final class ApiController extends AbstractController {
 
     #[Route('/programme/{id}', name: '.programme.delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
-    public function deleteProgramme(Programme $programme, EntityManagerInterface $entityManager): JsonResponse {
+    public function deleteProgramme(Programme $programme, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
         $entityManager->remove($programme);
         $entityManager->flush();
+
+        $currentUser = $this->getUser();
+        $adminEntityChangeLogger->log(
+            $currentUser instanceof User ? $currentUser : null,
+            'suppression',
+            'programme',
+            [
+                'id' => $programme->getId(),
+                'date' => $programme->getDate()?->format(DATE_ATOM),
+                'filmId' => $programme->getFilm()?->getId(),
+                'filmTitle' => $programme->getFilm()?->getTitle(),
+                'roomId' => $programme->getRoom()?->getId(),
+                'roomName' => $programme->getRoom()?->getName(),
+                'langId' => $programme->getLang()?->getId(),
+                'langName' => $programme->getLang()?->getName(),
+                'isClosed' => $programme->isClosed(),
+            ]
+        );
+
         return new JsonResponse([
             'message' => 'Le programme à bien été supprimé.'
         ], RESPONSE::HTTP_NO_CONTENT);
@@ -753,19 +1001,16 @@ final class ApiController extends AbstractController {
             return $this->json(['message' => 'Programme introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
-        // Récupère les réservations
         $reservations = $programme->getReservations();
 
         $result = [];
         foreach ($reservations as $reservation) {
-            // Récupére l'id de l'utilisateur via le basket (si exite)
             $basket = $reservation->getBasket();
             $userId = null;
             if ($basket && method_exists($basket, 'getUser') && $basket->getUser()) {
                 $userId = $basket->getUser()->getId();
             }
 
-            // Récupére la liste des id de sièges
             $seatIds = [];
             foreach ($reservation->getSeats() as $seat) {
                 $seatIds[] = $seat->getId();
@@ -784,8 +1029,9 @@ final class ApiController extends AbstractController {
     #[Route('/programme/create', name: '.programme.create', methods: ['POST'])]
     #[IsGranted('ROLE_FUND_MANAGER')]
     public function createProgramme(Request $request, EntityManagerInterface $entityManager, FilmRepository $filmRepo, LangRepository $langRepo, RoomRepository $roomRepo, ProgrammeRepository $programmeRepo
-    ): JsonResponse {
-        //Initialisation:
+        , AdminEntityChangeLogger $adminEntityChangeLogger): JsonResponse {
+
+
         $dateStr = $request->request->get('date');
         $film = $request->request->get('film');
         $langId = $request->request->get('langId');
@@ -823,6 +1069,24 @@ final class ApiController extends AbstractController {
             //Enregistrement en DB:
             $entityManager->persist($programme);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'programme',
+                [
+                    'id' => $programme->getId(),
+                    'date' => $programme->getDate()?->format(DATE_ATOM),
+                    'filmId' => $programme->getFilm()?->getId(),
+                    'filmTitle' => $programme->getFilm()?->getTitle(),
+                    'roomId' => $programme->getRoom()?->getId(),
+                    'roomName' => $programme->getRoom()?->getName(),
+                    'langId' => $programme->getLang()?->getId(),
+                    'langName' => $programme->getLang()?->getName(),
+                    'isClosed' => $programme->isClosed(),
+                ]
+            );
 
             return new JsonResponse([
                 'message' => 'Programme créé avec succès !'

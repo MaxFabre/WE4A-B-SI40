@@ -27,6 +27,10 @@ class LoginLoggerSubscriber implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
+        if (str_starts_with($event->getRequest()->getPathInfo(), '/api/')) {
+            return;
+        }
+
         $user = $event->getUser();
 
         if (!$user instanceof User) {
@@ -45,6 +49,10 @@ class LoginLoggerSubscriber implements EventSubscriberInterface
 
     public function onLoginFailure(LoginFailureEvent $event): void
     {
+        if (str_starts_with($event->getRequest()->getPathInfo(), '/api/')) {
+            return;
+        }
+
         $userId = null;
         $username = null;
         $exception = $event->getException();

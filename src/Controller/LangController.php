@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Lang;
+use App\Entity\User;
 use App\Form\LangType;
 use App\Repository\LangRepository;
+use App\Service\AdminEntityChangeLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +27,7 @@ final class LangController extends AbstractController {
     }
 
     #[Route('/create', name: '.create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response {
+    public function create(Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $lang = new Lang();
         $form = $this->createForm(LangType::class, $lang);
 
@@ -34,6 +36,17 @@ final class LangController extends AbstractController {
             //Enregistrement en db:
             $entityManager->persist($lang);
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'creation',
+                'lang',
+                [
+                    'id' => $lang->getId(),
+                    'name' => $lang->getName(),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'La langue de film à bien été créé.');
@@ -46,12 +59,23 @@ final class LangController extends AbstractController {
     }
 
     #[Route('/edit/{id}', name: '.edit', methods: ['GET', 'POST'])]
-    public function edit(Lang $lang, Request $request, EntityManagerInterface $entityManager): Response {
+    public function edit(Lang $lang, Request $request, EntityManagerInterface $entityManager, AdminEntityChangeLogger $adminEntityChangeLogger): Response {
         $form = $this->createForm(LangType::class, $lang);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             //Enregistrement en db:
             $entityManager->flush();
+
+            $currentUser = $this->getUser();
+            $adminEntityChangeLogger->log(
+                $currentUser instanceof User ? $currentUser : null,
+                'modification',
+                'lang',
+                [
+                    'id' => $lang->getId(),
+                    'name' => $lang->getName(),
+                ]
+            );
 
             //Redirection avec message:
             $this->addFlash('success', 'La langue de film à bien été modifié.');

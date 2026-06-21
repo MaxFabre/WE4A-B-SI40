@@ -21,7 +21,7 @@ class LogoutLoggerSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            LogoutEvent::class => 'onLogout',
+            LogoutEvent::class => ['onLogout', 128],
         ];
     }
 

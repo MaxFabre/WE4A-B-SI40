@@ -42,11 +42,6 @@ security:
                 enable_csrf: true
                 csrf_token_id: authenticate
 
-            logout:
-                path: app_logout
-                # where to redirect after logout
-                # target: app_any_route
-
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
 
